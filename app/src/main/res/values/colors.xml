@@ -1,0 +1,5 @@
+<resources>
+    <!-- hsl(150 30% 96%), hsl(150 48% 30%) from design/TOKENS.md -->
+    <color name="sprout_bg">#FFF2F8F5</color>
+    <color name="sprout_primary">#FF287250</color>
+</resources>

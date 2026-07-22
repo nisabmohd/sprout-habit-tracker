@@ -1,0 +1,5 @@
+<resources>
+    <style name="Theme.Sprout" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/sprout_bg</item>
+    </style>
+</resources>
