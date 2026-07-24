@@ -17,6 +17,19 @@ android {
         versionName = "0.1.0"
     }
 
+    flavorDimensions += "distribution"
+    productFlavors {
+        // Google sign-in + Drive appDataFolder backup.
+        create("play") {
+            dimension = "distribution"
+        }
+        // No Google or Play Services code at all (F-Droid).
+        create("foss") {
+            dimension = "distribution"
+            versionNameSuffix = "-foss"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
