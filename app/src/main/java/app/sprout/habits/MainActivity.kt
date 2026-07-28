@@ -20,10 +20,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.sprout.habits.data.Settings
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -40,8 +40,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            // Temporary: in-memory settings until DataStore and the More tab exist.
-            var settings by remember { mutableStateOf(ThemeSettings()) }
+            val settingsRepo = (application as SproutApp).container.settings
+            val settings = settingsRepo.settings.collectAsStateWithLifecycle(Settings()).value.theme
+            val scope = rememberCoroutineScope()
             val dark = settings.isDark()
             LaunchedEffect(dark) {
                 val style = if (dark) {
@@ -52,7 +53,15 @@ class MainActivity : ComponentActivity() {
                 enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
             }
             SproutTheme(settings) {
-                ThemePreview(settings, onChange = { settings = it })
+                // Temporary theme check until the More tab exists.
+                ThemePreview(settings, onChange = { new ->
+                    scope.launch {
+                        settingsRepo.setThemeMode(new.mode)
+                        settingsRepo.setDynamicColor(new.dynamicColor)
+                        settingsRepo.setFont(new.font)
+                        settingsRepo.setTextScale(new.textScale)
+                    }
+                })
             }
         }
     }
