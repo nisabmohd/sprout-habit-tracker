@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
@@ -28,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import app.sprout.habits.ui.nav.SproutNavHost
 import app.sprout.habits.ui.theme.BodyFont
 import app.sprout.habits.ui.theme.SproutTheme
 import app.sprout.habits.ui.theme.ThemeMode
@@ -53,14 +53,16 @@ class MainActivity : ComponentActivity() {
                 enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
             }
             SproutTheme(settings) {
-                // Temporary theme check until the More tab exists.
-                ThemePreview(settings, onChange = { new ->
-                    scope.launch {
-                        settingsRepo.setThemeMode(new.mode)
-                        settingsRepo.setDynamicColor(new.dynamicColor)
-                        settingsRepo.setFont(new.font)
-                        settingsRepo.setTextScale(new.textScale)
-                    }
+                SproutNavHost(moreContent = {
+                    // Temporary theme check until the More tab exists.
+                    ThemePreview(settings, onChange = { new ->
+                        scope.launch {
+                            settingsRepo.setThemeMode(new.mode)
+                            settingsRepo.setDynamicColor(new.dynamicColor)
+                            settingsRepo.setFont(new.font)
+                            settingsRepo.setTextScale(new.textScale)
+                        }
+                    })
                 })
             }
         }
@@ -72,7 +74,7 @@ private fun ThemePreview(settings: ThemeSettings, onChange: (ThemeSettings) -> U
     val t = MaterialTheme.typography
     val c = MaterialTheme.colorScheme
     Column(
-        Modifier.fillMaxSize().background(c.background).safeDrawingPadding().padding(16.dp),
+        Modifier.fillMaxSize().background(c.background).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text("Today", style = t.headlineMedium, color = c.onBackground)
