@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,7 +24,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.data.Settings
 import kotlinx.coroutines.launch
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import app.sprout.habits.data.HabitIcon
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
@@ -85,9 +89,11 @@ private fun ThemePreview(settings: ThemeSettings, onChange: (ThemeSettings) -> U
         Text("M T W T F S S", style = t.labelSmall, color = c.onSurfaceVariant)
         Text("15", style = t.displayLarge, color = c.primary)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            listOf(38f, 215f, 192f, 275f, 12f, 95f, 150f, 330f).forEach { hue ->
-                val h = habitColors(hue)
-                Box(Modifier.size(32.dp).background(h.solid, RoundedCornerShape(10.dp)))
+            HabitIcon.entries.forEach { icon ->
+                val h = habitColors(icon.defaultHue.toFloat())
+                Box(Modifier.size(40.dp).background(h.soft, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+                    Icon(painterResource(icon.drawable), contentDescription = icon.key, tint = h.ink, modifier = Modifier.size(22.dp))
+                }
             }
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
