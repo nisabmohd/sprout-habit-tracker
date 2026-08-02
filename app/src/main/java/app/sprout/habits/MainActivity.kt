@@ -44,7 +44,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val settingsRepo = (application as SproutApp).container.settings
+            val container = (application as SproutApp).container
+            val settingsRepo = container.settings
             val settings = settingsRepo.settings.collectAsStateWithLifecycle(Settings()).value.theme
             val scope = rememberCoroutineScope()
             val dark = settings.isDark()
@@ -57,7 +58,7 @@ class MainActivity : ComponentActivity() {
                 enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
             }
             SproutTheme(settings) {
-                SproutNavHost(moreContent = {
+                SproutNavHost(container, moreContent = {
                     // Temporary theme check until the More tab exists.
                     ThemePreview(settings, onChange = { new ->
                         scope.launch {

@@ -26,7 +26,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
+import app.sprout.habits.AppContainer
 import app.sprout.habits.R
+import app.sprout.habits.ui.today.TodayScreen
+import app.sprout.habits.ui.today.TodayViewModel
 import kotlin.reflect.KClass
 
 private enum class Tab(val route: Any, val routeClass: KClass<*>, val label: String, @DrawableRes val icon: Int) {
@@ -38,7 +42,7 @@ private enum class Tab(val route: Any, val routeClass: KClass<*>, val label: Str
 }
 
 @Composable
-fun SproutNavHost(moreContent: @Composable () -> Unit) {
+fun SproutNavHost(container: AppContainer, moreContent: @Composable () -> Unit) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val destination = backStackEntry?.destination
@@ -59,7 +63,10 @@ fun SproutNavHost(moreContent: @Composable () -> Unit) {
         },
     ) { padding ->
         NavHost(navController, startDestination = TodayRoute, modifier = Modifier.padding(padding)) {
-            composable<TodayRoute> { Placeholder("Today") }
+            composable<TodayRoute> {
+                val vm = viewModel { TodayViewModel(container.repository, container.settings) }
+                TodayScreen(vm, onAddHabit = { /* New habit screen comes in a later item. */ })
+            }
             composable<HabitsRoute> { Placeholder("Habits") }
             composable<JournalRoute> { Placeholder("Journal") }
             composable<InsightsRoute> { Placeholder("Insights") }
