@@ -70,7 +70,7 @@ private fun TodayContent(state: TodayUiState, onSelectDay: (LocalDate) -> Unit, 
         if (!state.loading && state.habits.isEmpty()) {
             item(key = "empty") { EmptyState() }
         }
-        items(state.habits, key = { it.id }) { HabitRow(it) }
+        items(state.habits, key = { it.id }) { HabitCard(it, onToggle = {}) }
     }
 }
 
@@ -218,29 +218,6 @@ private fun Segments(habits: List<HabitRowUi>) {
             if (fill > 0f) {
                 clipRect(left = x, right = x + w * fill) { drawRoundRect(solids[i], Offset(x, 0f), Size(w, size.height), r) }
             }
-        }
-    }
-}
-
-@Composable
-private fun HabitRow(habit: HabitRowUi) {
-    val colors = MaterialTheme.colorScheme
-    val hc = habitColors(habit.hue)
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .height(68.dp)
-            .background(colors.surfaceContainerLowest, RoundedCornerShape(22.dp))
-            .padding(horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(Modifier.size(44.dp).background(hc.soft, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
-            Icon(painterResource(habit.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(22.dp))
-        }
-        Spacer(Modifier.width(14.dp))
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(habit.name, style = MaterialTheme.typography.titleMedium, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(habit.subtitle, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

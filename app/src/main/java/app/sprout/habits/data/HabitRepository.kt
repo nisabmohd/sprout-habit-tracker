@@ -50,6 +50,7 @@ class HabitRepository(private val db: SproutDatabase) {
 
     fun observeNotes(): Flow<List<Note>> = notes.observeAll()
     fun observeNotes(habitId: Long): Flow<List<Note>> = notes.observeForHabit(habitId)
+    fun observeNotes(fromDay: Long, toDay: Long): Flow<List<Note>> = notes.observeRange(fromDay, toDay)
     suspend fun getNote(id: Long): Note? = notes.get(id)
     suspend fun saveNote(note: Note): Long {
         val id = notes.upsert(note.copy(updatedAt = System.currentTimeMillis()))

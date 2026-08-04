@@ -7,6 +7,7 @@ import app.sprout.habits.data.Entry
 import app.sprout.habits.data.Habit
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.HabitRepository
+import app.sprout.habits.data.Note
 import app.sprout.habits.data.SettingsRepository
 import app.sprout.habits.data.TrackType
 import app.sprout.habits.domain.DayOutcome
@@ -52,6 +53,7 @@ data class HabitRowUi(
     /** Fraction of the target reached, 0..1. */
     val progress: Float,
     val subtitle: String,
+    val hasNote: Boolean,
 )
 
 @Immutable
@@ -81,10 +83,13 @@ class TodayViewModel(
     val state: StateFlow<TodayUiState> =
         combine(today, selected, weekStart) { t, s, ws -> Triple(t, s, weekOf(s, ws)) }
             .flatMapLatest { (t, s, week) ->
+                val from = week.first().toEpochDay()
+                val to = week.last().toEpochDay()
                 combine(
                     repository.observeHabits(),
-                    repository.observeEntries(week.first().toEpochDay(), week.last().toEpochDay()),
-                ) { habits, entries -> buildState(t, s, week, habits, entries) }
+                    repository.observeEntries(from, to),
+                    repository.observeNotes(from, to),
+                ) { habits, entries, notes -> buildState(t, s, week, habits, entries, notes) }
             }
             .flowOn(Dispatchers.Default)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodayUiState())
@@ -108,8 +113,10 @@ class TodayViewModel(
         week: List<LocalDate>,
         habits: List<Habit>,
         entries: List<Entry>,
+        notes: List<Note>,
     ): TodayUiState {
         val byKey = entries.associateBy { it.habitId to it.date }
+        val noted = notes.mapTo(HashSet()) { it.habitId to it.date }
         val todayDay = today.toEpochDay()
 
         fun scheduledOn(date: LocalDate) = habits.filter { isScheduled(it.daysMask, date) && !createdAfter(it, date) }
@@ -135,6 +142,7 @@ class TodayViewModel(
             val entry = byKey[habit.id to day]
             val outcome = outcomeOf(entry, day, todayDay)
             val credit = dayCredit(entry, habit.target, day, todayDay) ?: 0.0
+            val hasNote = (habit.id to day) in noted
             HabitRowUi(
                 id = habit.id,
                 name = habit.name,
@@ -142,7 +150,8 @@ class TodayViewModel(
                 hue = habit.colorHue.toFloat(),
                 outcome = outcome,
                 progress = credit.toFloat(),
-                subtitle = subtitle(habit, entry, outcome),
+                subtitle = subtitle(habit, entry, outcome).let { if (hasNote) "$it · note added" else it },
+                hasNote = hasNote,
             )
         }
 
