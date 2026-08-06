@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.sprout.habits.data.Entry
+import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.data.Habit
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.HabitRepository
@@ -23,7 +24,10 @@ import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -70,6 +74,15 @@ data class TodayUiState(
     val habits: List<HabitRowUi> = emptyList(),
 )
 
+/** A change the user can undo from the snackbar. */
+data class UndoableChange(
+    val message: String,
+    val habitId: Long,
+    val day: Long,
+    /** The entry before the change, or null if the day was not logged. */
+    val previous: Entry?,
+)
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class TodayViewModel(
     private val repository: HabitRepository,
@@ -93,6 +106,39 @@ class TodayViewModel(
             }
             .flowOn(Dispatchers.Default)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodayUiState())
+
+    private val _changes = Channel<UndoableChange>(Channel.BUFFERED)
+
+    /** One event per logged change, for the Undo snackbar. */
+    val changes = _changes.receiveAsFlow()
+
+    fun markDone(habitId: Long) = log(habitId, "marked done") { habit, day ->
+        Entry(habit.id, day, EntryStatus.DONE, habit.target)
+    }
+
+    fun markSkipped(habitId: Long) = log(habitId, "skipped") { habit, day ->
+        Entry(habit.id, day, EntryStatus.SKIP)
+    }
+
+    fun undo(change: UndoableChange) {
+        viewModelScope.launch {
+            val previous = change.previous
+            if (previous == null) repository.clearEntry(change.habitId, change.day) else repository.setEntry(previous)
+        }
+    }
+
+    /** Writes a new entry for the selected day. [build] returns null to clear the day instead. */
+    private fun log(habitId: Long, verb: String, build: (Habit, Long) -> Entry?) {
+        val day = selected.value.toEpochDay()
+        viewModelScope.launch {
+            val habit = repository.getHabit(habitId) ?: return@launch
+            val previous = repository.getEntry(habitId, day)
+            val next = build(habit, day)
+            if (next == previous) return@launch
+            if (next == null) repository.clearEntry(habitId, day) else repository.setEntry(next)
+            _changes.send(UndoableChange("${habit.name} $verb", habitId, day, previous))
+        }
+    }
 
     fun select(date: LocalDate) {
         if (!date.isAfter(today.value)) selected.value = date

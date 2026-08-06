@@ -23,9 +23,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,18 +53,42 @@ import app.sprout.habits.domain.DayOutcome
 import app.sprout.habits.ui.components.ProgressRing
 import app.sprout.habits.ui.theme.habitColors
 import java.time.LocalDate
+import kotlinx.coroutines.flow.collectLatest
 import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
 fun TodayScreen(viewModel: TodayViewModel, onAddHabit: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbar = remember { SnackbarHostState() }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshToday() }
-    TodayContent(state, onSelectDay = viewModel::select, onAddHabit = onAddHabit)
+    LaunchedEffect(viewModel) {
+        viewModel.changes.collectLatest { change ->
+            snackbar.currentSnackbarData?.dismiss()
+            val result = snackbar.showSnackbar(change.message, actionLabel = "Undo", duration = SnackbarDuration.Short)
+            if (result == SnackbarResult.ActionPerformed) viewModel.undo(change)
+        }
+    }
+    Box(Modifier.fillMaxSize()) {
+        TodayContent(
+            state,
+            onSelectDay = viewModel::select,
+            onAddHabit = onAddHabit,
+            onDone = viewModel::markDone,
+            onSkip = viewModel::markSkipped,
+        )
+        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp))
+    }
 }
 
 @Composable
-private fun TodayContent(state: TodayUiState, onSelectDay: (LocalDate) -> Unit, onAddHabit: () -> Unit) {
+private fun TodayContent(
+    state: TodayUiState,
+    onSelectDay: (LocalDate) -> Unit,
+    onAddHabit: () -> Unit,
+    onDone: (Long) -> Unit,
+    onSkip: (Long) -> Unit,
+) {
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
@@ -70,7 +100,14 @@ private fun TodayContent(state: TodayUiState, onSelectDay: (LocalDate) -> Unit, 
         if (!state.loading && state.habits.isEmpty()) {
             item(key = "empty") { EmptyState() }
         }
-        items(state.habits, key = { it.id }) { HabitCard(it, onToggle = {}) }
+        items(state.habits, key = { it.id }) { habit ->
+            SwipeableHabitCard(
+                habit,
+                onDone = { onDone(habit.id) },
+                onSkip = { onSkip(habit.id) },
+                onToggle = {},
+            )
+        }
     }
 }
 
