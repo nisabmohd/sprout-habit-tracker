@@ -120,6 +120,16 @@ class TodayViewModel(
         Entry(habit.id, day, EntryStatus.SKIP)
     }
 
+    /** The circle on the card: DONE becomes not logged; anything else becomes DONE. */
+    fun toggleDone(habitId: Long) {
+        val done = state.value.habits.firstOrNull { it.id == habitId }?.outcome == DayOutcome.DONE
+        if (done) {
+            log(habitId, "marked not done") { _, _ -> null }
+        } else {
+            markDone(habitId)
+        }
+    }
+
     fun undo(change: UndoableChange) {
         viewModelScope.launch {
             val previous = change.previous

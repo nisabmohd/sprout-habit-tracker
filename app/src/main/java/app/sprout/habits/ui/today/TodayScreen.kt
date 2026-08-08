@@ -76,6 +76,7 @@ fun TodayScreen(viewModel: TodayViewModel, onAddHabit: () -> Unit) {
             onAddHabit = onAddHabit,
             onDone = viewModel::markDone,
             onSkip = viewModel::markSkipped,
+            onToggle = viewModel::toggleDone,
         )
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp))
     }
@@ -88,6 +89,7 @@ private fun TodayContent(
     onAddHabit: () -> Unit,
     onDone: (Long) -> Unit,
     onSkip: (Long) -> Unit,
+    onToggle: (Long) -> Unit,
 ) {
     LazyColumn(
         Modifier.fillMaxSize(),
@@ -105,7 +107,7 @@ private fun TodayContent(
                 habit,
                 onDone = { onDone(habit.id) },
                 onSkip = { onSkip(habit.id) },
-                onToggle = {},
+                onToggle = { onToggle(habit.id) },
             )
         }
     }
