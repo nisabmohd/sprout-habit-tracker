@@ -52,6 +52,7 @@ class HabitRepository(private val db: SproutDatabase) {
     fun observeNotes(habitId: Long): Flow<List<Note>> = notes.observeForHabit(habitId)
     fun observeNotes(fromDay: Long, toDay: Long): Flow<List<Note>> = notes.observeRange(fromDay, toDay)
     suspend fun getNote(id: Long): Note? = notes.get(id)
+    suspend fun getNote(habitId: Long, day: Long): Note? = notes.getFor(habitId, day)
     suspend fun saveNote(note: Note): Long {
         val id = notes.upsert(note.copy(updatedAt = System.currentTimeMillis()))
         // Upsert returns -1 when it updated an existing row.

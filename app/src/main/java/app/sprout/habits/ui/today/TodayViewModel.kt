@@ -74,6 +74,25 @@ data class TodayUiState(
     val habits: List<HabitRowUi> = emptyList(),
 )
 
+/** What the press-and-hold sheet needs for one habit on the selected day. */
+@Immutable
+data class LogSheetUi(
+    val habitId: Long,
+    val day: Long,
+    val name: String,
+    val icon: Int,
+    val hue: Float,
+    val trackType: TrackType,
+    val target: Double,
+    val unit: String,
+    /** "today", or the date when logging a past day. */
+    val dayLabel: String,
+    val status: EntryStatus,
+    val amount: Double,
+    val noteId: Long?,
+    val noteText: String,
+)
+
 /** A change the user can undo from the snackbar. */
 data class UndoableChange(
     val message: String,
@@ -127,6 +146,70 @@ class TodayViewModel(
             log(habitId, "marked not done") { _, _ -> null }
         } else {
             markDone(habitId)
+        }
+    }
+
+    private val _logSheet = MutableStateFlow<LogSheetUi?>(null)
+
+    /** The habit whose press-and-hold sheet is open, or null. */
+    val logSheet: StateFlow<LogSheetUi?> = _logSheet
+
+    fun openLogSheet(habitId: Long) {
+        val date = selected.value
+        val day = date.toEpochDay()
+        viewModelScope.launch {
+            val habit = repository.getHabit(habitId) ?: return@launch
+            val entry = repository.getEntry(habitId, day)
+            val note = repository.getNote(habitId, day)
+            _logSheet.value = LogSheetUi(
+                habitId = habit.id,
+                day = day,
+                name = habit.name,
+                icon = HabitIcon.fromKey(habit.icon).drawable,
+                hue = habit.colorHue.toFloat(),
+                trackType = habit.trackType,
+                target = habit.target,
+                unit = if (habit.trackType == TrackType.DURATION) "min" else habit.unit,
+                dayLabel = if (date == today.value) "today" else date.format(SHORT_DATE),
+                status = entry?.status ?: if (habit.trackType == TrackType.CHECK) EntryStatus.DONE else EntryStatus.PARTIAL,
+                amount = entry?.amount ?: 0.0,
+                noteId = note?.id,
+                noteText = note?.text.orEmpty(),
+            )
+        }
+    }
+
+    fun dismissLogSheet() {
+        _logSheet.value = null
+    }
+
+    /** Saves the sheet. A partial amount that reaches the goal is saved as DONE. */
+    fun saveLog(sheet: LogSheetUi, status: EntryStatus, amount: Double, noteText: String) {
+        _logSheet.value = null
+        viewModelScope.launch {
+            val finalStatus = if (status == EntryStatus.PARTIAL && amount >= sheet.target) EntryStatus.DONE else status
+            val finalAmount = when (finalStatus) {
+                EntryStatus.DONE -> maxOf(amount, sheet.target)
+                EntryStatus.PARTIAL -> amount
+                EntryStatus.SKIP -> 0.0
+            }
+            val previous = repository.getEntry(sheet.habitId, sheet.day)
+            val next = Entry(sheet.habitId, sheet.day, finalStatus, finalAmount)
+            if (next != previous) {
+                repository.setEntry(next)
+                val verb = when (finalStatus) {
+                    EntryStatus.DONE -> "marked done"
+                    EntryStatus.PARTIAL -> "logged"
+                    EntryStatus.SKIP -> "skipped"
+                }
+                _changes.send(UndoableChange("${sheet.name} $verb", sheet.habitId, sheet.day, previous))
+            }
+            val text = noteText.trim()
+            when {
+                text.isNotEmpty() && text != sheet.noteText ->
+                    repository.saveNote(Note(id = sheet.noteId ?: 0, habitId = sheet.habitId, date = sheet.day, text = text))
+                text.isEmpty() && sheet.noteId != null -> repository.deleteNote(sheet.noteId)
+            }
         }
     }
 
@@ -239,6 +322,7 @@ class TodayViewModel(
 
     companion object {
         private val DATE_FORMAT = DateTimeFormatter.ofPattern("EEEE, d MMMM")
+        private val SHORT_DATE = DateTimeFormatter.ofPattern("EEE d MMM")
 
         fun formatNumber(value: Double): String =
             if (value == value.toLong().toDouble()) value.toLong().toString() else "%.1f".format(value)

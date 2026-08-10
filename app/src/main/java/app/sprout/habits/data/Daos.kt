@@ -80,6 +80,10 @@ interface NoteDao {
     @Query("SELECT * FROM note WHERE date BETWEEN :from AND :to")
     fun observeRange(from: Long, to: Long): Flow<List<Note>>
 
+    /** The most recent note for one habit on one day, if any. */
+    @Query("SELECT * FROM note WHERE habitId = :habitId AND date = :date ORDER BY updatedAt DESC LIMIT 1")
+    suspend fun getFor(habitId: Long, date: Long): Note?
+
     @Query("SELECT * FROM note WHERE id = :id")
     suspend fun get(id: Long): Note?
 

@@ -77,8 +77,17 @@ fun TodayScreen(viewModel: TodayViewModel, onAddHabit: () -> Unit) {
             onDone = viewModel::markDone,
             onSkip = viewModel::markSkipped,
             onToggle = viewModel::toggleDone,
+            onLongPress = viewModel::openLogSheet,
         )
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp))
+    }
+    val logSheet by viewModel.logSheet.collectAsStateWithLifecycle()
+    logSheet?.let { sheet ->
+        LogSheet(
+            sheet,
+            onSave = { status, amount, note -> viewModel.saveLog(sheet, status, amount, note) },
+            onDismiss = viewModel::dismissLogSheet,
+        )
     }
 }
 
@@ -90,6 +99,7 @@ private fun TodayContent(
     onDone: (Long) -> Unit,
     onSkip: (Long) -> Unit,
     onToggle: (Long) -> Unit,
+    onLongPress: (Long) -> Unit,
 ) {
     LazyColumn(
         Modifier.fillMaxSize(),
@@ -108,6 +118,7 @@ private fun TodayContent(
                 onDone = { onDone(habit.id) },
                 onSkip = { onSkip(habit.id) },
                 onToggle = { onToggle(habit.id) },
+                onLongPress = { onLongPress(habit.id) },
             )
         }
     }

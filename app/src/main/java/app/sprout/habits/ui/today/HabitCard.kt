@@ -2,6 +2,7 @@ package app.sprout.habits.ui.today
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -47,8 +50,10 @@ val HabitCardShape = RoundedCornerShape(22.dp)
 fun HabitCard(
     habit: HabitRowUi,
     onToggle: () -> Unit,
+    onLongPress: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val haptics = LocalHapticFeedback.current
     val colors = MaterialTheme.colorScheme
     val hc = habitColors(habit.hue)
     val skipped = habit.outcome == DayOutcome.SKIP
@@ -62,7 +67,17 @@ fun HabitCard(
             .fillMaxWidth()
             .height(68.dp)
             .clip(HabitCardShape)
-            .background(if (skipped) colors.surfaceContainerHigh else colors.surfaceContainerLowest),
+            .background(if (skipped) colors.surfaceContainerHigh else colors.surfaceContainerLowest)
+            .combinedClickable(
+                onClickLabel = null,
+                onLongClickLabel = "Log amount",
+                onLongClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onLongPress()
+                },
+                // Opening the habit detail comes with that screen.
+                onClick = {},
+            ),
     ) {
         if (fillFraction > 0f) {
             Box(

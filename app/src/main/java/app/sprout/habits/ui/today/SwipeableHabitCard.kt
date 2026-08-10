@@ -41,6 +41,7 @@ fun SwipeableHabitCard(
     onDone: () -> Unit,
     onSkip: () -> Unit,
     onToggle: () -> Unit,
+    onLongPress: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val haptics = LocalHapticFeedback.current
@@ -78,7 +79,7 @@ fun SwipeableHabitCard(
         enableDismissFromEndToStart = canSkip,
         backgroundContent = { SwipeBackground(habit, state.dismissDirection) },
     ) {
-        HabitCard(habit, onToggle = onToggle)
+        HabitCard(habit, onToggle = onToggle, onLongPress = onLongPress)
     }
 }
 
