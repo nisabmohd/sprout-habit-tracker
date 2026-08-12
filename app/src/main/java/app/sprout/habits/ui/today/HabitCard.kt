@@ -51,6 +51,7 @@ fun HabitCard(
     habit: HabitRowUi,
     onToggle: () -> Unit,
     onLongPress: () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val haptics = LocalHapticFeedback.current
@@ -69,14 +70,13 @@ fun HabitCard(
             .clip(HabitCardShape)
             .background(if (skipped) colors.surfaceContainerHigh else colors.surfaceContainerLowest)
             .combinedClickable(
-                onClickLabel = null,
                 onLongClickLabel = "Log amount",
                 onLongClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     onLongPress()
                 },
-                // Opening the habit detail comes with that screen.
-                onClick = {},
+                onClickLabel = "Open ${habit.name}",
+                onClick = onClick,
             ),
     ) {
         if (fillFraction > 0f) {

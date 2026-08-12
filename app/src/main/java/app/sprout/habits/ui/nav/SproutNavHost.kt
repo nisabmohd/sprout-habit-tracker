@@ -2,6 +2,7 @@ package app.sprout.habits.ui.nav
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,6 +27,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import app.sprout.habits.ui.edit.EditHabitScreen
+import app.sprout.habits.ui.edit.EditHabitViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.sprout.habits.AppContainer
 import app.sprout.habits.R
@@ -62,10 +66,24 @@ fun SproutNavHost(container: AppContainer, moreContent: @Composable () -> Unit) 
             }
         },
     ) { padding ->
-        NavHost(navController, startDestination = TodayRoute, modifier = Modifier.padding(padding)) {
+        NavHost(
+            navController,
+            startDestination = TodayRoute,
+            modifier = Modifier.padding(if (currentTab != null) padding else PaddingValues()),
+        ) {
             composable<TodayRoute> {
                 val vm = viewModel { TodayViewModel(container.repository, container.settings) }
-                TodayScreen(vm, onAddHabit = { /* New habit screen comes in a later item. */ })
+                TodayScreen(
+                    vm,
+                    onAddHabit = { navController.navigate(EditHabitRoute()) },
+                    // Until Habit detail exists, a tap on a card opens its editor.
+                    onOpenHabit = { id -> navController.navigate(EditHabitRoute(id)) },
+                )
+            }
+            composable<EditHabitRoute> { entry ->
+                val id = entry.toRoute<EditHabitRoute>().habitId
+                val vm = viewModel { EditHabitViewModel(container.repository, container.settings, id) }
+                EditHabitScreen(vm, onClose = { navController.popBackStack() })
             }
             composable<HabitsRoute> { Placeholder("Habits") }
             composable<JournalRoute> { Placeholder("Journal") }
