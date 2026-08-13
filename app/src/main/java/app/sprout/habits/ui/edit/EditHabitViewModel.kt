@@ -115,6 +115,24 @@ class EditHabitViewModel(
         }
     }
 
+    fun archive() {
+        val habit = original ?: return
+        viewModelScope.launch {
+            repository.setArchived(habit.id, !habit.archived)
+            _saved.send(Unit)
+        }
+    }
+
+    fun delete() {
+        val habit = original ?: return
+        viewModelScope.launch {
+            repository.deleteHabit(habit)
+            _saved.send(Unit)
+        }
+    }
+
+    val isArchived: Boolean get() = original?.archived == true
+
     private fun formatTarget(value: Double) =
         if (value == value.toLong().toDouble()) value.toLong().toString() else value.toString()
 }

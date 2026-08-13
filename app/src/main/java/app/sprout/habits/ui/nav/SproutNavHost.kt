@@ -13,6 +13,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -29,6 +30,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.sprout.habits.ui.edit.EditHabitScreen
+import app.sprout.habits.ui.manage.ManageHabitsScreen
+import app.sprout.habits.ui.manage.ManageHabitsViewModel
 import app.sprout.habits.ui.edit.EditHabitViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.sprout.habits.AppContainer
@@ -85,7 +88,20 @@ fun SproutNavHost(container: AppContainer, moreContent: @Composable () -> Unit) 
                 val vm = viewModel { EditHabitViewModel(container.repository, container.settings, id) }
                 EditHabitScreen(vm, onClose = { navController.popBackStack() })
             }
-            composable<HabitsRoute> { Placeholder("Habits") }
+            composable<HabitsRoute> {
+                // Temporary until the Week / Overall views: just a way into Manage habits.
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    TextButton(onClick = { navController.navigate(ManageHabitsRoute) }) { Text("Manage habits") }
+                }
+            }
+            composable<ManageHabitsRoute> {
+                val vm = viewModel { ManageHabitsViewModel(container.repository) }
+                ManageHabitsScreen(
+                    vm,
+                    onEdit = { id -> navController.navigate(EditHabitRoute(id)) },
+                    onClose = { navController.popBackStack() },
+                )
+            }
             composable<JournalRoute> { Placeholder("Journal") }
             composable<InsightsRoute> { Placeholder("Insights") }
             composable<MoreRoute> { moreContent() }

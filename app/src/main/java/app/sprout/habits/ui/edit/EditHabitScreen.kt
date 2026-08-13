@@ -29,6 +29,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -61,6 +62,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.TrackType
+import app.sprout.habits.ui.manage.DeleteHabitDialog
 import app.sprout.habits.ui.theme.habitColors
 import app.sprout.habits.ui.today.TodayViewModel
 import java.time.DayOfWeek
@@ -72,13 +74,20 @@ fun EditHabitScreen(viewModel: EditHabitViewModel, onClose: () -> Unit) {
     val form by viewModel.form.collectAsStateWithLifecycle()
     LaunchedEffect(viewModel) { viewModel.saved.collect { onClose() } }
     if (!form.loaded) return
+    var deleting by rememberSaveable { mutableStateOf(false) }
     EditHabitContent(
         form = form,
         onEdit = viewModel::edit,
         onToggleDay = viewModel::toggleDay,
         onSave = viewModel::save,
         onClose = onClose,
+        archiveLabel = if (viewModel.isArchived) "Restore" else "Archive",
+        onArchive = viewModel::archive,
+        onDelete = { deleting = true },
     )
+    if (deleting) {
+        DeleteHabitDialog(form.name, onConfirm = { deleting = false; viewModel.delete() }, onDismiss = { deleting = false })
+    }
 }
 
 @Composable
@@ -88,6 +97,9 @@ private fun EditHabitContent(
     onToggleDay: (DayOfWeek) -> Unit,
     onSave: () -> Unit,
     onClose: () -> Unit,
+    archiveLabel: String,
+    onArchive: () -> Unit,
+    onDelete: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
@@ -267,6 +279,17 @@ private fun EditHabitContent(
                 ToggleRow("Ask for a note when I skip", "A reminder to write why", form.askForNote) { v -> onEdit { it.copy(askForNote = v) } }
                 HorizontalDivider(color = colors.surfaceContainerHigh)
                 ToggleRow("Show on home screen widget", "Week view and Today widget", form.showOnWidget) { v -> onEdit { it.copy(showOnWidget = v) } }
+            }
+
+            if (!form.isNew) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedButton(onClick = onArchive, modifier = Modifier.weight(1f).height(48.dp)) {
+                        Text(archiveLabel, style = type.labelLarge)
+                    }
+                    OutlinedButton(onClick = onDelete, modifier = Modifier.weight(1f).height(48.dp)) {
+                        Text("Delete", style = type.labelLarge, color = colors.error)
+                    }
+                }
             }
         }
     }

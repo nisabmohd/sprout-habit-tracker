@@ -10,3 +10,5 @@ import kotlinx.serialization.Serializable
 
 /** New habit when [habitId] is 0, otherwise edit. */
 @Serializable data class EditHabitRoute(val habitId: Long = 0L)
+
+@Serializable data object ManageHabitsRoute
