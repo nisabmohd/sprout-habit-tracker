@@ -13,6 +13,7 @@ import app.sprout.habits.data.SettingsRepository
 import app.sprout.habits.data.TrackType
 import app.sprout.habits.domain.DayOutcome
 import app.sprout.habits.domain.dayCredit
+import app.sprout.habits.domain.firstDay
 import app.sprout.habits.domain.isScheduled
 import app.sprout.habits.domain.outcomeOf
 import app.sprout.habits.domain.score
@@ -308,10 +309,7 @@ class TodayViewModel(
         )
     }
 
-    private fun createdAfter(habit: Habit, date: LocalDate): Boolean {
-        val created = java.time.Instant.ofEpochMilli(habit.createdAt).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
-        return created.isAfter(date)
-    }
+    private fun createdAfter(habit: Habit, date: LocalDate): Boolean = habit.firstDay() > date.toEpochDay()
 
     private fun subtitle(habit: Habit, entry: Entry?, outcome: DayOutcome): String = when (outcome) {
         DayOutcome.DONE -> if (habit.trackType == TrackType.CHECK) "Done" else amountOf(habit, entry?.amount ?: habit.target)
