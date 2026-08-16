@@ -1,0 +1,293 @@
+package app.sprout.habits.ui.habits
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.sprout.habits.R
+import app.sprout.habits.ui.components.DayMarkView
+import app.sprout.habits.ui.components.MarkColors
+import app.sprout.habits.ui.components.MarkKind
+import app.sprout.habits.ui.theme.habitColors
+
+@Composable
+fun HabitsScreen(
+    viewModel: HabitsViewModel,
+    onAddHabit: () -> Unit,
+    onManage: () -> Unit,
+    onOpenHabit: (Long) -> Unit,
+) {
+    val mode by viewModel.mode.collectAsStateWithLifecycle()
+    val week by viewModel.week.collectAsStateWithLifecycle()
+    val overall by viewModel.overall.collectAsStateWithLifecycle()
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshToday() }
+    val colors = MaterialTheme.colorScheme
+
+    LazyColumn(
+        Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item(key = "header") {
+            Row(Modifier.fillMaxWidth().padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("Habits", style = MaterialTheme.typography.headlineMedium, color = colors.onBackground, modifier = Modifier.weight(1f))
+                HeaderButton(R.drawable.ic_drag, "Manage habits", onManage)
+                Spacer(Modifier.width(8.dp))
+                HeaderButton(R.drawable.ic_plus, "New habit", onAddHabit)
+            }
+        }
+        item(key = "mode") {
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                HabitsMode.entries.forEachIndexed { index, m ->
+                    SegmentedButton(
+                        selected = mode == m,
+                        onClick = { viewModel.setMode(m) },
+                        shape = SegmentedButtonDefaults.itemShape(index, HabitsMode.entries.size),
+                        colors = SegmentedButtonDefaults.colors(activeContainerColor = colors.primaryContainer, activeContentColor = colors.onPrimaryContainer),
+                    ) { Text(if (m == HabitsMode.WEEK) "Week" else "Overall", style = MaterialTheme.typography.labelLarge) }
+                }
+            }
+        }
+        when (mode) {
+            HabitsMode.WEEK -> week?.let { w ->
+                item(key = "week-nav") { WeekNavigator(w, viewModel::previousWeek, viewModel::nextWeek) }
+                items(w.habits, key = { "w${it.id}" }) { WeekCard(it, w, onOpenHabit) }
+            }
+            HabitsMode.OVERALL -> overall?.let { o ->
+                item(key = "legend") { Legend() }
+                items(o.habits, key = { "o${it.id}" }) { OverallCard(it, o, onOpenHabit) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeaderButton(icon: Int, label: String, onClick: () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier.size(48.dp),
+        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Icon(painterResource(icon), contentDescription = label, modifier = Modifier.size(22.dp))
+    }
+}
+
+@Composable
+private fun WeekNavigator(week: WeekUi, onPrevious: () -> Unit, onNext: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = onPrevious) {
+            Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = "Previous week", modifier = Modifier.size(22.dp))
+        }
+        Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(week.label, style = MaterialTheme.typography.titleMedium, color = colors.onBackground)
+            Text("${week.percent}% complete this week", style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+        }
+        IconButton(onClick = onNext, enabled = week.canGoForward) {
+            Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = "Next week", modifier = Modifier.size(22.dp))
+        }
+    }
+}
+
+@Composable
+private fun CardHeader(icon: Int, hue: Float, title: String, subtitle: String?, trailing: @Composable () -> Unit) {
+    val hc = habitColors(hue)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(32.dp).background(hc.soft, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
+            Icon(painterResource(icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(18.dp))
+        }
+        Column(Modifier.weight(1f).padding(start = 12.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            subtitle?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        }
+        trailing()
+    }
+}
+
+@Composable
+private fun markColors() = MaterialTheme.colorScheme.let {
+    MarkColors(skip = it.outlineVariant, skipInk = it.onSurfaceVariant, outline = it.outline)
+}
+
+@Composable
+private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val hc = habitColors(habit.hue)
+    val mc = markColors()
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(colors.surfaceContainerLowest)
+            .clickable(onClickLabel = "Open ${habit.name}") { onOpen(habit.id) }
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        CardHeader(habit.icon, habit.hue, habit.name, null) {
+            Text(habit.goal, style = MaterialTheme.typography.bodyLarge, color = colors.onSurfaceVariant)
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            habit.marks.forEachIndexed { i, mark ->
+                val isToday = i == week.todayIndex
+                Column(
+                    Modifier
+                        .width(44.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(if (isToday) colors.surfaceContainerHigh else colors.surfaceContainerLowest)
+                        .padding(vertical = 6.dp)
+                        .clearAndSetSemantics { contentDescription = "${week.dayLabels[i]}: ${describe(mark.kind, mark.fraction)}" },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        week.dayLabels[i],
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (isToday) colors.onSurface else colors.onSurfaceVariant,
+                    )
+                    DayMarkView(mark, hc, mc, Modifier.size(34.dp))
+                }
+            }
+        }
+    }
+}
+
+private fun describe(kind: MarkKind, fraction: Float) = when (kind) {
+    MarkKind.DONE -> "done"
+    MarkKind.PARTIAL -> "partial, ${(fraction * 100).toInt()}%"
+    MarkKind.SKIP -> "skipped"
+    MarkKind.OPEN_TODAY -> "not logged yet"
+    MarkKind.FUTURE -> "upcoming"
+    MarkKind.NOT_SCHEDULED -> "not scheduled"
+}
+
+@Composable
+private fun Legend() {
+    val colors = MaterialTheme.colorScheme
+    Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text("Last $OVERALL_WEEKS weeks", style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant, modifier = Modifier.weight(1f))
+        LegendItem("Done") { drawRoundRect(colors.onSurfaceVariant, cornerRadius = CornerRadius(size.width * 0.3f)) }
+        LegendItem("Partial") { drawRoundRect(colors.outlineVariant, cornerRadius = CornerRadius(size.width * 0.3f)) }
+        LegendItem("Skipped") {
+            val w = 1.dp.toPx()
+            drawRoundRect(colors.outlineVariant, Offset(w / 2, w / 2), Size(size.width - w, size.height - w), CornerRadius(size.width * 0.3f), style = Stroke(w))
+        }
+    }
+}
+
+@Composable
+private fun LegendItem(label: String, draw: androidx.compose.ui.graphics.drawscope.DrawScope.() -> Unit) {
+    Row(Modifier.padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Canvas(Modifier.size(10.dp), onDraw = draw)
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 6.dp))
+    }
+}
+
+@Composable
+private fun OverallCard(habit: HabitOverallUi, overall: OverallUi, onOpen: (Long) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val hc = habitColors(habit.hue)
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(colors.surfaceContainerLowest)
+            .clickable(onClickLabel = "Open ${habit.name}") { onOpen(habit.id) }
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        CardHeader(habit.icon, habit.hue, habit.name, "Best streak ${habit.bestStreak} ${if (habit.bestStreak == 1) "day" else "days"}") {
+            Text("${habit.percent}%", style = MaterialTheme.typography.headlineMedium, color = hc.ink)
+        }
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val column = maxWidth / OVERALL_WEEKS
+            Box(Modifier.fillMaxWidth().height(16.dp)) {
+                overall.months.forEach { (label, col) ->
+                    Text(
+                        label,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.onSurfaceVariant,
+                        modifier = Modifier.offset(x = column * col),
+                    )
+                }
+            }
+        }
+        Heatmap(habit)
+    }
+}
+
+/** 26 columns (weeks) × 7 rows (days). Done = solid, partial = light, skipped = outline. */
+@Composable
+private fun Heatmap(habit: HabitOverallUi) {
+    val colors = MaterialTheme.colorScheme
+    val hc = habitColors(habit.hue)
+    val outline = colors.outlineVariant
+    val faint = colors.surfaceContainer
+    Canvas(
+        Modifier
+            .fillMaxWidth()
+            .aspectRatio(OVERALL_WEEKS / 7f)
+            .semantics { contentDescription = "${habit.name}: ${habit.percent}% over the last $OVERALL_WEEKS weeks" },
+    ) {
+        val pitch = size.width / OVERALL_WEEKS
+        val cell = pitch * 0.72f
+        val radius = CornerRadius(cell * 0.3f)
+        val stroke = 1.dp.toPx()
+        habit.cells.forEachIndexed { i, mark ->
+            val col = i / 7
+            val row = i % 7
+            val topLeft = Offset(col * pitch + (pitch - cell) / 2, row * pitch + (pitch - cell) / 2)
+            val s = Size(cell, cell)
+            when (mark.kind) {
+                MarkKind.DONE -> drawRoundRect(hc.solid, topLeft, s, radius)
+                MarkKind.PARTIAL -> drawRoundRect(hc.mid, topLeft, s, radius)
+                MarkKind.SKIP -> drawRoundRect(outline, topLeft + Offset(stroke / 2, stroke / 2), Size(cell - stroke, cell - stroke), radius, style = Stroke(stroke))
+                MarkKind.OPEN_TODAY -> drawRoundRect(hc.solid, topLeft + Offset(stroke, stroke), Size(cell - 2 * stroke, cell - 2 * stroke), radius, style = Stroke(stroke * 1.5f))
+                MarkKind.NOT_SCHEDULED -> drawRoundRect(faint, topLeft, s, radius)
+                MarkKind.FUTURE -> Unit
+            }
+        }
+    }
+}
