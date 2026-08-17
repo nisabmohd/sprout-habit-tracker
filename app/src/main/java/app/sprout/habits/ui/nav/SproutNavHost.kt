@@ -28,6 +28,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import app.sprout.habits.ui.detail.HabitDetailScreen
+import app.sprout.habits.ui.detail.HabitDetailViewModel
 import app.sprout.habits.ui.edit.EditHabitScreen
 import app.sprout.habits.ui.habits.HabitsScreen
 import app.sprout.habits.ui.habits.HabitsViewModel
@@ -80,8 +82,7 @@ fun SproutNavHost(container: AppContainer, moreContent: @Composable () -> Unit) 
                 TodayScreen(
                     vm,
                     onAddHabit = { navController.navigate(EditHabitRoute()) },
-                    // Until Habit detail exists, a tap on a card opens its editor.
-                    onOpenHabit = { id -> navController.navigate(EditHabitRoute(id)) },
+                    onOpenHabit = { id -> navController.navigate(HabitDetailRoute(id)) },
                 )
             }
             composable<EditHabitRoute> { entry ->
@@ -95,7 +96,20 @@ fun SproutNavHost(container: AppContainer, moreContent: @Composable () -> Unit) 
                     vm,
                     onAddHabit = { navController.navigate(EditHabitRoute()) },
                     onManage = { navController.navigate(ManageHabitsRoute) },
-                    onOpenHabit = { id -> navController.navigate(EditHabitRoute(id)) },
+                    onOpenHabit = { id -> navController.navigate(HabitDetailRoute(id)) },
+                )
+            }
+            composable<HabitDetailRoute> { entry ->
+                val id = entry.toRoute<HabitDetailRoute>().habitId
+                val vm = viewModel { HabitDetailViewModel(container.repository, container.settings, id) }
+                HabitDetailScreen(
+                    vm,
+                    onBack = { navController.popBackStack() },
+                    onEdit = { navController.navigate(EditHabitRoute(id)) },
+                    // Wired up with the Write note screen.
+                    onAddNote = null,
+                    onOpenNote = null,
+                    onSeeAllNotes = { navController.navigate(JournalRoute) { launchSingleTop = true } },
                 )
             }
             composable<ManageHabitsRoute> {
