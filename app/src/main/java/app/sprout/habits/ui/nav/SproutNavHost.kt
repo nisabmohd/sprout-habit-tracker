@@ -31,6 +31,8 @@ import androidx.navigation.toRoute
 import app.sprout.habits.ui.detail.HabitDetailScreen
 import app.sprout.habits.ui.detail.HabitDetailViewModel
 import app.sprout.habits.ui.edit.EditHabitScreen
+import app.sprout.habits.ui.journal.JournalScreen
+import app.sprout.habits.ui.journal.JournalViewModel
 import app.sprout.habits.ui.habits.HabitsScreen
 import app.sprout.habits.ui.habits.HabitsViewModel
 import app.sprout.habits.ui.manage.ManageHabitsScreen
@@ -120,7 +122,11 @@ fun SproutNavHost(container: AppContainer, moreContent: @Composable () -> Unit) 
                     onClose = { navController.popBackStack() },
                 )
             }
-            composable<JournalRoute> { Placeholder("Journal") }
+            composable<JournalRoute> {
+                val vm = viewModel { JournalViewModel(container.repository) }
+                // Add and edit are wired up with the Write note screen.
+                JournalScreen(vm, onAddNote = null, onOpenNote = null)
+            }
             composable<InsightsRoute> { Placeholder("Insights") }
             composable<MoreRoute> { moreContent() }
         }

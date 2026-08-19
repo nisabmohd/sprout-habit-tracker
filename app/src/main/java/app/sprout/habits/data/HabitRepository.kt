@@ -13,6 +13,9 @@ class HabitRepository(private val db: SproutDatabase) {
 
     fun observeHabits(): Flow<List<Habit>> = habits.observeActive()
     fun observeArchivedHabits(): Flow<List<Habit>> = habits.observeArchived()
+
+    /** Active and archived habits. */
+    fun observeAllHabits(): Flow<List<Habit>> = habits.observeAll()
     fun observeHabit(id: Long): Flow<Habit?> = habits.observe(id)
     suspend fun getHabit(id: Long): Habit? = habits.get(id)
 

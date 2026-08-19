@@ -16,6 +16,9 @@ interface HabitDao {
     @Query("SELECT * FROM habit WHERE archived = 1 ORDER BY sortOrder, id")
     fun observeArchived(): Flow<List<Habit>>
 
+    @Query("SELECT * FROM habit ORDER BY sortOrder, id")
+    fun observeAll(): Flow<List<Habit>>
+
     @Query("SELECT * FROM habit WHERE id = :id")
     fun observe(id: Long): Flow<Habit?>
 
