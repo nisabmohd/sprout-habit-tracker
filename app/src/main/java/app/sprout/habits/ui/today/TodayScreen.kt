@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -58,7 +59,13 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
-fun TodayScreen(viewModel: TodayViewModel, onAddHabit: () -> Unit, onOpenHabit: (Long) -> Unit) {
+fun TodayScreen(
+    viewModel: TodayViewModel,
+    onAddHabit: () -> Unit,
+    onOpenHabit: (Long) -> Unit,
+    /** Habit to preselect (0 = none) and the epoch day shown. */
+    onAddNote: (Long, Long) -> Unit,
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshToday() }
@@ -80,6 +87,21 @@ fun TodayScreen(viewModel: TodayViewModel, onAddHabit: () -> Unit, onOpenHabit: 
             onLongPress = viewModel::openLogSheet,
             onOpen = onOpenHabit,
         )
+        if (state.habits.isNotEmpty()) {
+            ExtendedFloatingActionButton(
+                // Preselect a skipped habit that has no note yet, if there is one.
+                onClick = {
+                    val suggested = state.habits.firstOrNull { it.outcome == DayOutcome.SKIP && !it.hasNote } ?: state.habits.first()
+                    onAddNote(suggested.id, state.selectedDate.toEpochDay())
+                },
+                icon = { Icon(painterResource(R.drawable.ic_habit_pen), contentDescription = null, modifier = Modifier.size(22.dp)) },
+                text = { Text("Add note", style = MaterialTheme.typography.labelLarge) },
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                shape = RoundedCornerShape(18.dp),
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+            )
+        }
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp))
     }
     val logSheet by viewModel.logSheet.collectAsStateWithLifecycle()
@@ -105,7 +127,7 @@ private fun TodayContent(
 ) {
     LazyColumn(
         Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item(key = "header") { Header(state, onAddHabit) }

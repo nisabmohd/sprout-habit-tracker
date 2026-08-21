@@ -31,6 +31,8 @@ import androidx.navigation.toRoute
 import app.sprout.habits.ui.detail.HabitDetailScreen
 import app.sprout.habits.ui.detail.HabitDetailViewModel
 import app.sprout.habits.ui.edit.EditHabitScreen
+import app.sprout.habits.ui.note.WriteNoteScreen
+import app.sprout.habits.ui.note.WriteNoteViewModel
 import app.sprout.habits.ui.journal.JournalScreen
 import app.sprout.habits.ui.journal.JournalViewModel
 import app.sprout.habits.ui.habits.HabitsScreen
@@ -85,7 +87,15 @@ fun SproutNavHost(container: AppContainer, moreContent: @Composable () -> Unit) 
                     vm,
                     onAddHabit = { navController.navigate(EditHabitRoute()) },
                     onOpenHabit = { id -> navController.navigate(HabitDetailRoute(id)) },
+                    onAddNote = { habitId, day -> navController.navigate(WriteNoteRoute(habitId = habitId, epochDay = day)) },
                 )
+            }
+            composable<WriteNoteRoute> { entry ->
+                val route = entry.toRoute<WriteNoteRoute>()
+                val vm = viewModel {
+                    WriteNoteViewModel(container.repository, route.noteId, route.habitId, route.epochDay.takeIf { it >= 0 })
+                }
+                WriteNoteScreen(vm, onClose = { navController.popBackStack() })
             }
             composable<EditHabitRoute> { entry ->
                 val id = entry.toRoute<EditHabitRoute>().habitId
@@ -108,9 +118,8 @@ fun SproutNavHost(container: AppContainer, moreContent: @Composable () -> Unit) 
                     vm,
                     onBack = { navController.popBackStack() },
                     onEdit = { navController.navigate(EditHabitRoute(id)) },
-                    // Wired up with the Write note screen.
-                    onAddNote = null,
-                    onOpenNote = null,
+                    onAddNote = { navController.navigate(WriteNoteRoute(habitId = id)) },
+                    onOpenNote = { noteId -> navController.navigate(WriteNoteRoute(noteId = noteId)) },
                     onSeeAllNotes = { navController.navigate(JournalRoute) { launchSingleTop = true } },
                 )
             }
@@ -124,8 +133,11 @@ fun SproutNavHost(container: AppContainer, moreContent: @Composable () -> Unit) 
             }
             composable<JournalRoute> {
                 val vm = viewModel { JournalViewModel(container.repository) }
-                // Add and edit are wired up with the Write note screen.
-                JournalScreen(vm, onAddNote = null, onOpenNote = null)
+                JournalScreen(
+                    vm,
+                    onAddNote = { navController.navigate(WriteNoteRoute()) },
+                    onOpenNote = { id -> navController.navigate(WriteNoteRoute(noteId = id)) },
+                )
             }
             composable<InsightsRoute> { Placeholder("Insights") }
             composable<MoreRoute> { moreContent() }
