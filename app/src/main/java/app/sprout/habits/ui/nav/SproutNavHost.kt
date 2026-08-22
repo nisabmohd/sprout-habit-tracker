@@ -31,6 +31,8 @@ import androidx.navigation.toRoute
 import app.sprout.habits.ui.detail.HabitDetailScreen
 import app.sprout.habits.ui.detail.HabitDetailViewModel
 import app.sprout.habits.ui.edit.EditHabitScreen
+import app.sprout.habits.ui.insights.InsightsScreen
+import app.sprout.habits.ui.insights.InsightsViewModel
 import app.sprout.habits.ui.note.WriteNoteScreen
 import app.sprout.habits.ui.note.WriteNoteViewModel
 import app.sprout.habits.ui.journal.JournalScreen
@@ -139,7 +141,10 @@ fun SproutNavHost(container: AppContainer, moreContent: @Composable () -> Unit) 
                     onOpenNote = { id -> navController.navigate(WriteNoteRoute(noteId = id)) },
                 )
             }
-            composable<InsightsRoute> { Placeholder("Insights") }
+            composable<InsightsRoute> {
+                val vm = viewModel { InsightsViewModel(container.repository, container.settings) }
+                InsightsScreen(vm)
+            }
             composable<MoreRoute> { moreContent() }
         }
     }
@@ -171,12 +176,5 @@ private fun SproutNavigationBar(current: Tab, onSelect: (Tab) -> Unit) {
                 ),
             )
         }
-    }
-}
-
-@Composable
-private fun Placeholder(title: String) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(title, style = MaterialTheme.typography.headlineMedium)
     }
 }
