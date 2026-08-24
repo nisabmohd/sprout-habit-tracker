@@ -49,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -62,6 +63,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.TrackType
+import app.sprout.habits.notify.Notifications
+import app.sprout.habits.notify.rememberNotificationPermission
 import app.sprout.habits.ui.manage.DeleteHabitDialog
 import app.sprout.habits.ui.theme.habitColors
 import app.sprout.habits.ui.today.TodayViewModel
@@ -105,6 +108,12 @@ private fun EditHabitContent(
     val type = MaterialTheme.typography
     val hc = habitColors(form.hue.toFloat())
     var pickingTime by rememberSaveable { mutableStateOf(false) }
+    val notifications = rememberNotificationPermission()
+    val context = LocalContext.current
+    /** Turning on anything that notifies asks for the permission first, if needed. */
+    fun needsNotifications(on: Boolean) {
+        if (on && !notifications.granted) notifications.request()
+    }
 
     Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().imePadding()) {
         Row(
@@ -270,13 +279,25 @@ private fun EditHabitContent(
                             Text(TodayViewModel.formatTime(form.reminderMinutes), style = type.titleLarge, color = colors.onSurface)
                             Text("On the days above · tap to change", style = type.bodyMedium, color = colors.onSurfaceVariant)
                         }
-                        Switch(checked = form.reminderOn, onCheckedChange = { v -> onEdit { it.copy(reminderOn = v) } })
+                        Switch(checked = form.reminderOn, onCheckedChange = { v -> needsNotifications(v); onEdit { it.copy(reminderOn = v) } })
                     }
                 }
             }
 
+            if ((form.reminderOn || form.askForNote) && !notifications.granted) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "Notifications are off, so reminders won't show.",
+                        style = type.bodyMedium,
+                        color = colors.error,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(onClick = { Notifications.openSettings(context) }) { Text("Turn on") }
+                }
+            }
+
             Card {
-                ToggleRow("Ask for a note when I skip", "A reminder to write why", form.askForNote) { v -> onEdit { it.copy(askForNote = v) } }
+                ToggleRow("Ask for a note when I skip", "A reminder to write why", form.askForNote) { v -> needsNotifications(v); onEdit { it.copy(askForNote = v) } }
                 HorizontalDivider(color = colors.surfaceContainerHigh)
                 ToggleRow("Show on home screen widget", "Week view and Today widget", form.showOnWidget) { v -> onEdit { it.copy(showOnWidget = v) } }
             }
@@ -298,6 +319,7 @@ private fun EditHabitContent(
         TimeDialog(
             initialMinutes = form.reminderMinutes,
             onConfirm = { minutes ->
+                needsNotifications(true)
                 onEdit { it.copy(reminderMinutes = minutes, reminderOn = true) }
                 pickingTime = false
             },
