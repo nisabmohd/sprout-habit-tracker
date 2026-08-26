@@ -1,5 +1,6 @@
 package app.sprout.habits
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -23,7 +24,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.data.Settings
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -40,8 +43,12 @@ import app.sprout.habits.ui.theme.habitColors
 import app.sprout.habits.ui.theme.isDark
 
 class MainActivity : ComponentActivity() {
+    /** A habit to open, from a tapped notification or widget; consumed by the nav host. */
+    private val openHabit = MutableStateFlow<Long?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) handleIntent(intent)
         enableEdgeToEdge()
         setContent {
             val container = (application as SproutApp).container
@@ -58,7 +65,8 @@ class MainActivity : ComponentActivity() {
                 enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
             }
             SproutTheme(settings) {
-                SproutNavHost(container, moreContent = {
+                val habitToOpen by openHabit.collectAsStateWithLifecycle()
+                SproutNavHost(container, habitToOpen = habitToOpen, onHabitOpened = { openHabit.value = null }, moreContent = {
                     // Temporary theme check until the More tab exists.
                     ThemePreview(settings, onChange = { new ->
                         scope.launch {
@@ -71,6 +79,22 @@ class MainActivity : ComponentActivity() {
                 })
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent?.action == ACTION_OPEN_HABIT) {
+            intent.getLongExtra(EXTRA_HABIT_ID, 0L).takeIf { it != 0L }?.let { openHabit.value = it }
+        }
+    }
+
+    companion object {
+        const val ACTION_OPEN_HABIT = "app.sprout.habits.action.OPEN_HABIT"
+        const val EXTRA_HABIT_ID = "habitId"
     }
 }
 

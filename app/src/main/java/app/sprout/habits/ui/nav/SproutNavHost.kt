@@ -14,6 +14,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,10 +59,21 @@ private enum class Tab(val route: Any, val routeClass: KClass<*>, val label: Str
 }
 
 @Composable
-fun SproutNavHost(container: AppContainer, moreContent: @Composable () -> Unit) {
+fun SproutNavHost(
+    container: AppContainer,
+    habitToOpen: Long?,
+    onHabitOpened: () -> Unit,
+    moreContent: @Composable () -> Unit,
+) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val destination = backStackEntry?.destination
+    LaunchedEffect(habitToOpen) {
+        habitToOpen?.let { id ->
+            navController.navigate(HabitDetailRoute(id)) { launchSingleTop = true }
+            onHabitOpened()
+        }
+    }
     val currentTab = Tab.entries.firstOrNull { tab -> destination?.hierarchy?.any { it.hasRoute(tab.routeClass) } == true }
 
     Scaffold(

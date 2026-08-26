@@ -38,6 +38,16 @@ object Notifications {
         return granted && context.getSystemService(NotificationManager::class.java).areNotificationsEnabled()
     }
 
+    /** Opens "Alarms & reminders" for this app (Android 12+), where exact alarms are allowed. */
+    fun openExactAlarmSettings(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            context.startActivity(
+                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, android.net.Uri.parse("package:${context.packageName}"))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
+        }
+    }
+
     /** Opens the system screen for this app's notifications. */
     fun openSettings(context: Context) {
         context.startActivity(

@@ -42,6 +42,7 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -59,6 +60,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
 import app.sprout.habits.data.HabitIcon
@@ -110,6 +113,8 @@ private fun EditHabitContent(
     var pickingTime by rememberSaveable { mutableStateOf(false) }
     val notifications = rememberNotificationPermission()
     val context = LocalContext.current
+    var exactAlarms by remember { mutableStateOf(canScheduleExactAlarms(context)) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { exactAlarms = canScheduleExactAlarms(context) }
     /** Turning on anything that notifies asks for the permission first, if needed. */
     fun needsNotifications(on: Boolean) {
         if (on && !notifications.granted) notifications.request()
@@ -284,6 +289,17 @@ private fun EditHabitContent(
                 }
             }
 
+            if (form.reminderOn && notifications.granted && !exactAlarms) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "Reminders may arrive up to 10 minutes late.",
+                        style = type.bodyMedium,
+                        color = colors.onSurfaceVariant,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(onClick = { Notifications.openExactAlarmSettings(context) }) { Text("Make exact") }
+                }
+            }
             if ((form.reminderOn || form.askForNote) && !notifications.granted) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -395,3 +411,7 @@ private fun daysLabel(mask: Int): String = when (mask) {
     0 -> "Pick at least one day"
     else -> "${Integer.bitCount(mask)} days a week"
 }
+
+private fun canScheduleExactAlarms(context: android.content.Context): Boolean =
+    android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S ||
+        context.getSystemService(android.app.AlarmManager::class.java).canScheduleExactAlarms()
