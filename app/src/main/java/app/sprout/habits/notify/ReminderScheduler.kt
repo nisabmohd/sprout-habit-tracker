@@ -34,6 +34,7 @@ class ReminderScheduler(
         val daysMask: Int,
         val archived: Boolean,
         val firstDay: Long,
+        val askForNote: Boolean,
     )
 
     /**
@@ -49,6 +50,7 @@ class ReminderScheduler(
                 .collect { current ->
                     (previous.keys - current.keys).forEach(::cancel)
                     current.values.filter { previous[it.id] != it }.forEach(::apply)
+                    scheduleNoteNudge(current.values.any { it.askForNote && !it.archived })
                     previous = current
                 }
         }
@@ -56,12 +58,36 @@ class ReminderScheduler(
 
     /** Reschedules every habit, e.g. after a reboot or a clock or time-zone change. */
     suspend fun rescheduleAll() {
-        repository.observeAllHabits().first().forEach { schedule(it) }
+        val habits = repository.observeAllHabits().first()
+        habits.forEach { schedule(it) }
+        scheduleNoteNudge(habits.any { it.askForNote && !it.archived })
     }
 
     fun schedule(habit: Habit) = apply(habit.key())
 
-    private fun Habit.key() = Key(id, reminderMinutes, daysMask, archived, firstDay())
+    private fun Habit.key() = Key(id, reminderMinutes, daysMask, archived, firstDay(), askForNote)
+
+    /** The evening check for skipped habits that ask for a note; one alarm for all of them. */
+    fun scheduleNoteNudge(enabled: Boolean) {
+        val intent = notePendingIntent()
+        if (!enabled) {
+            alarms.cancel(intent)
+            return
+        }
+        val at = nextReminderTime(System.currentTimeMillis(), ZoneId.systemDefault(), NOTE_NUDGE_MINUTES, 0b111_1111, 0L) ?: return
+        if (canScheduleExact()) {
+            alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, intent)
+        } else {
+            alarms.setWindow(AlarmManager.RTC_WAKEUP, at, WINDOW_MILLIS, intent)
+        }
+    }
+
+    private fun notePendingIntent(): PendingIntent = PendingIntent.getBroadcast(
+        context,
+        NOTE_NUDGE_REQUEST_CODE,
+        Intent(context, ReminderReceiver::class.java).setAction(ACTION_NOTE_NUDGE),
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+    )
 
     private fun apply(key: Key) {
         val minutes = key.minutes
@@ -91,8 +117,14 @@ class ReminderScheduler(
 
     companion object {
         const val ACTION_REMINDER = "app.sprout.habits.action.REMINDER"
+        const val ACTION_NOTE_NUDGE = "app.sprout.habits.action.NOTE_NUDGE"
         const val EXTRA_HABIT_ID = "habitId"
 
+        /** 9:00 PM, as in the reminder design. */
+        const val NOTE_NUDGE_MINUTES = 21 * 60
+
+        /** Habit alarms use the habit id as request code; ids start at 1, so -1 is free. */
+        private const val NOTE_NUDGE_REQUEST_CODE = -1
         private const val WINDOW_MILLIS = 10 * 60 * 1000L
     }
 }

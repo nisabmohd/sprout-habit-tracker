@@ -7,20 +7,32 @@ import android.content.Intent
 import app.sprout.habits.SproutApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-/** Fires at a habit's reminder time: posts the notification, then schedules the next one. */
+/**
+ * Fires at a habit's reminder time (posts it, then schedules the next one) and at the evening
+ * note check (nudges skipped habits that ask for a note, then schedules tomorrow's check).
+ */
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val habitId = intent.getLongExtra(ReminderScheduler.EXTRA_HABIT_ID, 0L)
-        if (habitId == 0L) return
         val container = (context.applicationContext as SproutApp).container
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val habit = container.repository.getHabit(habitId) ?: return@launch
-                container.reminderNotifier.showReminder(habit)
-                container.reminders.schedule(habit)
+                when (intent.action) {
+                    ReminderScheduler.ACTION_REMINDER -> {
+                        val habitId = intent.getLongExtra(ReminderScheduler.EXTRA_HABIT_ID, 0L)
+                        val habit = container.repository.getHabit(habitId) ?: return@launch
+                        container.reminderNotifier.showReminder(habit)
+                        container.reminders.schedule(habit)
+                    }
+                    ReminderScheduler.ACTION_NOTE_NUDGE -> {
+                        val habits = container.repository.observeHabits().first()
+                        container.reminderNotifier.showNoteNudges(habits)
+                        container.reminders.scheduleNoteNudge(habits.any { it.askForNote })
+                    }
+                }
             } finally {
                 pending.finish()
             }

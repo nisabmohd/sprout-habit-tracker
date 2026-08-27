@@ -13,6 +13,7 @@ import app.sprout.habits.data.Habit
 import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.data.TrackType
 import app.sprout.habits.ui.today.TodayViewModel.Companion.formatNumber
+import app.sprout.habits.domain.isScheduled
 import java.time.LocalDate
 
 /** Simple notifications: a title and one line, no action buttons; a tap opens the habit. */
@@ -28,6 +29,18 @@ class ReminderNotifier(
         if (entry?.status == EntryStatus.DONE || entry?.status == EntryStatus.SKIP) return
         val (title, text) = reminderText(habit, entry?.amount ?: 0.0)
         post(habit.id, Notifications.CHANNEL_REMINDERS, title, text, reminderId(habit.id))
+    }
+
+    /** For each habit that asks for a note: if it was skipped today and has no note yet, nudge. */
+    suspend fun showNoteNudges(habits: List<Habit>) {
+        val today = LocalDate.now()
+        val day = today.toEpochDay()
+        for (habit in habits) {
+            if (!habit.askForNote || habit.archived || !isScheduled(habit.daysMask, today)) continue
+            if (repository.getEntry(habit.id, day)?.status != EntryStatus.SKIP) continue
+            if (repository.getNote(habit.id, day) != null) continue
+            post(habit.id, Notifications.CHANNEL_NOTES, "${habit.name} · how did today go?", "Add a note about today.", noteReminderId(habit.id))
+        }
     }
 
     @SuppressLint("MissingPermission")
