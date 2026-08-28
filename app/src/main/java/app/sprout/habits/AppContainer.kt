@@ -5,6 +5,7 @@ import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.data.SettingsRepository
 import app.sprout.habits.notify.ReminderNotifier
 import app.sprout.habits.notify.ReminderScheduler
+import app.sprout.habits.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -17,6 +18,7 @@ class AppContainer(private val context: Context) {
     val settings by lazy { SettingsRepository(context) }
     val reminders by lazy { ReminderScheduler(context, repository) }
     val reminderNotifier by lazy { ReminderNotifier(context, repository) }
+    val widgets by lazy { WidgetUpdater(context, repository, settings) }
 
     /** Lives as long as the process, for work that isn't tied to a screen. */
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

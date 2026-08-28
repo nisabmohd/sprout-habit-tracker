@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Sprout</string>
+    <string name="widget_week_description">Every habit and its week</string>
+    <string name="widget_today_description">Today\'s progress and what\'s next</string>
+    <string name="widget_strip_description">A slim progress strip for today</string>
+    <string name="widget_streak_description">One habit\'s streak</string>
+    <string name="widget_week_label">This week</string>
+    <string name="widget_today_label">Today</string>
+    <string name="widget_strip_label">Today strip</string>
+    <string name="widget_streak_label">Streak</string>
 </resources>

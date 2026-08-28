@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The open circle in the Today widget; tinted with the habit color. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="36"
+    android:viewportHeight="36">
+    <path
+        android:pathData="M18,2a16,16 0,1 0,0.01 0z"
+        android:strokeWidth="2.5"
+        android:strokeColor="#FF000000" />
+</vector>

@@ -15,5 +15,6 @@ class SproutApp : Application() {
         Notifications.createChannels(this)
         container.appScope.launch(Dispatchers.IO) { DevData.seedIfEmpty(container.repository) }
         container.reminders.start(container.appScope)
+        container.widgets.start(container.appScope)
     }
 }
