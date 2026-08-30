@@ -45,6 +45,13 @@ interface HabitDao {
 
     @Delete
     suspend fun delete(habit: Habit)
+
+    @Insert
+    suspend fun insertAll(habits: List<Habit>)
+
+    /** Also removes every entry and note (cascade). */
+    @Query("DELETE FROM habit")
+    suspend fun deleteAll()
 }
 
 @Dao
@@ -70,6 +77,9 @@ interface EntryDao {
 
     @Query("DELETE FROM entry WHERE habitId = :habitId AND date = :date")
     suspend fun delete(habitId: Long, date: Long)
+
+    @Insert
+    suspend fun insertAll(entries: List<Entry>)
 }
 
 @Dao
@@ -98,4 +108,7 @@ interface NoteDao {
 
     @Query("DELETE FROM note WHERE id = :id")
     suspend fun delete(id: Long)
+
+    @Insert
+    suspend fun insertAll(notes: List<Note>)
 }

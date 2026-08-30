@@ -1,6 +1,13 @@
 package app.sprout.habits
 
 import android.content.Intent
+import app.sprout.habits.ui.more.BackupSection
+import androidx.compose.runtime.remember
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.fillMaxWidth
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -68,6 +75,9 @@ class MainActivity : ComponentActivity() {
                 val habitToOpen by openHabit.collectAsStateWithLifecycle()
                 SproutNavHost(container, habitToOpen = habitToOpen, onHabitOpened = { openHabit.value = null }, moreContent = {
                     // Temporary theme check until the More tab exists.
+                    val snackbar = remember { SnackbarHostState() }
+                    Box(Modifier.fillMaxSize()) {
+                    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                     ThemePreview(settings, onChange = { new ->
                         scope.launch {
                             settingsRepo.setThemeMode(new.mode)
@@ -76,6 +86,12 @@ class MainActivity : ComponentActivity() {
                             settingsRepo.setTextScale(new.textScale)
                         }
                     })
+                    Box(Modifier.padding(16.dp)) {
+                        BackupSection(container.backup, onMessage = { msg -> scope.launch { snackbar.showSnackbar(msg) } })
+                    }
+                    }
+                    SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
+                    }
                 })
             }
         }
@@ -103,7 +119,7 @@ private fun ThemePreview(settings: ThemeSettings, onChange: (ThemeSettings) -> U
     val t = MaterialTheme.typography
     val c = MaterialTheme.colorScheme
     Column(
-        Modifier.fillMaxSize().background(c.background).padding(16.dp),
+        Modifier.fillMaxWidth().background(c.background).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text("Today", style = t.headlineMedium, color = c.onBackground)

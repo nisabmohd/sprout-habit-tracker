@@ -62,4 +62,18 @@ class HabitRepository(private val db: SproutDatabase) {
         return if (id == -1L) note.id else id
     }
     suspend fun deleteNote(id: Long) = notes.delete(id)
+
+    // Backup
+
+    suspend fun snapshot(): Triple<List<Habit>, List<Entry>, List<Note>> = db.withTransaction {
+        Triple(habits.getAll(), entries.getAll(), notes.getAll())
+    }
+
+    /** Replaces all data in one transaction; on failure nothing changes. */
+    suspend fun replaceAll(newHabits: List<Habit>, newEntries: List<Entry>, newNotes: List<Note>) = db.withTransaction {
+        habits.deleteAll()
+        habits.insertAll(newHabits)
+        entries.insertAll(newEntries)
+        notes.insertAll(newNotes)
+    }
 }
