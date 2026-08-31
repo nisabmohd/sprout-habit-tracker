@@ -17,3 +17,6 @@ import kotlinx.serialization.Serializable
 
 /** Edit note [noteId], or write a new one (0) for [habitId] on [epochDay] (−1 = today). */
 @Serializable data class WriteNoteRoute(val noteId: Long = 0L, val habitId: Long = 0L, val epochDay: Long = -1L)
+
+@Serializable data object AboutRoute
+@Serializable data object LicencesRoute

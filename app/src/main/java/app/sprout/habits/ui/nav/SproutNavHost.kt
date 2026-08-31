@@ -45,6 +45,10 @@ import app.sprout.habits.ui.manage.ManageHabitsViewModel
 import app.sprout.habits.ui.edit.EditHabitViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.sprout.habits.AppContainer
+import app.sprout.habits.data.Settings
+import app.sprout.habits.ui.more.AboutScreen
+import app.sprout.habits.ui.more.LicencesScreen
+import app.sprout.habits.ui.more.MoreScreen
 import app.sprout.habits.R
 import app.sprout.habits.ui.today.TodayScreen
 import app.sprout.habits.ui.today.TodayViewModel
@@ -61,9 +65,9 @@ private enum class Tab(val route: Any, val routeClass: KClass<*>, val label: Str
 @Composable
 fun SproutNavHost(
     container: AppContainer,
+    settings: Settings,
     habitToOpen: Long?,
     onHabitOpened: () -> Unit,
-    moreContent: @Composable () -> Unit,
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -157,7 +161,13 @@ fun SproutNavHost(
                 val vm = viewModel { InsightsViewModel(container.repository, container.settings) }
                 InsightsScreen(vm)
             }
-            composable<MoreRoute> { moreContent() }
+            composable<MoreRoute> {
+                MoreScreen(settings, container.settings, container.backup, onOpenAbout = { navController.navigate(AboutRoute) })
+            }
+            composable<AboutRoute> {
+                AboutScreen(onBack = { navController.popBackStack() }, onOpenLicences = { navController.navigate(LicencesRoute) })
+            }
+            composable<LicencesRoute> { LicencesScreen(onBack = { navController.popBackStack() }) }
         }
     }
 }

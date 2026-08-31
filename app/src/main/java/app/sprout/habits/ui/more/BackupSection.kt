@@ -3,13 +3,7 @@ package app.sprout.habits.ui.more
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -18,9 +12,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
+import app.sprout.habits.R
 import app.sprout.habits.data.backup.BackupException
 import app.sprout.habits.data.backup.BackupFile
 import app.sprout.habits.data.backup.BackupManager
@@ -29,12 +22,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Export to JSON or CSV, and import JSON, through the system file picker (no storage permission). */
+/** "Export to file" and "Import from file" rows, through the system file picker (no storage permission). */
 @Composable
-fun BackupSection(backup: BackupManager, onMessage: (String) -> Unit) {
+fun BackupRows(backup: BackupManager, onMessage: (String) -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var pending by remember { mutableStateOf<BackupFile?>(null) }
+    var choosingFormat by remember { mutableStateOf(false) }
 
     fun write(uri: Uri?, block: suspend (java.io.OutputStream) -> Unit, done: String) {
         uri ?: return
@@ -69,24 +63,27 @@ fun BackupSection(backup: BackupManager, onMessage: (String) -> Unit) {
         }
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Backup & restore", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
-        Text(
-            "Save everything to a file you keep, or restore from one.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+    SettingsRow("Export to file", "JSON or CSV, works without an account", icon = R.drawable.ic_download, onClick = { choosingFormat = true })
+    CardDivider()
+    SettingsRow(
+        "Import from file",
+        "Replace current data with a backup",
+        icon = R.drawable.ic_upload,
+        onClick = { import.launch(arrayOf("application/json", "application/octet-stream", "text/plain")) },
+    )
+
+    if (choosingFormat) {
+        AlertDialog(
+            onDismissRequest = { choosingFormat = false },
+            title = { Text("Export to file") },
+            text = { Text("A JSON backup can be imported again. CSV opens in any spreadsheet.") },
+            confirmButton = {
+                TextButton(onClick = { choosingFormat = false; exportJson.launch("sprout-backup-${LocalDate.now()}.json") }) { Text("JSON backup") }
+            },
+            dismissButton = {
+                TextButton(onClick = { choosingFormat = false; exportCsv.launch("sprout-${LocalDate.now()}.csv") }) { Text("CSV") }
+            },
         )
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { exportJson.launch("sprout-backup-${LocalDate.now()}.json") }, modifier = Modifier.weight(1f)) {
-                Text("Export")
-            }
-            OutlinedButton(onClick = { import.launch(arrayOf("application/json", "application/octet-stream", "text/plain")) }, modifier = Modifier.weight(1f)) {
-                Text("Import")
-            }
-        }
-        OutlinedButton(onClick = { exportCsv.launch("sprout-${LocalDate.now()}.csv") }, modifier = Modifier.fillMaxWidth()) {
-            Text("Export CSV for spreadsheets")
-        }
     }
 
     pending?.let { file ->

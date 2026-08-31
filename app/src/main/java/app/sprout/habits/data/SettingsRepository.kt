@@ -29,6 +29,8 @@ data class Settings(
     val backupEnabled: Boolean = false,
     /** Epoch millis of the last successful backup, or null if never. */
     val lastBackupAt: Long? = null,
+    /** False until the welcome screen has been passed once. */
+    val onboarded: Boolean = false,
 )
 
 private val Context.dataStore by preferencesDataStore(name = "settings")
@@ -47,6 +49,7 @@ class SettingsRepository(context: Context) {
     suspend fun setDefaultReminderMinutes(minutes: Int) = store.edit { it[DEFAULT_REMINDER] = minutes }
     suspend fun setBackupEnabled(enabled: Boolean) = store.edit { it[BACKUP_ENABLED] = enabled }
     suspend fun setLastBackupAt(epochMillis: Long) = store.edit { it[LAST_BACKUP_AT] = epochMillis }
+    suspend fun setOnboarded() = store.edit { it[ONBOARDED] = true }
 
     private fun Preferences.toSettings(): Settings {
         val defaults = Settings()
@@ -63,6 +66,7 @@ class SettingsRepository(context: Context) {
             defaultReminderMinutes = this[DEFAULT_REMINDER] ?: defaults.defaultReminderMinutes,
             backupEnabled = this[BACKUP_ENABLED] ?: defaults.backupEnabled,
             lastBackupAt = this[LAST_BACKUP_AT],
+            onboarded = this[ONBOARDED] ?: false,
         )
     }
 
@@ -76,6 +80,7 @@ class SettingsRepository(context: Context) {
         val DEFAULT_REMINDER = intPreferencesKey("defaultReminderMinutes")
         val BACKUP_ENABLED = booleanPreferencesKey("backupEnabled")
         val LAST_BACKUP_AT = longPreferencesKey("lastBackupAt")
+        val ONBOARDED = booleanPreferencesKey("onboarded")
 
         inline fun <reified E : Enum<E>> enumOrDefault(name: String?, default: E): E =
             name?.let { n -> enumValues<E>().firstOrNull { it.name == n } } ?: default
