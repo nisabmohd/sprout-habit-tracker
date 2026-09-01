@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -252,22 +253,32 @@ private fun EditHabitContent(
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     orderedDays(form.weekStart).forEach { day ->
                         val on = form.daysMask and (1 shl (day.value - 1)) != 0
+                        // 48 dp touch target around the 44 dp circle from the design.
                         Box(
                             Modifier
-                                .size(44.dp)
+                                .size(48.dp)
                                 .clip(CircleShape)
-                                .background(if (on) hc.solid else colors.surfaceContainerLowest)
-                                .border(1.dp, if (on) hc.solid else colors.outlineVariant, CircleShape)
-                                .toggleable(value = on, role = Role.Checkbox) { onToggleDay(day) }
-                                .semantics { contentDescription = day.getDisplayName(TextStyle.FULL, Locale.getDefault()) },
+                                .semantics { contentDescription = day.getDisplayName(TextStyle.FULL, Locale.getDefault()) }
+                                .toggleable(value = on, role = Role.Checkbox) { onToggleDay(day) },
                             contentAlignment = Alignment.Center,
                         ) {
-                            Text(
-                                day.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
-                                style = type.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = if (on) hc.on else colors.onSurface,
-                            )
+                            Box(
+                                Modifier
+                                    .size(44.dp)
+                                    .clip(CircleShape)
+                                    .background(if (on) hc.solid else colors.surfaceContainerLowest)
+                                    .border(1.dp, if (on) hc.solid else colors.outlineVariant, CircleShape),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    day.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                                    style = type.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (on) hc.on else colors.onSurface,
+                                    // The full day name is on the toggle; don't also read "M".
+                                    modifier = Modifier.clearAndSetSemantics {},
+                                )
+                            }
                         }
                     }
                 }

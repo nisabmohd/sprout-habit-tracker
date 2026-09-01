@@ -190,7 +190,7 @@ private fun WeekStrip(week: List<WeekDayUi>, onSelect: (LocalDate) -> Unit) {
                     .clickable(enabled = enabled) { onSelect(day.date) }
                     .semantics(mergeDescendants = true) {
                         selected = day.isSelected
-                        contentDescription = "${day.date.dayOfWeek}, ${day.dayOfMonth}" +
+                        contentDescription = "${day.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${day.dayOfMonth}" +
                             (day.progress?.let { ", ${(it * 100).toInt()}%" } ?: "")
                     },
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -256,7 +256,7 @@ private fun ScoreCard(state: TodayUiState) {
                 modifier = Modifier.padding(bottom = 4.dp),
             )
         }
-        Segments(state.habits)
+        Segments(state.habits, Modifier.semantics { contentDescription = summary(state) })
     }
 }
 
@@ -268,12 +268,12 @@ private fun summary(state: TodayUiState): String = buildList {
 
 /** One bar per habit: solid when done, part-filled when partial, faint when skipped. */
 @Composable
-private fun Segments(habits: List<HabitRowUi>) {
+private fun Segments(habits: List<HabitRowUi>, modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
     val line = colors.outlineVariant
     val skip = colors.surfaceContainerHigh
     val solids = habits.map { habitColors(it.hue).solid }
-    Canvas(Modifier.fillMaxWidth().height(8.dp)) {
+    Canvas(modifier.fillMaxWidth().height(8.dp)) {
         if (habits.isEmpty()) {
             drawRoundRect(line, cornerRadius = CornerRadius(size.height / 2))
             return@Canvas

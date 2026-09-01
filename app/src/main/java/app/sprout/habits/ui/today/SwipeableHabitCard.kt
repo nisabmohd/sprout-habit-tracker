@@ -74,6 +74,7 @@ fun SwipeableHabitCard(
             customActions = buildList {
                 if (canDone) add(CustomAccessibilityAction("Mark done") { onDone(); true })
                 if (canSkip) add(CustomAccessibilityAction("Skip") { onSkip(); true })
+                add(CustomAccessibilityAction("Log amount") { onLongPress(); true })
             }
         },
         enableDismissFromStartToEnd = canDone,
