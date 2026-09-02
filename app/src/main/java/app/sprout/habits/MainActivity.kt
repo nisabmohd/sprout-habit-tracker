@@ -6,9 +6,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -29,10 +32,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val container = (application as SproutApp).container
         setContent {
-            // Null until DataStore has loaded, so the first frame already has the right theme
-            // (the window background, light or night, shows until then).
+            // Null until DataStore has loaded, so the first real frame already has the right theme.
+            // Until then draw an empty frame over the window background (light or night), so the
+            // launch still produces a frame for the system and startup tooling.
             val settings by container.settings.settings.collectAsStateWithLifecycle(null)
-            val current = settings ?: return@setContent
+            val current = settings ?: run {
+                Spacer(Modifier.fillMaxSize())
+                return@setContent
+            }
             val dark = current.theme.isDark()
             LaunchedEffect(dark) {
                 val style = if (dark) {

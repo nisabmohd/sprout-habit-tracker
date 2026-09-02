@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Sprout"
 include(":app")
+include(":baselineprofile")

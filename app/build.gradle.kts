@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.baselineprofile)
 }
 
 android {
@@ -67,6 +68,14 @@ ksp {
     arg("room.generateKotlin", "true")
 }
 
+baselineProfile {
+    // Generated on demand with ./gradlew :app:generateBaselineProfile, then committed.
+    automaticGenerationDuringBuild = false
+    // One profile for both flavors; the screens are the same.
+    mergeIntoMain = true
+    dexLayoutOptimization = true
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -85,6 +94,8 @@ dependencies {
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.profileinstaller)
+    baselineProfile(project(":baselineprofile"))
 
     testImplementation(libs.junit)
 }
