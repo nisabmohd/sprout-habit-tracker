@@ -47,6 +47,30 @@ android {
         }
     }
 
+    androidResources {
+        // Only the languages the app ships; drops every other locale from AndroidX resources.
+        localeFilters += listOf("en")
+    }
+
+    packaging {
+        resources {
+            excludes += listOf(
+                "META-INF/**/LICENSE.txt",
+                "META-INF/*.version",
+                "META-INF/{AL2.0,LGPL2.1}",
+                "kotlin/**.kotlin_builtins",
+                "kotlin-tooling-metadata.json",
+                "DebugProbesKt.bin",
+            )
+        }
+    }
+
+    dependenciesInfo {
+        // The signed dependency block is only readable by Google Play; F-Droid rejects it.
+        includeInApk = false
+        includeInBundle = false
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
