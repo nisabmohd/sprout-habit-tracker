@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -211,7 +212,14 @@ private fun ByHabit(rates: List<HabitRateUi>) {
                         val w = size.width * r.percent / 100f
                         if (w > 0f) drawRoundRect(solid, size = Size(w, size.height), cornerRadius = radius)
                     }
-                    Text("${r.percent}%", style = type.titleSmall, color = colors.onSurface, textAlign = TextAlign.End, modifier = Modifier.width(44.dp))
+                    Text(
+                        "${r.percent}%",
+                        style = type.titleSmall,
+                        color = colors.onSurface,
+                        textAlign = TextAlign.End,
+                        softWrap = false,
+                        modifier = Modifier.widthIn(min = 44.dp),
+                    )
                 }
             }
         }

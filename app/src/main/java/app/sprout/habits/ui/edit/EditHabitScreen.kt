@@ -65,6 +65,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.TrackType
 import app.sprout.habits.notify.Notifications
@@ -216,6 +217,8 @@ private fun EditHabitContent(
 
             Section("How do you track it?") {
                 val options = listOf(TrackType.CHECK to "Check off", TrackType.AMOUNT to "Amount", TrackType.DURATION to "Duration")
+                // Each segment is a fixed share of the row, so labels stop scaling at 1.3x.
+                CappedFontScale {
                 SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                     options.forEachIndexed { index, (value, label) ->
                         SegmentedButton(
@@ -225,6 +228,7 @@ private fun EditHabitContent(
                             icon = {},
                         ) { Text(label, style = type.labelLarge) }
                     }
+                }
                 }
                 when (form.trackType) {
                     TrackType.AMOUNT -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

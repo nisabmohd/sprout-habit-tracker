@@ -50,6 +50,7 @@ import app.sprout.habits.ui.more.AboutScreen
 import app.sprout.habits.ui.more.LicencesScreen
 import app.sprout.habits.ui.more.MoreScreen
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.ui.today.TodayScreen
 import app.sprout.habits.ui.today.TodayViewModel
 import kotlin.reflect.KClass
@@ -175,6 +176,8 @@ fun SproutNavHost(
 @Composable
 private fun SproutNavigationBar(current: Tab, onSelect: (Tab) -> Unit) {
     val colors = MaterialTheme.colorScheme
+    // Five labels have to fit in one row; past 1.3x they would wrap mid-word.
+    CappedFontScale {
     NavigationBar(containerColor = colors.surfaceContainer) {
         Tab.entries.forEach { tab ->
             val selected = tab == current
@@ -185,6 +188,7 @@ private fun SproutNavigationBar(current: Tab, onSelect: (Tab) -> Unit) {
                 label = {
                     Text(
                         tab.label,
+                        maxLines = 1,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                     )
@@ -198,5 +202,6 @@ private fun SproutNavigationBar(current: Tab, onSelect: (Tab) -> Unit) {
                 ),
             )
         }
+    }
     }
 }

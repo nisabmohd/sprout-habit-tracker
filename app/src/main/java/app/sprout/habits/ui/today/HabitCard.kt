@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -66,7 +68,9 @@ fun HabitCard(
     Box(
         modifier
             .fillMaxWidth()
-            .height(68.dp)
+            // Grows with large text instead of clipping it.
+            .heightIn(min = 68.dp)
+            .height(IntrinsicSize.Min)
             .clip(HabitCardShape)
             .background(if (skipped) colors.surfaceContainerHigh else colors.surfaceContainerLowest)
             .combinedClickable(
@@ -88,7 +92,7 @@ fun HabitCard(
             )
         }
         Row(
-            Modifier.fillMaxSize().padding(horizontal = 12.dp),
+            Modifier.fillMaxWidth().heightIn(min = 68.dp).padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconTile(habit, hc)

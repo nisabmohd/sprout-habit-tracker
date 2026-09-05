@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -48,6 +49,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.ui.components.DayMarkView
 import app.sprout.habits.ui.components.MarkColors
 import app.sprout.habits.ui.components.MarkKind
@@ -80,6 +82,8 @@ fun HabitsScreen(
             }
         }
         item(key = "mode") {
+            // Each segment is a fixed share of the row, so labels stop scaling at 1.3x.
+            CappedFontScale {
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                 HabitsMode.entries.forEachIndexed { index, m ->
                     SegmentedButton(
@@ -89,6 +93,7 @@ fun HabitsScreen(
                         colors = SegmentedButtonDefaults.colors(activeContainerColor = colors.primaryContainer, activeContentColor = colors.onPrimaryContainer),
                     ) { Text(if (m == HabitsMode.WEEK) "Week" else "Overall", style = MaterialTheme.typography.labelLarge) }
                 }
+            }
             }
         }
         when (mode) {
@@ -169,6 +174,8 @@ private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit) {
         CardHeader(habit.icon, habit.hue, habit.name, null) {
             Text(habit.goal, style = MaterialTheme.typography.bodyLarge, color = colors.onSurfaceVariant)
         }
+        // Seven fixed columns: the day labels stop scaling at 1.3x so they don't wrap.
+        CappedFontScale {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             habit.marks.forEachIndexed { i, mark ->
                 val isToday = i == week.todayIndex
@@ -191,6 +198,7 @@ private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit) {
                 }
             }
         }
+        }
     }
 }
 
@@ -206,13 +214,19 @@ private fun describe(kind: MarkKind, fraction: Float) = when (kind) {
 @Composable
 private fun Legend() {
     val colors = MaterialTheme.colorScheme
-    Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text("Last $OVERALL_WEEKS weeks", style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant, modifier = Modifier.weight(1f))
+    FlowRow(
+        Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        itemVerticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("Last $OVERALL_WEEKS weeks", style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant, modifier = Modifier.padding(end = 12.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
         LegendItem("Done") { drawRoundRect(colors.onSurfaceVariant, cornerRadius = CornerRadius(size.width * 0.3f)) }
         LegendItem("Partial") { drawRoundRect(colors.outlineVariant, cornerRadius = CornerRadius(size.width * 0.3f)) }
         LegendItem("Skipped") {
             val w = 1.dp.toPx()
             drawRoundRect(colors.outlineVariant, Offset(w / 2, w / 2), Size(size.width - w, size.height - w), CornerRadius(size.width * 0.3f), style = Stroke(w))
+        }
         }
     }
 }
@@ -241,18 +255,22 @@ private fun OverallCard(habit: HabitOverallUi, overall: OverallUi, onOpen: (Long
         CardHeader(habit.icon, habit.hue, habit.name, "Best streak ${habit.bestStreak} ${if (habit.bestStreak == 1) "day" else "days"}") {
             Text("${habit.percent}%", style = MaterialTheme.typography.headlineMedium, color = hc.ink)
         }
+        // Labels sit over fixed heatmap columns, so they stop scaling at 1.3x.
+        CappedFontScale {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             val column = maxWidth / OVERALL_WEEKS
-            Box(Modifier.fillMaxWidth().height(16.dp)) {
+            Box(Modifier.fillMaxWidth()) {
                 overall.months.forEach { (label, col) ->
                     Text(
                         label,
                         style = MaterialTheme.typography.labelSmall,
                         color = colors.onSurfaceVariant,
+                        maxLines = 1,
                         modifier = Modifier.offset(x = column * col),
                     )
                 }
             }
+        }
         }
         Heatmap(habit)
     }

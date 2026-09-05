@@ -52,6 +52,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import app.sprout.habits.BuildConfig
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.data.Settings
 import app.sprout.habits.data.SettingsRepository
 import app.sprout.habits.data.backup.BackupManager
@@ -115,6 +116,8 @@ fun MoreScreen(
                 SettingsCard {
                     Column(Modifier.padding(horizontal = 20.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text("Theme", style = MaterialTheme.typography.titleMedium)
+                        // Each segment is a fixed share of the row, so labels stop scaling at 1.3x.
+                        CappedFontScale {
                         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                             val modes = listOf(ThemeMode.SYSTEM to "System", ThemeMode.LIGHT to "Light", ThemeMode.DARK to "Dark")
                             modes.forEachIndexed { i, (mode, label) ->
@@ -129,6 +132,7 @@ fun MoreScreen(
                                     ),
                                 ) { Text(label, style = MaterialTheme.typography.labelLarge) }
                             }
+                        }
                         }
                     }
                     val dynamicSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S

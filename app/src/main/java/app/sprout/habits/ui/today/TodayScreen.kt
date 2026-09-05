@@ -51,6 +51,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
 import app.sprout.habits.domain.DayOutcome
+import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.ui.components.ProgressRing
 import app.sprout.habits.ui.theme.habitColors
 import java.time.LocalDate
@@ -215,11 +216,14 @@ private fun WeekStrip(week: List<WeekDayUi>, onSelect: (LocalDate) -> Unit) {
                             .background(if (day.isSelected) colors.primary else colors.background, CircleShape),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(
-                            day.dayOfMonth.toString(),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = if (day.isSelected) colors.onPrimary else colors.onBackground,
-                        )
+                        // The circle can't grow, so the number stops scaling at 1.3x.
+                        CappedFontScale {
+                            Text(
+                                day.dayOfMonth.toString(),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = if (day.isSelected) colors.onPrimary else colors.onBackground,
+                            )
+                        }
                     }
                 }
             }
@@ -248,22 +252,25 @@ private fun ScoreCard(state: TodayUiState) {
                 color = colors.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 4.dp),
             )
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.width(12.dp))
+            // Takes the rest of the row and wraps at large text sizes.
             Text(
                 summary(state),
                 style = type.titleSmall,
                 color = colors.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 4.dp),
+                textAlign = androidx.compose.ui.text.style.TextAlign.End,
+                modifier = Modifier.weight(1f).padding(bottom = 4.dp),
             )
         }
         Segments(state.habits, Modifier.semantics { contentDescription = summary(state) })
     }
 }
 
+/** "1 done · 2 partial · 3 left"; each count stays on one line with its word when text wraps. */
 private fun summary(state: TodayUiState): String = buildList {
-    add("${state.doneCount} done")
-    if (state.partialCount > 0) add("${state.partialCount} partial")
-    if (state.openCount > 0) add("${state.openCount} left")
+    add("${state.doneCount}\u00A0done")
+    if (state.partialCount > 0) add("${state.partialCount}\u00A0partial")
+    if (state.openCount > 0) add("${state.openCount}\u00A0left")
 }.joinToString(" · ")
 
 /** One bar per habit: solid when done, part-filled when partial, faint when skipped. */

@@ -50,6 +50,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.data.TrackType
 import app.sprout.habits.ui.theme.habitColors
@@ -109,6 +110,8 @@ fun LogSheet(
             } else {
                 listOf(EntryStatus.DONE to "Done", EntryStatus.SKIP to "Skip")
             }
+            // Each segment is a fixed share of the row, so labels stop scaling at 1.3x.
+            CappedFontScale {
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                 options.forEachIndexed { index, (value, label) ->
                     SegmentedButton(
@@ -127,6 +130,7 @@ fun LogSheet(
                         ),
                     ) { Text(label, style = type.labelLarge) }
                 }
+            }
             }
 
             if (hasAmount && status != EntryStatus.SKIP) {
