@@ -259,7 +259,8 @@ private fun FontRow(font: BodyFont, selected: Boolean, onClick: () -> Unit) {
 
 @Composable
 private fun TextSizeRow(scale: Float, onChange: (Float) -> Unit) {
-    val index = TEXT_SCALES.indexOfFirst { it.first == scale }.coerceAtLeast(1)
+    // Unknown saved value → show "Default"; index 0 (Small) is a real choice.
+    val index = TEXT_SCALES.indexOfFirst { it.first == scale }.takeIf { it >= 0 } ?: 1
     Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Text size", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
