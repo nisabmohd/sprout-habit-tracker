@@ -75,9 +75,9 @@ private val TEXT_SCALES = listOf(0.85f to "Small", 1f to "Default", 1.15f to "La
 
 private val FONT_INFO = mapOf(
     BodyFont.SYSTEM to ("System default" to "Your phone's font"),
-    BodyFont.FIGTREE to ("Figtree" to "Default · friendly and clear"),
+    BodyFont.FIGTREE to ("Figtree" to "Friendly and clear"),
     BodyFont.OUTFIT to ("Outfit" to "Rounded, geometric"),
-    BodyFont.LEXEND to ("Lexend" to "Built for easy reading"),
+    BodyFont.LEXEND to ("Lexend" to "Default · built for easy reading"),
     BodyFont.ATKINSON to ("Atkinson Hyperlegible" to "Designed for low vision"),
 )
 

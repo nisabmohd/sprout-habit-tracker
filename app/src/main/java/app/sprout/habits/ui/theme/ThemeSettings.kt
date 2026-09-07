@@ -13,7 +13,7 @@ data class ThemeSettings(
     val dynamicColor: Boolean = true,
     /** Seed hue for the app chrome when dynamic color is off or unavailable. */
     val accentHue: Float = DEFAULT_ACCENT_HUE,
-    val font: BodyFont = BodyFont.FIGTREE,
+    val font: BodyFont = BodyFont.LEXEND,
     /** Multiplies every type-scale size, on top of the system font scale. */
     val textScale: Float = 1f,
 )
