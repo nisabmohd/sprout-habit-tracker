@@ -1,8 +1,23 @@
 package app.sprout.habits.ui.nav
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.navigation.NavBackStackEntry
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -11,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -81,26 +95,23 @@ fun SproutNavHost(
     }
     val currentTab = Tab.entries.firstOrNull { tab -> destination?.hierarchy?.any { it.hasRoute(tab.routeClass) } == true }
 
-    Scaffold(
-        bottomBar = {
-            // Only the five tab roots show the bar; detail screens are full screen.
-            if (currentTab != null) {
-                SproutNavigationBar(currentTab) { tab ->
-                    navController.navigate(tab.route) {
-                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-            }
-        },
-    ) { padding ->
+    // The bar overlays the content so it can slide away on full-screen pages without making the
+    // screen underneath jump; tab screens reserve room for it themselves (TabFrame).
+    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    Box(Modifier.fillMaxSize()) {
         NavHost(
             navController,
             startDestination = TodayRoute,
-            modifier = Modifier.padding(if (currentTab != null) padding else PaddingValues()),
+            modifier = Modifier.fillMaxSize(),
+            // Between tabs: a quick crossfade. Into and out of a page opened from a tab: Material's
+            // shared-axis motion, a short slide with a fade, reversed on back.
+            enterTransition = { if (initialState.isTab() && targetState.isTab()) fadeIn(tween(220)) else forwardIn() },
+            exitTransition = { if (initialState.isTab() && targetState.isTab()) fadeOut(tween(160)) else forwardOut() },
+            popEnterTransition = { if (initialState.isTab() && targetState.isTab()) fadeIn(tween(220)) else backIn() },
+            popExitTransition = { if (initialState.isTab() && targetState.isTab()) fadeOut(tween(160)) else backOut() },
         ) {
             composable<TodayRoute> {
+                TabFrame {
                 val vm = viewModel { TodayViewModel(container.repository, container.settings) }
                 TodayScreen(
                     vm,
@@ -108,6 +119,7 @@ fun SproutNavHost(
                     onOpenHabit = { id -> navController.navigate(HabitDetailRoute(id)) },
                     onAddNote = { habitId, day -> navController.navigate(WriteNoteRoute(habitId = habitId, epochDay = day)) },
                 )
+                }
             }
             composable<WriteNoteRoute> { entry ->
                 val route = entry.toRoute<WriteNoteRoute>()
@@ -122,6 +134,7 @@ fun SproutNavHost(
                 EditHabitScreen(vm, onClose = { navController.popBackStack() })
             }
             composable<HabitsRoute> {
+                TabFrame {
                 val vm = viewModel { HabitsViewModel(container.repository, container.settings) }
                 HabitsScreen(
                     vm,
@@ -129,6 +142,7 @@ fun SproutNavHost(
                     onManage = { navController.navigate(ManageHabitsRoute) },
                     onOpenHabit = { id -> navController.navigate(HabitDetailRoute(id)) },
                 )
+                }
             }
             composable<HabitDetailRoute> { entry ->
                 val id = entry.toRoute<HabitDetailRoute>().habitId
@@ -151,27 +165,76 @@ fun SproutNavHost(
                 )
             }
             composable<JournalRoute> {
+                TabFrame {
                 val vm = viewModel { JournalViewModel(container.repository) }
                 JournalScreen(
                     vm,
                     onAddNote = { navController.navigate(WriteNoteRoute()) },
                     onOpenNote = { id -> navController.navigate(WriteNoteRoute(noteId = id)) },
                 )
+                }
             }
             composable<InsightsRoute> {
+                TabFrame {
                 val vm = viewModel { InsightsViewModel(container.repository, container.settings) }
                 InsightsScreen(vm)
+                }
             }
             composable<MoreRoute> {
+                TabFrame {
                 MoreScreen(settings, container.settings, container.backup, onOpenAbout = { navController.navigate(AboutRoute) })
+                }
             }
             composable<AboutRoute> {
                 AboutScreen(onBack = { navController.popBackStack() }, onOpenLicences = { navController.navigate(LicencesRoute) })
             }
             composable<LicencesRoute> { LicencesScreen(onBack = { navController.popBackStack() }) }
         }
+        AnimatedVisibility(
+            visible = currentTab != null,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            enter = slideInVertically(tween(250)) { it } + fadeIn(tween(250)),
+            exit = slideOutVertically(tween(200)) { it } + fadeOut(tween(200)),
+        ) {
+            // Keeps showing the last tab while the bar slides out.
+            var lastTab by remember { mutableStateOf(Tab.TODAY) }
+            if (currentTab != null) lastTab = currentTab
+            SproutNavigationBar(lastTab) { tab ->
+                navController.navigate(tab.route) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        }
+    }
     }
 }
+
+/** Tab screens: opaque, below the status bar and above the navigation bar. */
+@Composable
+private fun TabFrame(content: @Composable () -> Unit) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(bottom = NAV_BAR_HEIGHT),
+    ) { content() }
+}
+
+/** Material 3 navigation bar height, not counting the system navigation inset. */
+private val NAV_BAR_HEIGHT = 80.dp
+
+private fun NavBackStackEntry.isTab() = Tab.entries.any { tab -> destination.hierarchy.any { it.hasRoute(tab.routeClass) } }
+
+private const val MOTION_MS = 300
+
+private fun forwardIn() = slideInHorizontally(tween(MOTION_MS)) { it / 8 } + fadeIn(tween(MOTION_MS))
+private fun forwardOut() = slideOutHorizontally(tween(MOTION_MS)) { -it / 8 } + fadeOut(tween(MOTION_MS / 2))
+private fun backIn() = slideInHorizontally(tween(MOTION_MS)) { -it / 8 } + fadeIn(tween(MOTION_MS))
+private fun backOut() = slideOutHorizontally(tween(MOTION_MS)) { it / 8 } + fadeOut(tween(MOTION_MS / 2))
 
 @Composable
 private fun SproutNavigationBar(current: Tab, onSelect: (Tab) -> Unit) {
