@@ -5,6 +5,9 @@ import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.data.Habit
 import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.data.Note
+import app.sprout.habits.data.SettingsRepository
+import app.sprout.habits.ui.theme.ThemeSettings
+import kotlinx.coroutines.flow.first
 import app.sprout.habits.data.TrackType
 import java.io.InputStream
 import java.io.OutputStream
@@ -29,6 +32,8 @@ data class BackupFile(
     val habits: List<HabitDto>,
     val entries: List<EntryDto>,
     val notes: List<NoteDto>,
+    /** Absent in backups made before preferences were included; restoring then keeps current ones. */
+    val settings: SettingsDto? = null,
 ) {
     companion object {
         const val APP_ID = "sprout"
@@ -66,10 +71,25 @@ data class EntryDto(
 @Serializable
 data class NoteDto(val id: Long, val habitId: Long, val date: String, val text: String, val updatedAt: Long)
 
+/** Appearance and general preferences from the More tab. Names are enum names; unknown ones fall back. */
+@Serializable
+data class SettingsDto(
+    val theme: String,
+    val dynamicColor: Boolean,
+    val accentHue: Float,
+    val font: String,
+    val textScale: Float,
+    val weekStart: String,
+    val defaultReminderMinutes: Int,
+)
+
 class BackupException(message: String, cause: Throwable? = null) : Exception(message, cause)
 
 /** Converts between the database and a [BackupFile], and reads and writes JSON and CSV. */
-class BackupManager(private val repository: HabitRepository) {
+class BackupManager(
+    private val repository: HabitRepository,
+    private val settings: SettingsRepository,
+) {
 
     suspend fun createBackup(now: Long = System.currentTimeMillis()): BackupFile {
         val (habits, entries, notes) = repository.snapshot()
@@ -83,6 +103,17 @@ class BackupManager(private val repository: HabitRepository) {
             },
             entries = entries.map { EntryDto(it.habitId, LocalDate.ofEpochDay(it.date).toString(), it.status.name, it.amount) },
             notes = notes.map { NoteDto(it.id, it.habitId, LocalDate.ofEpochDay(it.date).toString(), it.text, it.updatedAt) },
+            settings = settings.settings.first().let {
+                SettingsDto(
+                    theme = it.theme.mode.name,
+                    dynamicColor = it.theme.dynamicColor,
+                    accentHue = it.theme.accentHue,
+                    font = it.theme.font.name,
+                    textScale = it.theme.textScale,
+                    weekStart = it.weekStart.name,
+                    defaultReminderMinutes = it.defaultReminderMinutes,
+                )
+            },
         )
     }
 
@@ -113,6 +144,22 @@ class BackupManager(private val repository: HabitRepository) {
             .map { Note(it.id, it.habitId, parseDate(it.date), it.text, it.updatedAt) }
             .distinctBy { it.id }
         repository.replaceAll(habits, entries, notes)
+        backup.settings?.let { dto ->
+            val current = settings.settings.first()
+            settings.restore(
+                current.copy(
+                    theme = ThemeSettings(
+                        mode = enumOr(dto.theme, current.theme.mode),
+                        dynamicColor = dto.dynamicColor,
+                        accentHue = dto.accentHue,
+                        font = enumOr(dto.font, current.theme.font),
+                        textScale = dto.textScale.coerceIn(0.85f, 1.3f),
+                    ),
+                    weekStart = enumOr(dto.weekStart, current.weekStart),
+                    defaultReminderMinutes = dto.defaultReminderMinutes.coerceIn(0, 24 * 60 - 1),
+                ),
+            )
+        }
     }
 
     /** One row per logged day, with its note if there is one. Dates are ISO; opens in any spreadsheet. */

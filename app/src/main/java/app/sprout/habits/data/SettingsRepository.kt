@@ -51,6 +51,17 @@ class SettingsRepository(context: Context) {
     suspend fun setLastBackupAt(epochMillis: Long) = store.edit { it[LAST_BACKUP_AT] = epochMillis }
     suspend fun setOnboarded() = store.edit { it[ONBOARDED] = true }
 
+    /** Replaces the user's preferences in one write, e.g. when restoring a backup. */
+    suspend fun restore(settings: Settings) = store.edit {
+        it[THEME] = settings.theme.mode.name
+        it[DYNAMIC_COLOR] = settings.theme.dynamicColor
+        it[ACCENT_HUE] = settings.theme.accentHue
+        it[FONT] = settings.theme.font.name
+        it[TEXT_SCALE] = settings.theme.textScale
+        it[WEEK_START] = settings.weekStart.name
+        it[DEFAULT_REMINDER] = settings.defaultReminderMinutes
+    }
+
     private fun Preferences.toSettings(): Settings {
         val defaults = Settings()
         val theme = defaults.theme

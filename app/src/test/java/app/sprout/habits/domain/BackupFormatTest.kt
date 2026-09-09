@@ -44,6 +44,21 @@ class BackupFormatTest {
         assertEquals(true, e.message!!.contains("newer version"))
     }
 
+    @Test fun readsSettingsWhenPresent() {
+        val file = BackupManager.parse(
+            """{"app":"sprout","version":1,"exportedAt":0,"habits":[],"entries":[],"notes":[],
+               "settings":{"theme":"DARK","dynamicColor":false,"accentHue":215,"font":"LEXEND","textScale":1.15,
+               "weekStart":"SUNDAY","defaultReminderMinutes":1260}}""".byteInputStream(),
+        )
+        assertEquals("DARK", file.settings!!.theme)
+        assertEquals(1260, file.settings!!.defaultReminderMinutes)
+    }
+
+    @Test fun olderBackupWithoutSettingsStillReads() {
+        val file = BackupManager.parse("""{"app":"sprout","version":1,"exportedAt":0,"habits":[],"entries":[],"notes":[]}""".byteInputStream())
+        assertEquals(null, file.settings)
+    }
+
     @Test fun readsValidFileAndIgnoresUnknownKeys() {
         val file = BackupManager.parse(
             """{"app":"sprout","version":1,"exportedAt":5,"future":true,
