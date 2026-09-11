@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.today
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -88,6 +89,8 @@ fun TodayScreen(
             onLongPress = viewModel::openLogSheet,
             onOpen = onOpenHabit,
         )
+        // Lift the button above the Undo snackbar while it shows, so the two never overlap.
+        val fabLift by animateDpAsState(if (snackbar.currentSnackbarData != null) 72.dp else 0.dp, label = "fabLift")
         if (state.habits.isNotEmpty()) {
             ExtendedFloatingActionButton(
                 // Preselect a skipped habit that has no note yet, if there is one.
@@ -100,7 +103,7 @@ fun TodayScreen(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 shape = RoundedCornerShape(18.dp),
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).padding(bottom = fabLift),
             )
         }
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp))
