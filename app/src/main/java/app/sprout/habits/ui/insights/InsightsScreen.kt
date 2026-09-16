@@ -143,7 +143,7 @@ private fun DayBars(ui: InsightsUi) {
     Card {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(if (ui.averaged) "Habits per day, average" else "Habits per day", style = type.titleMedium, color = colors.onSurface, modifier = Modifier.weight(1f))
+                Text(if (ui.averaged) "Habits per day (average)" else "Habits per day", style = type.titleMedium, color = colors.onSurface, modifier = Modifier.weight(1f))
                 LegendDot("Done", done)
                 LegendDot("Partial", partial)
             }

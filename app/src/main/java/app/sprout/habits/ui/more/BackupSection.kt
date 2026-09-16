@@ -94,7 +94,7 @@ fun BackupRows(backup: BackupManager, onMessage: (String) -> Unit) {
                 Text(
                     "This backup has ${count(file.habits.size, "habit")}, ${count(file.entries.size, "logged day")} and " +
                         "${count(file.notes.size, "note")}. " +
-                        "Importing replaces everything in Sprout now.",
+                        "Importing it replaces everything in Sprout.",
                 )
             },
             confirmButton = {

@@ -61,7 +61,7 @@ fun AboutScreen(onBack: () -> Unit, onOpenLicences: () -> Unit) {
                     Text("Free and open source", style = type.titleMedium, color = colors.onPrimaryContainer, modifier = Modifier.padding(start = 12.dp))
                 }
                 Text(
-                    "Licensed under the GNU GPL v3. No ads, no trackers, no analytics. Your habits and journal stay on your device unless you export them.",
+                    "Licensed under the GNU GPL v3. Sprout has no ads and doesn't track you. Your habits and notes stay on this device unless you export them.",
                     style = type.bodyMedium,
                     color = colors.onPrimaryContainer,
                 )

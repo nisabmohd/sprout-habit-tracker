@@ -307,12 +307,12 @@ private fun EditHabitContent(
             if (form.reminderOn && notifications.granted && !exactAlarms) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Reminders may arrive up to 10 minutes late.",
+                        "Reminders can be up to 10 minutes late unless you allow exact alarms.",
                         style = type.bodyMedium,
                         color = colors.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
                     )
-                    TextButton(onClick = { Notifications.openExactAlarmSettings(context) }) { Text("Make exact") }
+                    TextButton(onClick = { Notifications.openExactAlarmSettings(context) }) { Text("Allow") }
                 }
             }
             if ((form.reminderOn || form.askForNote) && !notifications.granted) {

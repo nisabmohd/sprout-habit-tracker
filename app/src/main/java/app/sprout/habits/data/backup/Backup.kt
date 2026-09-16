@@ -134,7 +134,7 @@ class BackupManager(
             )
         }
         val ids = habits.mapTo(HashSet()) { it.id }
-        if (ids.size != habits.size) throw BackupException("The backup has two habits with the same id.")
+        if (ids.size != habits.size) throw BackupException("This backup is damaged and can't be imported.")
         val entries = backup.entries
             .filter { it.habitId in ids }
             .map { Entry(it.habitId, parseDate(it.date), enumOr(it.status, EntryStatus.DONE), it.amount) }
