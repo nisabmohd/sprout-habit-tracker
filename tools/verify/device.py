@@ -151,7 +151,8 @@ def small_targets(min_dp=48):
         if n.package != PACKAGE or not (n.clickable or n.checkable):
             continue
         x1, y1, x2, y2 = n.bounds
-        if y1 in edges or y2 in edges:
+        # Clipped by a list edge (allow a few pixels of rounding), or only a sliver still visible.
+        if any(abs(y1 - e) <= 8 or abs(y2 - e) <= 8 for e in edges) or (y2 - y1) < 12 * d:
             continue
         w, h = (x2 - x1) / d, (y2 - y1) / d
         if w < min_dp - 1.5 or h < min_dp - 1.5:
