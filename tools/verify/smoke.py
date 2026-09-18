@@ -175,6 +175,8 @@ def main(filters):
     if not os.path.exists(APK):
         sys.exit(f"Build first: ./gradlew :app:assemblePlayDebug (missing {APK})")
     fresh_install()
+    if welcome_shows_once not in selected and d.exists("Get started", timeout=3):
+        d.tap("Get started")
     failures = 0
     for c in selected:
         try:

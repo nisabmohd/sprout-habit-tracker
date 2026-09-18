@@ -18,7 +18,7 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         // Where the About screen's links point. Set once the GitHub repo exists.
-        buildConfigField("String", "REPO_URL", "\"https://github.com/OWNER/sprout\"")
+        buildConfigField("String", "REPO_URL", "\"https://github.com/nisabmohd/sprout-habit-tracker\"")
     }
 
     flavorDimensions += "distribution"

@@ -146,6 +146,9 @@ def small_targets(min_dp=48):
     nodes = dump()
     # A node touching the top or bottom edge of a scrolling container is cut off, not small.
     edges = {y for n in nodes if n.scrollable for y in (n.bounds[1], n.bounds[3])}
+    # Compose reports only the uncovered part of a node, so anything under a floating button
+    # (e.g. "Add note") looks small; its hidden edge meets the covering control's edge.
+    covers = [n.bounds for n in nodes if n.package == PACKAGE and n.clickable]
     out = []
     for n in nodes:
         if n.package != PACKAGE or not (n.clickable or n.checkable):
@@ -153,6 +156,8 @@ def small_targets(min_dp=48):
         x1, y1, x2, y2 = n.bounds
         # Clipped by a list edge (allow a few pixels of rounding), or only a sliver still visible.
         if any(abs(y1 - e) <= 8 or abs(y2 - e) <= 8 for e in edges) or (y2 - y1) < 12 * d:
+            continue
+        if any(c != n.bounds and c[0] < x2 and x1 < c[2] and (abs(y2 - c[1]) <= 2 or abs(y1 - c[3]) <= 2) for c in covers):
             continue
         w, h = (x2 - x1) / d, (y2 - y1) / d
         if w < min_dp - 1.5 or h < min_dp - 1.5:
