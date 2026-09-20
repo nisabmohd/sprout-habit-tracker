@@ -157,6 +157,10 @@ def small_targets(min_dp=48):
         # Clipped by a list edge (allow a few pixels of rounding), or only a sliver still visible.
         if any(abs(y1 - e) <= 8 or abs(y2 - e) <= 8 for e in edges) or (y2 - y1) < 12 * d:
             continue
+        # Sticking out past the top or bottom of a list it sits in: scrolled partly out of view.
+        if any(sx1 <= x1 and x2 <= sx2 and (y1 < sy1 or y2 > sy2) for sx1, sy1, sx2, sy2 in
+               (m.bounds for m in nodes if m.scrollable)):
+            continue
         if any(c != n.bounds and c[0] < x2 and x1 < c[2] and (abs(y2 - c[1]) <= 2 or abs(y1 - c[3]) <= 2) for c in covers):
             continue
         w, h = (x2 - x1) / d, (y2 - y1) / d
