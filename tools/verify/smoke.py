@@ -62,6 +62,7 @@ def today_shows_score_and_habits():
 
 @check
 def today_circle_toggles_done():
+    assert d.scroll_to("Mark Vitamins done"), "Vitamins not on Today"
     d.tap("Mark Vitamins done")
     assert d.exists("Mark Vitamins not done"), "circle did not mark done"
     d.tap("Mark Vitamins not done")
@@ -70,7 +71,7 @@ def today_circle_toggles_done():
 
 @check
 def today_swipe_skip_and_undo():
-    n = d.find("Workout")
+    n = d.scroll_to("Workout")
     assert n, "Workout not on Today"
     w, _ = d.screen_size()
     y = n.center[1]
@@ -85,6 +86,7 @@ def today_swipe_skip_and_undo():
 
 @check
 def today_long_press_sheet():
+    d.nav("Today")
     d.long_press("Read")
     assert d.exists("Goal 20 pages", contains=True), "amount sheet missing its goal"
     assert d.exists("Partial"), "outcome buttons missing"
@@ -93,6 +95,8 @@ def today_long_press_sheet():
 
 @check
 def new_habit_is_created():
+    d.nav("Today")
+    d.scroll_to_top()
     d.tap("New habit")
     d.tap("Name")
     d.type_text("Smoke test habit")

@@ -110,6 +110,13 @@ def scroll_to(label, contains=False, max_swipes=6):
     return None
 
 
+def scroll_to_top(swipes=4):
+    """Scrolls the current list back to its top (headers there, like +, may be scrolled away)."""
+    w, h = screen_size()
+    for _ in range(swipes):
+        swipe(w // 2, int(h * 0.35), w // 2, int(h * 0.85), 200)
+
+
 def type_text(text):
     shell("input text " + text.replace(" ", "%s").replace("'", "\\'"))
     time.sleep(0.4)
