@@ -34,6 +34,20 @@ android {
         }
     }
 
+    signingConfigs {
+        // Set by CI (see docs/RELEASING.md). Without them, release builds use the debug key so
+        // they can still be installed locally.
+        val keystore = System.getenv("SPROUT_KEYSTORE_PATH")
+        if (keystore != null) {
+            create("release") {
+                storeFile = file(keystore)
+                storePassword = System.getenv("SPROUT_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("SPROUT_KEY_ALIAS")
+                keyPassword = System.getenv("SPROUT_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -42,8 +56,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            // Debug-signed until a release keystore exists (Day 5), so release builds can be installed and tested.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 
