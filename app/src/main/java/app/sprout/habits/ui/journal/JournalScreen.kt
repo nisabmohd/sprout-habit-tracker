@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalScrollCaptureInProgress
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -59,7 +60,8 @@ fun JournalScreen(
             }
             items(list.orEmpty(), key = { it.id }) { note -> JournalCard(note, onOpenNote) }
         }
-        if (onAddNote != null) {
+        // Hidden during a long screenshot, or it would be stamped into every captured frame.
+        if (onAddNote != null && !LocalScrollCaptureInProgress.current) {
             FloatingActionButton(
                 onClick = onAddNote,
                 containerColor = colors.primaryContainer,

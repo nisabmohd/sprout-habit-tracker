@@ -85,6 +85,28 @@ def today_swipe_skip_and_undo():
 
 
 @check
+def today_opposite_swipe_undoes():
+    w, _ = d.screen_size()
+    def swipe(label, right):
+        n = d.scroll_to(label)
+        assert n, f"{label} not on Today"
+        y = n.center[1]
+        a, b = (int(w * 0.12), int(w * 0.88)) if right else (int(w * 0.88), int(w * 0.12))
+        d.swipe(a, y, b, y, 250)
+        time.sleep(1)
+    # Done card: swipe left undoes instead of skipping.
+    swipe("Wake up at 7", right=False)
+    assert d.exists("Mark Wake up at 7 done"), "swipe left on a done card didn't undo it"
+    swipe("Wake up at 7", right=True)
+    assert d.exists("Mark Wake up at 7 not done"), "swipe right didn't mark it done again"
+    # Skipped card: swipe right undoes instead of marking done.
+    swipe("Workout", right=False)
+    assert d.exists("Skipped", timeout=2), "swipe left didn't skip Workout"
+    swipe("Workout", right=True)
+    assert d.exists("Mark Workout done"), "swipe right on a skipped card didn't undo it"
+
+
+@check
 def today_long_press_sheet():
     d.nav("Today")
     d.long_press("Read")

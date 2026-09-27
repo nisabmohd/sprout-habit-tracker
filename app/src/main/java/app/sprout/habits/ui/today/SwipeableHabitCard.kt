@@ -31,7 +31,8 @@ import app.sprout.habits.domain.DayOutcome
 import app.sprout.habits.ui.theme.habitColors
 
 /**
- * [HabitCard] with swipe right = Done and swipe left = Skip. The card springs back after the
+ * [HabitCard] with swipe right = Done and swipe left = Skip; on a card that's already done or
+ * skipped, the opposite swipe undoes it. The card springs back after the
  * swipe; the new state comes from the database. Swipe state lives here, per card, so a swipe
  * never recomposes the list.
  */
@@ -40,6 +41,7 @@ fun SwipeableHabitCard(
     habit: HabitRowUi,
     onDone: () -> Unit,
     onSkip: () -> Unit,
+    onUndo: () -> Unit,
     onToggle: () -> Unit,
     onLongPress: () -> Unit,
     onClick: () -> Unit,
@@ -48,16 +50,19 @@ fun SwipeableHabitCard(
     val haptics = LocalHapticFeedback.current
     val currentOnDone by rememberUpdatedState(onDone)
     val currentOnSkip by rememberUpdatedState(onSkip)
+    val currentOnUndo by rememberUpdatedState(onUndo)
+    val outcome by rememberUpdatedState(habit.outcome)
     val state = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             when (value) {
+                // The opposite swipe undoes: right on a skipped card, left on a done one.
                 SwipeToDismissBoxValue.StartToEnd -> {
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                    currentOnDone()
+                    if (outcome == DayOutcome.SKIP) currentOnUndo() else currentOnDone()
                 }
                 SwipeToDismissBoxValue.EndToStart -> {
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                    currentOnSkip()
+                    if (outcome == DayOutcome.DONE) currentOnUndo() else currentOnSkip()
                 }
                 SwipeToDismissBoxValue.Settled -> Unit
             }
@@ -66,19 +71,18 @@ fun SwipeableHabitCard(
         },
         positionalThreshold = { distance -> distance * 0.35f },
     )
-    val canDone = habit.outcome != DayOutcome.DONE
-    val canSkip = habit.outcome != DayOutcome.SKIP
+    val done = habit.outcome == DayOutcome.DONE
+    val skipped = habit.outcome == DayOutcome.SKIP
     SwipeToDismissBox(
         state = state,
         modifier = modifier.semantics {
             customActions = buildList {
-                if (canDone) add(CustomAccessibilityAction("Mark done") { onDone(); true })
-                if (canSkip) add(CustomAccessibilityAction("Skip") { onSkip(); true })
+                if (!done) add(CustomAccessibilityAction("Mark done") { onDone(); true })
+                if (!skipped) add(CustomAccessibilityAction("Skip") { onSkip(); true })
+                if (done || skipped) add(CustomAccessibilityAction("Undo") { onUndo(); true })
                 add(CustomAccessibilityAction("Log amount") { onLongPress(); true })
             }
         },
-        enableDismissFromStartToEnd = canDone,
-        enableDismissFromEndToStart = canSkip,
         backgroundContent = { SwipeBackground(habit, state.dismissDirection) },
     ) {
         HabitCard(habit, onToggle = onToggle, onLongPress = onLongPress, onClick = onClick)
@@ -89,6 +93,20 @@ fun SwipeableHabitCard(
 private fun SwipeBackground(habit: HabitRowUi, direction: SwipeToDismissBoxValue) {
     val colors = MaterialTheme.colorScheme
     val hc = habitColors(habit.hue)
+    val undo = (direction == SwipeToDismissBoxValue.StartToEnd && habit.outcome == DayOutcome.SKIP) ||
+        (direction == SwipeToDismissBoxValue.EndToStart && habit.outcome == DayOutcome.DONE)
+    if (undo) {
+        val start = direction == SwipeToDismissBoxValue.StartToEnd
+        Row(
+            Modifier.fillMaxSize().background(colors.surfaceContainerHigh, HabitCardShape).padding(horizontal = 24.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp, if (start) Alignment.Start else Alignment.End),
+        ) {
+            Icon(painterResource(R.drawable.ic_undo), contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
+            Text("Undo", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = colors.onSurfaceVariant)
+        }
+        return
+    }
     when (direction) {
         SwipeToDismissBoxValue.StartToEnd -> Row(
             Modifier.fillMaxSize().background(hc.solid, HabitCardShape).padding(start = 24.dp),

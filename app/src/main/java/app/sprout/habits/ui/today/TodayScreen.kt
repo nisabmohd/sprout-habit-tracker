@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalScrollCaptureInProgress
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -85,13 +86,15 @@ fun TodayScreen(
             onAddHabit = onAddHabit,
             onDone = viewModel::markDone,
             onSkip = viewModel::markSkipped,
+            onUndo = viewModel::resetDay,
             onToggle = viewModel::toggleDone,
             onLongPress = viewModel::openLogSheet,
             onOpen = onOpenHabit,
         )
         // Lift the button above the Undo snackbar while it shows, so the two never overlap.
         val fabLift by animateDpAsState(if (snackbar.currentSnackbarData != null) 72.dp else 0.dp, label = "fabLift")
-        if (state.habits.isNotEmpty()) {
+        // Hidden during a long screenshot, or it would be stamped into every captured frame.
+        if (state.habits.isNotEmpty() && !LocalScrollCaptureInProgress.current) {
             ExtendedFloatingActionButton(
                 // Preselect a skipped habit that has no note yet, if there is one.
                 onClick = {
@@ -125,6 +128,7 @@ private fun TodayContent(
     onAddHabit: () -> Unit,
     onDone: (Long) -> Unit,
     onSkip: (Long) -> Unit,
+    onUndo: (Long) -> Unit,
     onToggle: (Long) -> Unit,
     onLongPress: (Long) -> Unit,
     onOpen: (Long) -> Unit,
@@ -145,6 +149,7 @@ private fun TodayContent(
                 habit,
                 onDone = { onDone(habit.id) },
                 onSkip = { onSkip(habit.id) },
+                onUndo = { onUndo(habit.id) },
                 onToggle = { onToggle(habit.id) },
                 onLongPress = { onLongPress(habit.id) },
                 onClick = { onOpen(habit.id) },

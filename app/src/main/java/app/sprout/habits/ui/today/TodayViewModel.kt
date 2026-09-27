@@ -140,6 +140,9 @@ class TodayViewModel(
         Entry(habit.id, day, EntryStatus.SKIP)
     }
 
+    /** Clears the selected day back to not logged (the opposite swipe on a done or skipped card). */
+    fun resetDay(habitId: Long) = log(habitId, "undone") { _, _ -> null }
+
     /** The circle on the card: DONE becomes not logged; anything else becomes DONE. */
     fun toggleDone(habitId: Long) {
         val done = state.value.habits.firstOrNull { it.id == habitId }?.outcome == DayOutcome.DONE

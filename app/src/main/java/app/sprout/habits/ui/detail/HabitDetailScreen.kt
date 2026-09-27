@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalScrollCaptureInProgress
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -132,7 +133,8 @@ fun HabitDetailScreen(
             }
             items(ui.notes.take(5), key = { it.id }) { note -> NoteCard(note, onOpenNote) }
         }
-        if (onAddNote != null) {
+        // Hidden during a long screenshot, or it would be stamped into every captured frame.
+        if (onAddNote != null && !LocalScrollCaptureInProgress.current) {
             ExtendedFloatingActionButton(
                 onClick = onAddNote,
                 icon = { Icon(painterResource(R.drawable.ic_habit_pen), contentDescription = null, modifier = Modifier.size(22.dp)) },
