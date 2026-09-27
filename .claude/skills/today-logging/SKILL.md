@@ -5,7 +5,7 @@ description: How the Today screen logs habits (swipe, tap, hold, undo, score) an
 
 # Today and logging
 
-**Rules (CLAUDE.md):** outcomes are DONE, PARTIAL (with amount) or SKIP. Swipe right = DONE, swipe left = SKIP, tap circle = toggle DONE, press and hold = amount sheet. Undo snackbar after each change. A past scheduled day with no entry counts as SKIP; today not logged is OPEN (counts as 0).
+**Rules (AGENTS.md):** outcomes are DONE, PARTIAL (with amount) or SKIP. Swipe right = DONE, swipe left = SKIP, tap circle = toggle DONE, press and hold = amount sheet. Undo snackbar after each change. A past scheduled day with no entry counts as SKIP; today not logged is OPEN (counts as 0).
 
 **Code**
 - `ui/today/TodayViewModel.kt`: state for the selected day, `markDone`, `markSkipped`, `toggleDone`, `saveLog`, `undo` (restores the exact previous entry).

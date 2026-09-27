@@ -35,7 +35,7 @@ fun BodyFont.family(): FontFamily = when (this) {
 }
 
 /**
- * The type scale from CLAUDE.md. Only these sizes exist: 40, 28, 22, 16, 14, 12, 11.
+ * The type scale from AGENTS.md. Only these sizes exist: 40, 28, 22, 16, 14, 12, 11.
  * Headings (display, headline, titleLarge) use Outfit; everything else uses [body].
  */
 fun sproutTypography(body: BodyFont, scale: Float): Typography {
