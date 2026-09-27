@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.today
 
+import app.sprout.habits.ui.components.SproutSheet
 import androidx.compose.foundation.background
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
@@ -27,7 +28,6 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SegmentedButton
@@ -37,7 +37,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -96,11 +95,7 @@ fun LogSheet(
         status = if (amount >= sheet.target) EntryStatus.DONE else EntryStatus.PARTIAL
     }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = colors.surfaceContainerLowest,
-    ) {
+    SproutSheet(onDismissRequest = onDismiss) {
         Column(
             Modifier
                 .fillMaxWidth()

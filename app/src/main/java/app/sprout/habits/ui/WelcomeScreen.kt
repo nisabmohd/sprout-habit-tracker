@@ -1,5 +1,6 @@
 package app.sprout.habits.ui
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,9 +53,9 @@ fun WelcomeScreen(onStart: () -> Unit) {
         )
         Spacer(Modifier.height(32.dp))
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Feature(HabitIcon.SUN, "Swipe, hold or tap to log")
-            Feature(HabitIcon.PEN, "Journal linked to each habit")
-            Feature(HabitIcon.LEAF, "Week at a glance on your home screen")
+            Feature(HabitIcon.MORNING.drawable, 38f, "Swipe, hold or tap to log")
+            Feature(HabitIcon.WRITE.drawable, 330f, "Journal linked to each habit")
+            Feature(HabitIcon.OUTDOORS.drawable, 150f, "Week at a glance on your home screen")
         }
         Spacer(Modifier.weight(1f).height(32.dp))
         Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(56.dp)) {
@@ -71,11 +72,11 @@ fun WelcomeScreen(onStart: () -> Unit) {
 }
 
 @Composable
-private fun Feature(icon: HabitIcon, text: String) {
-    val hc = habitColors(icon.defaultHue.toFloat())
+private fun Feature(@DrawableRes icon: Int, hue: Float, text: String) {
+    val hc = habitColors(hue)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(40.dp).background(hc.soft, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
-            Icon(painterResource(icon.drawable), contentDescription = null, tint = hc.ink, modifier = Modifier.size(20.dp))
+            Icon(painterResource(icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(20.dp))
         }
         Text(text, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(start = 16.dp))
     }

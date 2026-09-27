@@ -3,7 +3,7 @@ package app.sprout.habits.ui.note
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.sprout.habits.data.EntryStatus
+import app.sprout.habits.data.Entry
 import app.sprout.habits.data.Habit
 import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.data.Note
@@ -50,11 +50,11 @@ class WriteNoteViewModel(
         .combine(_form) { all, f -> all.filter { !it.archived || it.id == f.habitId } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    /** The outcome logged for the chosen habit on the chosen day, shown next to the date. */
-    val status: StateFlow<EntryStatus?> = _form
+    /** What was logged for the chosen habit on the chosen day, shown next to the date. */
+    val entry: StateFlow<Entry?> = _form
         .map { it.habitId to it.date.toEpochDay() }
         .flatMapLatest { (habit, day) ->
-            if (habit == 0L) flowOf(null) else repository.observeEntries(habit, day, day).map { it.firstOrNull()?.status }
+            if (habit == 0L) flowOf(null) else repository.observeEntries(habit, day, day).map { it.firstOrNull() }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

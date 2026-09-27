@@ -10,6 +10,7 @@ import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.data.SettingsRepository
 import app.sprout.habits.data.TrackType
 import app.sprout.habits.domain.bestStreak
+import app.sprout.habits.domain.currentStreak
 import app.sprout.habits.domain.dayCredit
 import app.sprout.habits.domain.history
 import app.sprout.habits.domain.measure
@@ -70,7 +71,7 @@ data class HabitOverallUi(
     val name: String,
     val icon: Int,
     val hue: Float,
-    val percent: Int,
+    val currentStreak: Int,
     val bestStreak: Int,
     /** Column-major: [OVERALL_WEEKS] columns of 7 days. */
     val cells: List<DayMark>,
@@ -171,20 +172,19 @@ class HabitsViewModel(
         val rows = habits.map { habit ->
             val history = habit.history(byHabit[habit.id].orEmpty())
             val cells = (firstDay..lastDay).map { day ->
+                // Days before the habit existed are faint placeholders (not scheduled), never skips.
                 val scheduled = history.isScheduled(day)
                 val entry = history.entries[day]
                 val credit = dayCredit(entry, habit.target, day, todayDay) ?: 0.0
                 markFor(scheduled, outcomeOf(entry, day, todayDay), credit.toFloat(), day > todayDay)
             }
-            // Best streak within the window shown; the habit detail shows the all-time one.
-            val windowed = app.sprout.habits.domain.HabitHistory(habit.daysMask, habit.target, history.entries, maxOf(history.firstDay, firstDay))
             HabitOverallUi(
                 id = habit.id,
                 name = habit.name,
                 icon = HabitIcon.fromKey(habit.icon).drawable,
                 hue = habit.colorHue.toFloat(),
-                percent = (windowed.score(firstDay, lastDay, todayDay) * 100).roundToInt(),
-                bestStreak = windowed.bestStreak(todayDay),
+                currentStreak = history.currentStreak(todayDay),
+                bestStreak = history.bestStreak(todayDay),
                 cells = cells,
             )
         }

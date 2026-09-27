@@ -23,10 +23,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -58,11 +56,7 @@ fun HabitFilterSheet(
 ) {
     val colors = MaterialTheme.colorScheme
     var picked by remember { mutableStateOf(selected) }
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = colors.surfaceContainerLowest,
-    ) {
+    SproutSheet(onDismissRequest = onDismiss) {
         Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("Filter by habit", style = MaterialTheme.typography.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
             TextButton(onClick = { picked = emptySet() }, enabled = picked.isNotEmpty()) { Text("Clear", style = MaterialTheme.typography.labelLarge) }

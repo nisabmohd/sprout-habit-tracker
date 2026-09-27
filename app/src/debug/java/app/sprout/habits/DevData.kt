@@ -18,14 +18,14 @@ object DevData {
         val today = LocalDate.now()
         val createdAt = today.minusDays(60).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val habits = listOf(
-            Habit(name = "Wake up at 7", icon = "sun", colorHue = 38, reminderMinutes = 7 * 60),
-            Habit(name = "Read", icon = "book", colorHue = 215, trackType = TrackType.AMOUNT, target = 20.0, unit = "pages"),
-            Habit(name = "Drink water", icon = "drop", colorHue = 192, trackType = TrackType.AMOUNT, target = 8.0, unit = "glasses"),
-            Habit(name = "Stay calm", icon = "calm", colorHue = 275, askForNote = true),
-            Habit(name = "Workout", icon = "dumbbell", colorHue = 12, trackType = TrackType.DURATION, target = 45.0),
-            Habit(name = "Vitamins", icon = "pill", colorHue = 95),
-            Habit(name = "Walk outside", icon = "leaf", colorHue = 150, daysMask = 0b0011111),
-            Habit(name = "Evening journal", icon = "pen", colorHue = 330, reminderMinutes = 21 * 60 + 30),
+            Habit(name = "Wake up at 7", icon = "alarm", colorHue = 38, reminderMinutes = 7 * 60),
+            Habit(name = "Read", icon = "menu_book", colorHue = 215, trackType = TrackType.AMOUNT, target = 20.0, unit = "pages"),
+            Habit(name = "Drink water", icon = "water_drop", colorHue = 192, trackType = TrackType.AMOUNT, target = 8.0, unit = "glasses"),
+            Habit(name = "Stay calm", icon = "self_improvement", colorHue = 275, askForNote = true),
+            Habit(name = "Workout", icon = "fitness_center", colorHue = 12, trackType = TrackType.DURATION, target = 45.0),
+            Habit(name = "Vitamins", icon = "medication", colorHue = 95),
+            Habit(name = "Walk outside", icon = "directions_walk", colorHue = 150, daysMask = 0b0011111),
+            Habit(name = "Evening journal", icon = "edit_note", colorHue = 330, reminderMinutes = 21 * 60 + 30),
         ).map { it.copy(createdAt = createdAt) }
         val ids = habits.map { repository.saveHabit(it) }
         val random = Random(7)

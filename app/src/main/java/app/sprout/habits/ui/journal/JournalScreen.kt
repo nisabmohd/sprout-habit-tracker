@@ -1,5 +1,8 @@
 package app.sprout.habits.ui.journal
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import app.sprout.habits.ui.components.NoteCard
 import androidx.compose.foundation.background
 import androidx.compose.ui.semantics.Role
 import androidx.compose.runtime.setValue
@@ -7,8 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.widthIn
@@ -28,7 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -64,7 +65,7 @@ fun JournalScreen(
         LazyColumn(
             Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 104.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item(key = "title") {
                 Row(Modifier.fillMaxWidth().padding(start = 4.dp, top = 8.dp, bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -82,7 +83,7 @@ fun JournalScreen(
                     }
                 }
             }
-            val list = state?.notes
+            val list = state?.days
             val filter = state?.filter.orEmpty()
             val dated = state?.from != null
             if (list != null && list.isEmpty() && (filter.isNotEmpty() || dated)) {
@@ -108,19 +109,29 @@ fun JournalScreen(
                     }
                 }
             }
-            items(list.orEmpty(), key = { it.id }) { note -> JournalCard(note, onOpenNote) }
+            list.orEmpty().forEach { day ->
+                item(key = "d${day.day}") {
+                    Text(
+                        day.label,
+                        style = type.titleSmall,
+                        color = colors.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 4.dp, top = 8.dp),
+                    )
+                }
+                items(day.notes, key = { it.id }) { note -> NoteCard(note, onOpenNote) }
+            }
         }
         // Hidden during a long screenshot, or it would be stamped into every captured frame.
         if (onAddNote != null && !LocalScrollCaptureInProgress.current) {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = onAddNote,
+                icon = { Icon(painterResource(R.drawable.ic_habit_pen), contentDescription = null, modifier = Modifier.size(22.dp)) },
+                text = { Text("Add note", style = type.labelLarge) },
                 containerColor = colors.primaryContainer,
                 contentColor = colors.onPrimaryContainer,
                 shape = RoundedCornerShape(18.dp),
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-            ) {
-                Icon(painterResource(R.drawable.ic_habit_pen), contentDescription = "Add note", modifier = Modifier.size(22.dp))
-            }
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).semantics { contentDescription = "Add note" },
+            )
         }
     }
     val ui = state
@@ -143,37 +154,5 @@ fun JournalScreen(
             onApply = { ids -> viewModel.setFilter(ids); choosing = false },
             onDismiss = { choosing = false },
         )
-    }
-}
-
-@Composable
-private fun JournalCard(note: JournalNoteUi, onOpen: ((Long) -> Unit)?) {
-    val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
-    val hc = habitColors(note.hue)
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
-            .background(colors.surfaceContainerLowest)
-            .then(if (onOpen != null) Modifier.clickable(onClickLabel = "Edit note") { onOpen(note.id) } else Modifier)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(24.dp).background(hc.soft, RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
-                Icon(painterResource(note.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(14.dp))
-            }
-            Text(
-                note.habitName,
-                style = type.titleSmall,
-                color = colors.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f).padding(start = 10.dp),
-            )
-            Text(note.dateLabel, style = type.bodyMedium, color = colors.onSurfaceVariant)
-        }
-        Text(note.text, style = type.bodyLarge, color = colors.onSurface)
     }
 }

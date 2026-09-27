@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.sprout.habits.data.Entry
-import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.data.Habit
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.HabitRepository
@@ -15,8 +14,8 @@ import app.sprout.habits.domain.currentStreak
 import app.sprout.habits.domain.dayCredit
 import app.sprout.habits.domain.history
 import app.sprout.habits.domain.outcomeOf
-import app.sprout.habits.domain.score
 import app.sprout.habits.ui.components.DayMark
+import app.sprout.habits.ui.components.NoteCardUi
 import app.sprout.habits.ui.components.markFor
 import app.sprout.habits.ui.habits.HabitsViewModel
 import app.sprout.habits.ui.today.TodayViewModel
@@ -26,7 +25,6 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
-import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -41,15 +39,19 @@ data class CalendarDayUi(val date: LocalDate, val mark: DayMark, val isToday: Bo
     val day: Int get() = date.dayOfMonth
 }
 
+/** A note on the habit's page, with "Today" / "Yesterday" / "Thu 24 Sep" for its day. */
 @Immutable
-data class NoteUi(val id: Long, val dateLabel: String, val status: EntryStatus?, val text: String)
+data class DetailNoteUi(val card: NoteCardUi, val dateLabel: String)
 
 @Immutable
 data class HabitDetailUi(
     val habit: Habit,
     val icon: Int,
     val subtitle: String,
-    val monthPercent: Int,
+    /** Done or Partial days in the month shown. */
+    val monthDone: Int,
+    /** "this month", or "August" when looking at another month. */
+    val monthDoneLabel: String,
     val currentStreak: Int,
     val bestStreak: Int,
     val noteCount: Int,
@@ -59,7 +61,7 @@ data class HabitDetailUi(
     /** Leading blanks before day 1, so the grid starts on the week-start day. */
     val leadingBlanks: Int,
     val days: List<CalendarDayUi>,
-    val notes: List<NoteUi>,
+    val notes: List<DetailNoteUi>,
 )
 
 class HabitDetailViewModel(
@@ -130,7 +132,8 @@ class HabitDetailViewModel(
             habit = habit,
             icon = HabitIcon.fromKey(habit.icon).drawable,
             subtitle = subtitle,
-            monthPercent = (history.score(first, last, todayDay) * 100).roundToInt(),
+            monthDone = (first..minOf(last, todayDay)).count { history.isScheduled(it) && history.isKept(it, todayDay) },
+            monthDoneLabel = if (ym == YearMonth.now()) "this month" else ym.month.getDisplayName(TextStyle.FULL, Locale.getDefault()),
             currentStreak = history.currentStreak(todayDay),
             bestStreak = history.bestStreak(todayDay),
             noteCount = notes.size,
@@ -140,7 +143,7 @@ class HabitDetailViewModel(
             leadingBlanks = (ym.atDay(1).dayOfWeek.value - weekStart.value + 7) % 7,
             days = days,
             notes = notes.map { n ->
-                NoteUi(n.id, relativeDate(LocalDate.ofEpochDay(n.date), today), history.entries[n.date]?.status, n.text)
+                DetailNoteUi(NoteCardUi.of(n, habit, history.entries[n.date], today), relativeDate(LocalDate.ofEpochDay(n.date), today))
             },
         )
     }

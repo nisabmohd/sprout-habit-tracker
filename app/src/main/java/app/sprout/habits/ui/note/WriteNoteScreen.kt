@@ -1,9 +1,19 @@
 package app.sprout.habits.ui.note
 
+import java.time.LocalDate
+import app.sprout.habits.ui.components.MarkColors
+import app.sprout.habits.ui.components.DayMarkView
+import app.sprout.habits.ui.components.NoteCardUi
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.foundation.text.BasicTextField
+import app.sprout.habits.ui.components.SproutSheet
 import androidx.compose.foundation.background
 import androidx.compose.ui.semantics.Role
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,8 +42,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -53,7 +61,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
-import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.ui.components.DatePickerSheet
 import app.sprout.habits.ui.theme.habitColors
@@ -65,7 +72,7 @@ import java.time.format.DateTimeFormatter
 fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose: () -> Unit) {
     val form by viewModel.form.collectAsStateWithLifecycle()
     val habits by viewModel.habits.collectAsStateWithLifecycle()
-    val status by viewModel.status.collectAsStateWithLifecycle()
+    val entry by viewModel.entry.collectAsStateWithLifecycle()
     LaunchedEffect(viewModel) { viewModel.done.collect { onClose() } }
     if (!form.loaded) return
 
@@ -76,7 +83,6 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
     var menuOpen by remember { mutableStateOf(false) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     val focus = remember { FocusRequester() }
-    LaunchedEffect(Unit) { if (form.isNew) focus.requestFocus() }
 
     Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().navigationBarsPadding().imePadding()) {
         Row(
@@ -107,66 +113,82 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
             }
         }
 
-        Column(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        // One card down to the keyboard: the habit row on top, then the note, with no outline.
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp)
+                .clip(RoundedCornerShape(28.dp))
+                .background(colors.surfaceContainerLowest)
+                .padding(8.dp),
+        ) {
             val habit = habits.firstOrNull { it.id == form.habitId }
             if (habit == null) {
-                Text("Add a habit first, then write a note about it.", style = type.bodyLarge, color = colors.onSurfaceVariant)
+                Text(
+                    "Add a habit first, then write a note about it.",
+                    style = type.bodyLarge,
+                    color = colors.onSurfaceVariant,
+                    modifier = Modifier.padding(16.dp),
+                )
             } else {
                 val hc = habitColors(habit.colorHue.toFloat())
-                Box {
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(hc.soft)
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Box(
-                            Modifier
-                                .size(48.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(hc.mid)
-                                .clickable(onClickLabel = "Choose habit") { pickingHabit = true },
-                            contentAlignment = Alignment.Center,
+                val (mark, outcome) = NoteCardUi.dayOutcome(habit, entry, form.date.toEpochDay(), LocalDate.now().toEpochDay())
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(68.dp)
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(hc.soft)
+                        .clickable(onClickLabel = "Choose habit") { pickingHabit = true }
+                        .padding(start = 12.dp, end = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(hc.mid), contentAlignment = Alignment.Center) {
+                        Icon(painterResource(HabitIcon.fromKey(habit.icon).drawable), contentDescription = null, tint = hc.ink, modifier = Modifier.size(22.dp))
+                    }
+                    Column(Modifier.weight(1f).padding(start = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(habit.name, style = type.titleMedium, color = hc.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Row(
+                            Modifier.clickable(onClickLabel = "Change date") { pickingDate = true },
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Icon(painterResource(HabitIcon.fromKey(habit.icon).drawable), contentDescription = null, tint = hc.ink, modifier = Modifier.size(24.dp))
-                        }
-                        Column(Modifier.weight(1f).padding(start = 14.dp)) {
+                            DayMarkView(mark, hc, MarkColors(colors.outlineVariant, colors.onSurfaceVariant, colors.outline), Modifier.size(16.dp))
                             Text(
-                                habit.name,
-                                style = type.titleMedium,
-                                color = hc.ink,
-                                modifier = Modifier.clickable(onClickLabel = "Choose habit") { pickingHabit = true },
-                            )
-                            Text(
-                                listOfNotNull(form.date.format(DateTimeFormatter.ofPattern("EEEE, d MMM")), status?.label()).joinToString(" · "),
-                                style = type.titleSmall,
+                                "$outcome · ${form.date.format(DateTimeFormatter.ofPattern("EEEE, d MMM"))}",
+                                style = type.bodyMedium,
                                 color = hc.ink.copy(alpha = 0.8f),
-                                modifier = Modifier.clickable(onClickLabel = "Change date") { pickingDate = true },
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(start = 6.dp),
                             )
-                        }
-                        IconButton(onClick = { pickingHabit = true }) {
-                            Icon(painterResource(R.drawable.ic_chevron_down), contentDescription = "Choose habit", tint = hc.ink, modifier = Modifier.size(22.dp))
                         }
                     }
+                    IconButton(onClick = { pickingHabit = true }) {
+                        Icon(painterResource(R.drawable.ic_chevron_down), contentDescription = "Choose habit", tint = hc.ink, modifier = Modifier.size(22.dp))
+                    }
                 }
+                val textStyle = type.bodyLarge.copy(fontSize = 18.sp, lineHeight = 1.55.em, color = colors.onSurface)
+                BasicTextField(
+                    value = form.text,
+                    onValueChange = viewModel::setText,
+                    textStyle = textStyle,
+                    cursorBrush = SolidColor(hc.solid),
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(start = 16.dp, end = 16.dp, top = 20.dp)
+                        .focusRequester(focus)
+                        .semantics { contentDescription = "Note" },
+                    decorationBox = { field ->
+                        Box {
+                            if (form.text.isEmpty()) Text("How did it go today?", style = textStyle.copy(color = colors.onSurfaceVariant))
+                            field()
+                        }
+                    },
+                )
+                // A new note opens ready to type; the field only exists once the habit is known.
+                LaunchedEffect(Unit) { if (form.isNew) focus.requestFocus() }
             }
-
-            OutlinedTextField(
-                value = form.text,
-                onValueChange = viewModel::setText,
-                placeholder = { Text("How did it go?", style = type.bodyLarge) },
-                textStyle = type.bodyLarge,
-                shape = RoundedCornerShape(24.dp),
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = colors.surfaceContainerLowest,
-                    focusedContainerColor = colors.surfaceContainerLowest,
-                    unfocusedBorderColor = colors.outlineVariant,
-                ),
-                modifier = Modifier.fillMaxWidth().weight(1f, fill = false).height(420.dp).focusRequester(focus),
-            )
         }
     }
 
@@ -198,11 +220,6 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
     }
 }
 
-private fun EntryStatus.label() = when (this) {
-    EntryStatus.DONE -> "Done"
-    EntryStatus.PARTIAL -> "Partial"
-    EntryStatus.SKIP -> "Skipped"
-}
 
 /** Every habit in a scrollable sheet; a dropdown got cut off with more than a handful. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -215,18 +232,14 @@ private fun HabitPickerSheet(
 ) {
     val colors = MaterialTheme.colorScheme
     // Fully open right away so every habit is visible; the list scrolls if there are many.
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = colors.surfaceContainerLowest,
-    ) {
+    SproutSheet(onDismissRequest = onDismiss) {
         Text(
             "Choose habit",
             style = MaterialTheme.typography.titleLarge,
             color = colors.onSurface,
             modifier = Modifier.padding(start = 24.dp, bottom = 8.dp),
         )
-        LazyColumn(contentPadding = PaddingValues(start = 12.dp, end = 12.dp, bottom = 24.dp)) {
+        LazyColumn(Modifier.weight(1f, fill = false), contentPadding = PaddingValues(start = 12.dp, end = 12.dp, bottom = 24.dp)) {
             items(habits, key = { it.id }) { h ->
                 val c = habitColors(h.colorHue.toFloat())
                 val selected = h.id == selectedId

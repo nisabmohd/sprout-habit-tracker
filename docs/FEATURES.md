@@ -12,17 +12,17 @@ Code: `ui/today/`, scoring in `domain/Scoring.kt`.
 
 ## Habits
 
-Habits are created and edited on one screen: name, icon, color, how it's tracked (check off, an amount with a unit, or minutes), the days it's scheduled, a reminder, whether to ask for a note after a skip, and whether it appears on widgets. Manage habits lets you drag to reorder, archive, restore and delete.
+Habits are created and edited on one screen: name, icon (7 suggestions, or any of 29 in a searchable sheet), color, how it's tracked (check off, an amount with a unit, or minutes), the days it's scheduled, a reminder, whether to ask for a note after a skip, and whether it appears on widgets. Manage habits lets you drag to reorder, archive, restore and delete.
 
 Duration habits are set in minutes or hours; amounts are stored in minutes and shown in the chosen unit ("1.5 / 2 h").
 
-The Habits tab has a Week view (seven day marks per habit, with arrows to earlier weeks; tap any past day to edit it in the same sheet as Today) and an Overall view (a 26-week heatmap per habit with its score and best streak). Tapping a habit opens its detail screen with this month's score, best streak, note count, a month calendar (tap a past day to edit it) and its notes.
+The Habits tab has a Week view (seven day marks per habit, with arrows to earlier weeks; tap any past day to edit it in the same sheet as Today) and an Overall view (a 26-week heatmap per habit with its current and best streak). Tapping a habit opens its detail screen with the days done this month, best streak, note count, a month calendar (tap a past day to edit it) and its notes.
 
 Code: `ui/edit/`, `ui/manage/`, `ui/habits/`, `ui/detail/`, statistics in `domain/Stats.kt`.
 
 ## Journal and notes
 
-A note belongs to one habit and one day. The Journal tab lists every note, newest first. The two buttons at the top open bottom sheets to filter by date range and by one or more habits. Notes can be added from Today, the Journal, a habit's detail screen or the press-and-hold sheet, and edited or deleted later.
+A note belongs to one habit and one day. The Journal tab lists every note, newest first, under date headers; each card shows the habit, that day's outcome and when the note was written. The two buttons at the top open bottom sheets to filter by date range and by one or more habits. Notes can be added from Today, the Journal, a habit's detail screen or the press-and-hold sheet, and edited or deleted later.
 
 Code: `ui/journal/`, `ui/note/`.
 

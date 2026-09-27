@@ -261,7 +261,6 @@ private fun LegendItem(label: String, draw: androidx.compose.ui.graphics.drawsco
 @Composable
 private fun OverallCard(habit: HabitOverallUi, overall: OverallUi, onOpen: (Long) -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val hc = habitColors(habit.hue)
     Column(
         Modifier
             .fillMaxWidth()
@@ -271,9 +270,7 @@ private fun OverallCard(habit: HabitOverallUi, overall: OverallUi, onOpen: (Long
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        CardHeader(habit.icon, habit.hue, habit.name, "Best streak ${habit.bestStreak} ${if (habit.bestStreak == 1) "day" else "days"}") {
-            Text("${habit.percent}%", style = MaterialTheme.typography.headlineMedium, color = hc.ink)
-        }
+        CardHeader(habit.icon, habit.hue, habit.name, "${habit.currentStreak}-day streak · best ${habit.bestStreak}") {}
         // Labels sit over fixed heatmap columns, so they stop scaling at 1.3x.
         CappedFontScale {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
@@ -306,7 +303,7 @@ private fun Heatmap(habit: HabitOverallUi) {
         Modifier
             .fillMaxWidth()
             .aspectRatio(OVERALL_WEEKS / 7f)
-            .semantics { contentDescription = "${habit.name}: ${habit.percent}% over the last $OVERALL_WEEKS weeks" },
+            .semantics { contentDescription = "${habit.name}: ${habit.currentStreak}-day streak, best ${habit.bestStreak}, last $OVERALL_WEEKS weeks" },
     ) {
         val pitch = size.width / OVERALL_WEEKS
         val cell = pitch * 0.72f

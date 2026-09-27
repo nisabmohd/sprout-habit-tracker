@@ -112,7 +112,7 @@ fun TodayScreen(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 shape = RoundedCornerShape(18.dp),
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).padding(bottom = fabLift),
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).padding(bottom = fabLift).semantics { contentDescription = "Add note" },
             )
         }
         UndoSnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp))

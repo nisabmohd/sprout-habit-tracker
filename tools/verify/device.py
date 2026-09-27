@@ -32,6 +32,7 @@ class Node:
         self.clickable = attr("clickable") == "true"
         self.checkable = attr("checkable") == "true"
         self.checked = attr("checked") == "true"
+        self.selected = attr("selected") == "true"
         self.scrollable = attr("scrollable") == "true"
         x1, y1, x2, y2 = map(int, re.findall(r"\d+", attr("bounds")))
         self.bounds = (x1, y1, x2, y2)

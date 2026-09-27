@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.1
+
+New:
+
+- Choose from 29 habit icons (Material Symbols) in a searchable "Choose icon" sheet; New habit shows 7 suggestions and a More tile. Existing habits keep a matching icon.
+- Journal notes are grouped under "Today", "Yesterday" and dated headers, and each card shows the habit, that day's outcome ("Skipped", "8 of 20 pages", "Done · 45 min") and the time.
+- The note editor is one clean card: the habit row on top and a plain text area that opens ready to type.
+- Habits → Overall shows "X-day streak · best Y", and a habit's page shows "N days this month", instead of percentages. Notes on a habit's page use the Journal card style.
+
+Fixed:
+
+- Sheets could reach the top of the screen with a long list, and sat above the bottom edge. They now sit on the bottom edge and leave the top of the screen visible.
+- On Android 8 and 9, opening a sheet with a text field popped up the keyboard by itself.
+- The date sheet opened on next month when this week ends in it, with every day disabled.
+- The "Add note" buttons had no label for TalkBack.
+
 ## 0.3.0
 
 New:

@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.detail
 
+import androidx.compose.ui.semantics.semantics
+import app.sprout.habits.ui.components.NoteCard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -50,7 +52,6 @@ import app.sprout.habits.ui.today.UndoSnackbarHost
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
-import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.ui.components.MarkKind
 import app.sprout.habits.ui.manage.DeleteHabitDialog
 import app.sprout.habits.ui.theme.HabitColors
@@ -121,7 +122,7 @@ fun HabitDetailScreen(
             }
             item(key = "stats") {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    StatTile("${ui.monthPercent}%", "this month", hc, Modifier.weight(1f))
+                    StatTile(days(ui.monthDone), ui.monthDoneLabel, hc, Modifier.weight(1f))
                     StatTile(days(ui.bestStreak), "best streak", hc, Modifier.weight(1f))
                     StatTile("${ui.noteCount}", if (ui.noteCount == 1) "note" else "notes", hc, Modifier.weight(1f))
                 }
@@ -138,7 +139,7 @@ fun HabitDetailScreen(
                     Text("No notes yet.", style = type.bodyMedium, color = colors.onSurfaceVariant)
                 }
             }
-            items(ui.notes.take(5), key = { it.id }) { note -> NoteCard(note, onOpenNote) }
+            items(ui.notes.take(5), key = { it.card.id }) { note -> NoteCard(note.card, onOpenNote, showHabit = false, dateLabel = note.dateLabel) }
         }
         // Hidden during a long screenshot, or it would be stamped into every captured frame.
         // Lift the button above the Undo snackbar while it shows, so the two never overlap.
@@ -151,7 +152,7 @@ fun HabitDetailScreen(
                 containerColor = colors.primaryContainer,
                 contentColor = colors.onPrimaryContainer,
                 shape = RoundedCornerShape(18.dp),
-                modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(16.dp).padding(bottom = fabLift),
+                modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(16.dp).padding(bottom = fabLift).semantics { contentDescription = "Add note" },
             )
         }
         UndoSnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 8.dp))
@@ -173,7 +174,7 @@ private fun StatTile(value: String, label: String, hc: HabitColors, modifier: Mo
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Text(value, style = MaterialTheme.typography.titleLarge, color = hc.ink, maxLines = 1)
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
     }
 }
 
@@ -264,38 +265,5 @@ private fun CalendarDay(day: CalendarDayUi, hc: HabitColors, editable: Boolean, 
         contentAlignment = Alignment.Center,
     ) {
         Text("${day.day}", style = MaterialTheme.typography.titleSmall, color = fg)
-    }
-}
-
-@Composable
-fun NoteCard(note: NoteUi, onOpen: ((Long) -> Unit)?, title: String = note.dateLabel) {
-    val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp))
-            .background(colors.surfaceContainerLowest)
-            .then(if (onOpen != null) Modifier.clickable(onClickLabel = "Edit note") { onOpen(note.id) } else Modifier)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(title, style = type.titleSmall, color = colors.onSurface)
-            note.status?.let { status ->
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    when (status) {
-                        EntryStatus.DONE -> "Done"
-                        EntryStatus.PARTIAL -> "Partial"
-                        EntryStatus.SKIP -> "Skipped"
-                    },
-                    style = type.labelMedium,
-                    color = colors.onSurfaceVariant,
-                    modifier = Modifier.background(colors.surfaceContainerHigh, CircleShape).padding(horizontal = 8.dp, vertical = 2.dp),
-                )
-            }
-        }
-        Text(note.text, style = type.bodyLarge, color = colors.onSurface)
     }
 }

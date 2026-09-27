@@ -6,9 +6,10 @@ import androidx.lifecycle.viewModelScope
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.ui.components.HabitFilterOption
-import app.sprout.habits.ui.detail.HabitDetailViewModel
+import app.sprout.habits.ui.components.NoteCardUi
 import app.sprout.habits.ui.insights.InsightsViewModel
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,20 +18,14 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 
+/** Notes of one day under its header ("Today", "Yesterday", "Thursday, 24 Sep"). */
 @Immutable
-data class JournalNoteUi(
-    val id: Long,
-    val habitName: String,
-    val icon: Int,
-    val hue: Float,
-    val dateLabel: String,
-    val text: String,
-)
+data class JournalDayUi(val day: Long, val label: String, val notes: List<NoteCardUi>)
 
 @Immutable
 data class JournalUi(
-    /** Newest first, already filtered. */
-    val notes: List<JournalNoteUi>,
+    /** Newest day first, already filtered. */
+    val days: List<JournalDayUi>,
     /** Empty = every habit. */
     val filter: Set<Long>,
     val options: List<HabitFilterOption>,
@@ -47,25 +42,27 @@ class JournalViewModel(repository: HabitRepository) : ViewModel() {
 
     /** Null while loading. */
     val state: StateFlow<JournalUi?> =
-        combine(repository.observeNotes(), repository.observeAllHabits(), filterIds, range) { notes, habits, filter, r ->
+        combine(
+            repository.observeNotes(),
+            repository.observeAllHabits(),
+            repository.observeEntries(0, Long.MAX_VALUE),
+            filterIds,
+            range,
+        ) { notes, habits, entries, filter, r ->
             val byId = habits.associateBy { it.id }
+            val entryOf = entries.associateBy { it.habitId to it.date }
             val withNotes = notes.mapTo(HashSet()) { it.habitId }
             val today = LocalDate.now()
+            val cards = notes
+                .filter { filter.isEmpty() || it.habitId in filter }
+                .filter { r == null || it.date in r.first.toEpochDay()..r.second.toEpochDay() }
+                .mapNotNull { note ->
+                    val habit = byId[note.habitId] ?: return@mapNotNull null
+                    NoteCardUi.of(note, habit, entryOf[note.habitId to note.date], today)
+                }
             JournalUi(
-                notes = notes
-                    .filter { filter.isEmpty() || it.habitId in filter }
-                    .filter { r == null || it.date in r.first.toEpochDay()..r.second.toEpochDay() }
-                    .mapNotNull { note ->
-                        val habit = byId[note.habitId] ?: return@mapNotNull null
-                        JournalNoteUi(
-                            id = note.id,
-                            habitName = habit.name,
-                            icon = HabitIcon.fromKey(habit.icon).drawable,
-                            hue = habit.colorHue.toFloat(),
-                            dateLabel = HabitDetailViewModel.relativeDate(LocalDate.ofEpochDay(note.date), today),
-                            text = note.text,
-                        )
-                    },
+                // Notes arrive newest day first, so grouping keeps that order.
+                days = cards.groupBy { it.day }.map { (day, list) -> JournalDayUi(day, dayHeader(LocalDate.ofEpochDay(day), today), list) },
                 filter = filter,
                 // Active habits, plus archived ones that still have notes.
                 options = habits.filter { !it.archived || it.id in withNotes }
@@ -85,5 +82,14 @@ class JournalViewModel(repository: HabitRepository) : ViewModel() {
 
     fun setFilter(habitIds: Set<Long>) {
         filterIds.value = habitIds
+    }
+
+    companion object {
+        /** "Today", "Yesterday", "Thursday, 24 Sep", or with the year when it isn't this one. */
+        fun dayHeader(date: LocalDate, today: LocalDate): String = when (date) {
+            today -> "Today"
+            today.minusDays(1) -> "Yesterday"
+            else -> date.format(DateTimeFormatter.ofPattern(if (date.year == today.year) "EEEE, d MMM" else "EEEE, d MMM yyyy"))
+        }
     }
 }

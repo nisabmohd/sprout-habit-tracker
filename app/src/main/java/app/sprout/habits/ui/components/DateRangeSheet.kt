@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.components
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,10 +21,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,15 +70,13 @@ fun DateRangeSheet(
     val today = LocalDate.now()
     var start by remember { mutableStateOf<LocalDate?>(from) }
     var end by remember { mutableStateOf<LocalDate?>(to) }
-    var month by remember { mutableStateOf(YearMonth.from(to ?: today)) }
+    // Open on the month with the range end, but never a month still to come (this week can end
+    // in next month).
+    var month by remember { mutableStateOf(YearMonth.from(minOf(to ?: today, today))) }
     val dm = DateTimeFormatter.ofPattern("d MMM")
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = colors.surfaceContainerLowest,
-    ) {
-        Column(Modifier.padding(horizontal = 20.dp).navigationBarsPadding()) {
+    SproutSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Date range", style = type.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
                 TextButton(onClick = onShortcut) { Text(shortcutLabel, style = type.labelLarge) }
@@ -136,12 +134,8 @@ fun DatePickerSheet(
     var picked by remember { mutableStateOf(date) }
     var month by remember { mutableStateOf(YearMonth.from(date)) }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = colors.surfaceContainerLowest,
-    ) {
-        Column(Modifier.padding(horizontal = 20.dp).navigationBarsPadding()) {
+    SproutSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Date", style = type.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
                 TextButton(onClick = { picked = today; month = YearMonth.from(today) }) { Text("Today", style = type.labelLarge) }

@@ -27,7 +27,7 @@ data class HabitForm(
     val loaded: Boolean = false,
     val isNew: Boolean = true,
     val name: String = "",
-    val icon: HabitIcon = HabitIcon.CALM,
+    val icon: HabitIcon = HabitIcon.MEDITATE,
     val hue: Int = HABIT_HUES.first(),
     val trackType: TrackType = TrackType.CHECK,
     /** Text of the target field, kept as typed. */

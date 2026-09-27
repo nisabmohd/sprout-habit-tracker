@@ -187,28 +187,34 @@ private fun EditHabitContent(
             }
 
             Section("Icon") {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    HabitIcon.entries.forEach { icon ->
-                        val selected = icon == form.icon
-                        Box(
-                            Modifier
-                                .weight(1f)
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (selected) hc.soft else colors.surfaceContainerLowest)
-                                .then(if (selected) Modifier.border(2.dp, hc.solid, RoundedCornerShape(12.dp)) else Modifier)
-                                .clickable(role = Role.RadioButton) { edit { it.copy(icon = icon) } }
-                                .semantics { contentDescription = icon.key; this.selected = selected },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                painterResource(icon.drawable),
-                                contentDescription = null,
-                                tint = if (selected) hc.ink else colors.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp),
-                            )
+                // Seven suggestions and a More tile that opens every icon in a sheet.
+                var pickingIcon by rememberSaveable { mutableStateOf(false) }
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    HabitIcon.suggestedFor(form.icon).forEach { icon ->
+                        IconTile(icon, selected = icon == form.icon, colors = hc, modifier = Modifier.weight(1f).aspectRatio(1f)) {
+                            edit { it.copy(icon = icon) }
                         }
                     }
+                    Box(
+                        Modifier
+                            .weight(1f)
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(colors.surfaceContainerHigh)
+                            .clickable(onClickLabel = "More icons") { endTyping(); pickingIcon = true }
+                            .semantics { contentDescription = "More icons" },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(painterResource(R.drawable.ic_more_horiz), contentDescription = null, tint = colors.onSurface, modifier = Modifier.size(24.dp))
+                    }
+                }
+                if (pickingIcon) {
+                    IconPickerSheet(
+                        current = form.icon,
+                        colors = hc,
+                        onPick = { icon -> edit { it.copy(icon = icon) }; pickingIcon = false },
+                        onDismiss = { pickingIcon = false },
+                    )
                 }
             }
 

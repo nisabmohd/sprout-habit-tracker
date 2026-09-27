@@ -1,5 +1,8 @@
 package app.sprout.habits.ui.more
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import app.sprout.habits.ui.components.SproutSheet
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -66,8 +69,6 @@ import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import app.sprout.habits.ui.components.TimePickerSheet
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.foundation.layout.navigationBarsPadding
 
 /** Accent choices when dynamic color is off: the app's green first, then the habit hues. */
@@ -185,12 +186,8 @@ fun MoreScreen(
     }
 
     if (pickingWeekStart) {
-        ModalBottomSheet(
-            onDismissRequest = { pickingWeekStart = false },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-        ) {
-            Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 24.dp).navigationBarsPadding()) {
+        SproutSheet(onDismissRequest = { pickingWeekStart = false }) {
+            Column(Modifier.verticalScroll(rememberScrollState()).padding(start = 12.dp, end = 12.dp, bottom = 24.dp).navigationBarsPadding()) {
                 Text(
                     "Week starts on",
                     style = MaterialTheme.typography.titleLarge,

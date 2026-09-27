@@ -249,6 +249,8 @@ def habits_week_and_overall():
     assert d.exists("complete this week", contains=True), "week view missing"
     d.tap("Overall")
     assert d.exists("Last 26 weeks"), "overall heatmap missing"
+    assert d.exists("-day streak · best", contains=True), "overall card missing its streak line"
+    assert not any(n.label.endswith("%") for n in d.dump()), "overall still shows a percentage"
     d.tap("Week")
 
 
@@ -256,6 +258,8 @@ def habits_week_and_overall():
 def habit_detail_opens():
     d.tap("Read", timeout=5)
     assert d.exists("best streak"), "detail stats missing"
+    assert d.exists("this month"), "detail's first stat isn't \"this month\""
+    assert not any(n.label.endswith("%") for n in d.dump()), "detail still shows a percentage"
     assert d.exists("Edit habit"), "edit action missing"
     d.back()
 
@@ -268,6 +272,42 @@ def journal_lists_and_adds_notes():
     d.type_text("Smoke test note")
     d.tap("Save")
     assert d.exists("Smoke test note", timeout=4), "new note not in Journal"
+
+
+@check
+def journal_cards_and_new_note():
+    d.nav("Journal")
+    assert d.exists("Today"), "no date header over today's notes"
+    assert d.exists("Skipped"), "note card doesn't show the day's outcome"
+    d.tap("Add note")
+    assert d.exists("How did it go today?"), "new note placeholder missing"
+    time.sleep(1)
+    assert "mInputShown=true" in d.shell("dumpsys input_method"), "new note didn't open with the keyboard"
+    d.back()
+    d.tap("Close")
+
+
+@check
+def icon_picker():
+    d.nav("Today")
+    d.scroll_to_top()
+    d.tap("New habit")
+    d.tap("More icons")
+    assert d.exists("Choose icon"), "icon picker didn't open"
+    _, h = d.screen_size()
+    title = d.find("Choose icon")
+    assert title.bounds[1] > h * 0.08, "sheet reaches the top of the screen"
+    use = d.find("Use this icon")
+    assert use.bounds[3] > h * 0.85, "sheet doesn't sit on the bottom edge"
+    d.tap("Search icons")
+    d.type_text("pho")
+    assert d.exists("Less phone") and not d.exists("Code", timeout=1), "search doesn't filter icons"
+    d.back()  # keyboard
+    d.tap("Less phone")
+    d.tap("Use this icon")
+    n = d.find("Less phone")
+    assert n and (n.selected or n.checked), "picked icon isn't selected in the row"
+    d.tap("Close")
 
 
 @check
