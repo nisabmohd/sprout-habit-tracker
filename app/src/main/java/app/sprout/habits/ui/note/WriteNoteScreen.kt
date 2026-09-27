@@ -3,6 +3,7 @@ package app.sprout.habits.ui.note
 import androidx.compose.foundation.background
 import androidx.compose.ui.semantics.Role
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
@@ -230,7 +231,12 @@ private fun HabitPickerSheet(
     onDismiss: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.surfaceContainerLowest) {
+    // Fully open right away so every habit is visible; the list scrolls if there are many.
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = colors.surfaceContainerLowest,
+    ) {
         Text(
             "Choose habit",
             style = MaterialTheme.typography.titleLarge,

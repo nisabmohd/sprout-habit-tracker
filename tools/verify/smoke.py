@@ -156,6 +156,25 @@ def journal_lists_and_adds_notes():
 
 
 @check
+def journal_filter_by_habit():
+    d.nav("Journal")
+    d.tap("All habits")
+    assert d.exists("Show notes for"), "filter sheet didn't open"
+    d.tap("Stay calm")
+    time.sleep(1)
+    assert d.exists("Rough morning", contains=True), "Stay calm's note missing when filtered"
+    assert not d.exists("Smoke test note", timeout=1), "another habit's note shown under the filter"
+    time.sleep(1)  # let the sheet finish closing
+    d.tap("Stay calm")  # the filter button now shows the habit's name
+    assert d.exists("Show notes for"), "filter sheet didn't reopen"
+    d.tap("Vitamins")
+    time.sleep(1)
+    assert d.exists("No notes for Vitamins yet"), "empty filter message missing"
+    d.tap("Show all habits")
+    assert d.exists("All habits"), "filter didn't reset"
+
+
+@check
 def insights_render():
     d.nav("Insights")
     assert d.exists("Average score"), "score card missing"
