@@ -2,6 +2,7 @@ package app.sprout.habits.widget
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
@@ -47,7 +48,9 @@ class WeekWidget : GlanceAppWidget() {
         val theme = context.themeSettings()
         val bitmaps = WidgetBitmaps(context)
         provideContent {
-            SproutGlanceTheme(theme) { WeekContent(context, data, bitmaps) }
+            val live by liveWidgetData(context, data) { it.week() }
+            val liveTheme by liveTheme(context, theme)
+            SproutGlanceTheme(liveTheme) { WeekContent(context, live, bitmaps) }
         }
     }
 }
@@ -61,10 +64,10 @@ private fun WeekContent(context: Context, data: WeekWidgetData, bitmaps: WidgetB
             .fillMaxSize()
             .background(GlanceTheme.colors.widgetBackground)
             .cornerRadius(28.dp)
-            .padding(16.dp)
-            .clickable(actionStartActivity(context.openAppIntent())),
+            .padding(16.dp),
     ) {
-        Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.Vertical.CenterVertically) {
+        // Only the header opens the app; each habit row opens that habit. Never nested.
+        Row(GlanceModifier.fillMaxWidth().clickable(actionStartActivity(context.openAppIntent())), verticalAlignment = Alignment.Vertical.CenterVertically) {
             Column(GlanceModifier.defaultWeight()) {
                 Text("This week", style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Medium, color = GlanceTheme.colors.onSurface))
                 Text(data.range, style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurfaceVariant))

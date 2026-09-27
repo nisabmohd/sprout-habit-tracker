@@ -2,6 +2,7 @@ package app.sprout.habits.widget
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.ColorFilter
@@ -27,6 +28,7 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
@@ -47,7 +49,11 @@ class TodayWidget : GlanceAppWidget() {
         val data = WidgetDataSource(context.container.repository, context.container.settings).today()
         val theme = context.themeSettings()
         val bitmaps = WidgetBitmaps(context)
-        provideContent { SproutGlanceTheme(theme) { TodayContent(data, bitmaps) } }
+        provideContent {
+            val live by liveWidgetData(context, data) { it.today() }
+            val liveTheme by liveTheme(context, theme)
+            SproutGlanceTheme(liveTheme) { TodayContent(live, bitmaps) }
+        }
     }
 }
 
@@ -67,11 +73,10 @@ private fun TodayContent(data: TodayWidgetData, bitmaps: WidgetBitmaps) {
             .fillMaxSize()
             .background(colors.widgetBackground)
             .cornerRadius(28.dp)
-            .padding(16.dp)
-            .clickable(actionStartActivity(context.openAppIntent())),
+            .padding(16.dp),
         verticalAlignment = Alignment.Vertical.CenterVertically,
     ) {
-        Box(GlanceModifier.size(104.dp), contentAlignment = Alignment.Center) {
+        Box(GlanceModifier.size(104.dp).clickable(actionStartActivity(context.openAppIntent())), contentAlignment = Alignment.Center) {
             Image(ImageProvider(ring), contentDescription = "${data.done} of ${data.total} done today", modifier = GlanceModifier.size(104.dp))
             Column(horizontalAlignment = Alignment.Horizontal.CenterHorizontally) {
                 Text("${data.done}/${data.total}", style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Medium, color = colors.onSurface))
@@ -87,30 +92,43 @@ private fun TodayContent(data: TodayWidgetData, bitmaps: WidgetBitmaps) {
             data.upNext.take(2).forEach { habit ->
                 val hc = habitColors(habit.hue, bitmaps.dark)
                 Spacer(GlanceModifier.height(8.dp))
+                // Two sibling tap areas, never nested: the name opens the habit, the circle marks it
+                // done. Nested clickables let the outer one win on some launchers.
                 Row(
                     GlanceModifier
                         .fillMaxWidth()
                         .height(48.dp)
                         .background(ColorProvider(hc.soft, hc.soft))
-                        .cornerRadius(16.dp)
-                        .padding(start = 14.dp, end = 6.dp)
-                        .clickable(actionStartActivity(context.openHabitIntent(habit.id))),
+                        .cornerRadius(16.dp),
                     verticalAlignment = Alignment.Vertical.CenterVertically,
                 ) {
-                    Text(
-                        habit.name,
-                        maxLines = 1,
-                        modifier = GlanceModifier.defaultWeight(),
-                        style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium, color = ColorProvider(hc.ink, hc.ink)),
-                    )
-                    Image(
-                        ImageProvider(R.drawable.widget_circle),
-                        contentDescription = "Mark ${habit.name} done",
-                        colorFilter = ColorFilter.tint(ColorProvider(hc.solid, hc.solid)),
-                        modifier = GlanceModifier
-                            .size(36.dp)
+                    Box(
+                        GlanceModifier
+                            .defaultWeight()
+                            .fillMaxHeight()
+                            .padding(start = 14.dp)
+                            .clickable(actionStartActivity(context.openHabitIntent(habit.id))),
+                        contentAlignment = Alignment.CenterStart,
+                    ) {
+                        Text(
+                            habit.name,
+                            maxLines = 1,
+                            style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium, color = ColorProvider(hc.ink, hc.ink)),
+                        )
+                    }
+                    Box(
+                        GlanceModifier
+                            .size(48.dp)
                             .clickable(actionRunCallback<MarkDoneAction>(actionParametersOf(MarkDoneAction.HabitIdKey to habit.id))),
-                    )
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Image(
+                            ImageProvider(R.drawable.widget_circle),
+                            contentDescription = "Mark ${habit.name} done",
+                            colorFilter = ColorFilter.tint(ColorProvider(hc.solid, hc.solid)),
+                            modifier = GlanceModifier.size(34.dp),
+                        )
+                    }
                 }
             }
         }

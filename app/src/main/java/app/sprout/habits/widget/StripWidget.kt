@@ -2,6 +2,7 @@ package app.sprout.habits.widget
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
@@ -39,7 +40,11 @@ class StripWidget : GlanceAppWidget() {
         val data = WidgetDataSource(context.container.repository, context.container.settings).today()
         val theme = context.themeSettings()
         val bitmaps = WidgetBitmaps(context)
-        provideContent { SproutGlanceTheme(theme) { StripContent(data, bitmaps) } }
+        provideContent {
+            val live by liveWidgetData(context, data) { it.today() }
+            val liveTheme by liveTheme(context, theme)
+            SproutGlanceTheme(liveTheme) { StripContent(live, bitmaps) }
+        }
     }
 }
 

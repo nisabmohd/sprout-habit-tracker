@@ -46,7 +46,7 @@ data class WeekWidgetData(
 data class TodayWidgetData(
     val done: Int,
     val total: Int,
-    /** Scheduled today and not logged yet, soonest reminder first. */
+    /** Scheduled today and not finished (not logged or partly done), soonest reminder first. */
     val upNext: List<WidgetHabit>,
     /** All of today's habits, for the progress strip. */
     val today: List<WidgetHabit>,
@@ -88,7 +88,8 @@ class WidgetDataSource(private val repository: HabitRepository, private val sett
         val rows = habits
             .map { row(it, entries[it.id].orEmpty(), listOf(today), todayDay) }
             .filter { it.todayOutcome != null }
-        val open = rows.filter { it.todayOutcome == DayOutcome.OPEN }
+        // Still to do: not logged yet, or only partly done (the circle can finish it).
+        val open = rows.filter { it.todayOutcome == DayOutcome.OPEN || it.todayOutcome == DayOutcome.PARTIAL }
             .sortedWith(compareBy(nullsLast()) { it.reminderMinutes })
         val nowMinutes = LocalTime.now().let { it.hour * 60 + it.minute }
         val next = open.firstOrNull { (it.reminderMinutes ?: -1) >= nowMinutes } ?: open.firstOrNull()

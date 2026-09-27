@@ -2,6 +2,7 @@ package app.sprout.habits.widget
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -32,6 +33,8 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
+import androidx.glance.text.TextAlign
+import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -48,7 +51,11 @@ class StreakWidget : GlanceAppWidget() {
         val data = WidgetDataSource(context.container.repository, context.container.settings).streak(habitId)
         val theme = context.themeSettings()
         val bitmaps = WidgetBitmaps(context)
-        provideContent { SproutGlanceTheme(theme) { StreakContent(data, bitmaps) } }
+        provideContent {
+            val live by liveWidgetData(context, data) { it.streak(habitId) }
+            val liveTheme by liveTheme(context, theme)
+            SproutGlanceTheme(liveTheme) { StreakContent(live, bitmaps) }
+        }
     }
 
     companion object {
@@ -72,29 +79,42 @@ private fun StreakContent(data: StreakWidgetData?, bitmaps: WidgetBitmaps) {
     val habit = data.habit
     val hc = habitColors(habit.hue, bitmaps.dark)
     val ink = ColorProvider(hc.ink, hc.ink)
-    val width = (LocalSize.current.width.value - 36).coerceAtLeast(100f)
+    val size = LocalSize.current
+    // Launchers give a 2x2 cell anywhere from about 100 to 200 dp; shrink instead of cutting off.
+    val compact = size.height.value < 170f
+    val tiny = size.height.value < 120f
+    val pad = if (compact) 12.dp else 18.dp
+    val marksWidth = (size.width.value - 2 * pad.value).coerceAtLeast(80f)
+    val markSize = if (compact) 14f else 18f
     Column(
         GlanceModifier
             .fillMaxSize()
             .background(ColorProvider(hc.soft, hc.soft))
             .cornerRadius(28.dp)
-            .padding(18.dp)
+            .padding(pad)
             .clickable(actionStartActivity(context.openHabitIntent(habit.id))),
     ) {
         Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.Vertical.CenterVertically) {
-            Image(ImageProvider(habit.icon), contentDescription = null, colorFilter = ColorFilter.tint(ink), modifier = GlanceModifier.size(24.dp))
-            Spacer(GlanceModifier.defaultWeight())
-            Text(habit.name, maxLines = 1, style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = ink))
+            Image(ImageProvider(habit.icon), contentDescription = null, colorFilter = ColorFilter.tint(ink), modifier = GlanceModifier.size(if (compact) 18.dp else 24.dp))
+            Spacer(GlanceModifier.width(8.dp))
+            Text(
+                habit.name,
+                maxLines = 1,
+                modifier = GlanceModifier.defaultWeight(),
+                style = TextStyle(fontSize = if (compact) 12.sp else 14.sp, fontWeight = FontWeight.Bold, color = ink, textAlign = TextAlign.End),
+            )
         }
         Spacer(GlanceModifier.defaultWeight())
-        Text("${data.streak}", style = TextStyle(fontSize = 40.sp, fontWeight = FontWeight.Medium, color = ink))
-        Text(if (data.streak == 1) "day streak" else "day streak", style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium, color = ink))
-        Spacer(GlanceModifier.height(10.dp))
-        Image(
-            ImageProvider(bitmaps.marks(data.last7, habit.hue, width, 18f)),
-            contentDescription = "Last 7 days",
-            modifier = GlanceModifier.fillMaxWidth().height(18.dp),
-        )
+        Text("${data.streak}", maxLines = 1, style = TextStyle(fontSize = if (compact) 28.sp else 40.sp, fontWeight = FontWeight.Medium, color = ink))
+        Text("day streak", maxLines = 1, style = TextStyle(fontSize = if (compact) 12.sp else 14.sp, fontWeight = FontWeight.Medium, color = ink))
+        if (!tiny) {
+            Spacer(GlanceModifier.height(if (compact) 6.dp else 10.dp))
+            Image(
+                ImageProvider(bitmaps.marks(data.last7, habit.hue, marksWidth, markSize)),
+                contentDescription = "Last 7 days",
+                modifier = GlanceModifier.fillMaxWidth().height(markSize.dp),
+            )
+        }
     }
 }
 

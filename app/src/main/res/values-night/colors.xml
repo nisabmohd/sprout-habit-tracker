@@ -2,4 +2,5 @@
     <!-- hsl(150 14% 7%), the dark background from design/TOKENS.md -->
     <color name="sprout_bg">#FF0F140F</color>
     <color name="sprout_primary">#FF287250</color>
+    <color name="widget_bg">#FF1A201C</color>
 </resources>
