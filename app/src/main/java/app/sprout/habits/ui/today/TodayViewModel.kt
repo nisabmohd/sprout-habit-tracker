@@ -92,6 +92,8 @@ data class LogSheetUi(
     val amount: Double,
     val noteId: Long?,
     val noteText: String,
+    /** True when the day already has an entry the sheet's Undo can clear. */
+    val hasEntry: Boolean,
 )
 
 /** A change the user can undo from the snackbar. */
@@ -140,6 +142,16 @@ class TodayViewModel(
         Entry(habit.id, day, EntryStatus.SKIP)
     }
 
+    /** The sheet's Undo pill: closes the sheet and clears that day back to not logged. */
+    fun clearFromSheet(sheet: LogSheetUi) {
+        _logSheet.value = null
+        viewModelScope.launch {
+            val previous = repository.getEntry(sheet.habitId, sheet.day) ?: return@launch
+            repository.clearEntry(sheet.habitId, sheet.day)
+            _changes.send(UndoableChange("${sheet.name} cleared", sheet.habitId, sheet.day, previous))
+        }
+    }
+
     /** Clears the selected day back to not logged (the opposite swipe on a done or skipped card). */
     fun resetDay(habitId: Long) = log(habitId, "undone") { _, _ -> null }
 
@@ -179,6 +191,7 @@ class TodayViewModel(
                 amount = entry?.amount ?: 0.0,
                 noteId = note?.id,
                 noteText = note?.text.orEmpty(),
+                hasEntry = entry != null,
             )
         }
     }
@@ -201,12 +214,13 @@ class TodayViewModel(
             val next = Entry(sheet.habitId, sheet.day, finalStatus, finalAmount)
             if (next != previous) {
                 repository.setEntry(next)
-                val verb = when (finalStatus) {
-                    EntryStatus.DONE -> "marked done"
-                    EntryStatus.PARTIAL -> "logged"
-                    EntryStatus.SKIP -> "skipped"
+                val message = when (finalStatus) {
+                    EntryStatus.DONE -> "${sheet.name} marked done"
+                    // "Read · 15 of 20 pages"
+                    EntryStatus.PARTIAL -> "${sheet.name} · ${formatNumber(finalAmount)} of ${formatNumber(sheet.target)} ${sheet.unit}".trimEnd()
+                    EntryStatus.SKIP -> "${sheet.name} skipped"
                 }
-                _changes.send(UndoableChange("${sheet.name} $verb", sheet.habitId, sheet.day, previous))
+                _changes.send(UndoableChange(message, sheet.habitId, sheet.day, previous))
             }
             val text = noteText.trim()
             when {

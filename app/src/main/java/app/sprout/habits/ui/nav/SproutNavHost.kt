@@ -177,7 +177,7 @@ fun SproutNavHost(
             composable<InsightsRoute> {
                 TabFrame {
                 val vm = viewModel { InsightsViewModel(container.repository, container.settings) }
-                InsightsScreen(vm)
+                InsightsScreen(vm, settings.weekStart)
                 }
             }
             composable<MoreRoute> {

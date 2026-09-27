@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import app.sprout.habits.data.Entry
 import app.sprout.habits.data.Habit
 import app.sprout.habits.data.HabitRepository
+import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.SettingsRepository
+import app.sprout.habits.ui.components.HabitFilterOption
 import app.sprout.habits.domain.DayOutcome
 import app.sprout.habits.domain.dayCredit
 import app.sprout.habits.domain.history
@@ -28,7 +30,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 
-enum class InsightsPeriod(val label: String) { WEEK("This week"), MONTH("This month"), QUARTER("Last 3 months") }
 
 @Immutable
 data class DayBarUi(val label: String, val done: Float, val partial: Float, val isToday: Boolean)
@@ -38,9 +39,13 @@ data class HabitRateUi(val id: Long, val name: String, val hue: Float, val perce
 
 @Immutable
 data class InsightsUi(
-    val period: InsightsPeriod,
-    val filterId: Long?,
-    val habits: List<Pair<Long, String>>,
+    /** "21 – 27 Sep 2026" */
+    val rangeLabel: String,
+    val from: LocalDate,
+    val to: LocalDate,
+    /** Empty = every habit. */
+    val filter: Set<Long>,
+    val options: List<HabitFilterOption>,
     val scorePercent: Int,
     val doneCount: Int,
     val partialCount: Int,
@@ -57,47 +62,44 @@ class InsightsViewModel(
     private val repository: HabitRepository,
     private val settings: SettingsRepository,
 ) : ViewModel() {
-    private val period = MutableStateFlow(InsightsPeriod.WEEK)
-    private val filter = MutableStateFlow<Long?>(null)
+    /** Null = this week (follows the week-start setting and rolls over with the calendar). */
+    private val range = MutableStateFlow<Pair<LocalDate, LocalDate>?>(null)
+    private val filter = MutableStateFlow<Set<Long>>(emptySet())
 
-    val state: StateFlow<InsightsUi?> = combine(period, settings.settings) { p, s -> p to s.weekStart }
-        .flatMapLatest { (p, weekStart) ->
+    val state: StateFlow<InsightsUi?> = combine(range, settings.settings) { r, s -> r to s.weekStart }
+        .flatMapLatest { (r, weekStart) ->
             val today = LocalDate.now()
-            val (from, to) = range(p, today, weekStart)
+            val (from, to) = r ?: thisWeek(today, weekStart)
             combine(
                 repository.observeHabits(),
                 repository.observeEntries(from.toEpochDay(), to.toEpochDay()),
                 filter,
-            ) { habits, entries, f -> build(p, today, from, to, weekStart, habits, entries, f) }
+            ) { habits, entries, f -> build(today, from, to, weekStart, habits, entries, f) }
         }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    fun setPeriod(value: InsightsPeriod) {
-        period.value = value
+    /** Null goes back to this week. */
+    fun setRange(from: LocalDate?, to: LocalDate?) {
+        range.value = if (from == null || to == null) null else minOf(from, to) to maxOf(from, to)
     }
 
-    fun setFilter(habitId: Long?) {
-        filter.value = habitId
+    fun setFilter(habitIds: Set<Long>) {
+        filter.value = habitIds
     }
 
-    private fun range(p: InsightsPeriod, today: LocalDate, weekStart: DayOfWeek): Pair<LocalDate, LocalDate> = when (p) {
-        InsightsPeriod.WEEK -> weekOf(today, weekStart).let { it.first() to it.last() }
-        InsightsPeriod.MONTH -> today.withDayOfMonth(1) to today
-        InsightsPeriod.QUARTER -> today.minusMonths(3).plusDays(1) to today
-    }
+    private fun thisWeek(today: LocalDate, weekStart: DayOfWeek) = weekOf(today, weekStart).let { it.first() to it.last() }
 
     private fun build(
-        p: InsightsPeriod,
         today: LocalDate,
         from: LocalDate,
         to: LocalDate,
         weekStart: DayOfWeek,
         allHabits: List<Habit>,
         entries: List<Entry>,
-        filterId: Long?,
+        filterIds: Set<Long>,
     ): InsightsUi {
-        val habits = allHabits.filter { filterId == null || it.id == filterId }
+        val habits = allHabits.filter { filterIds.isEmpty() || it.id in filterIds }
         val byHabit = entries.groupBy { it.habitId }.mapValues { (_, l) -> l.associateBy { it.date } }
         val todayDay = today.toEpochDay()
         val first = from.toEpochDay()
@@ -131,7 +133,8 @@ class InsightsViewModel(
             HabitRateUi(habit.id, habit.name, habit.colorHue.toFloat(), (score(habitCredits) * 100).roundToInt())
         }.sortedByDescending { it.percent }
 
-        val averaged = p != InsightsPeriod.WEEK
+        // Longer than a week: show each weekday's average instead of one week's counts.
+        val averaged = to.toEpochDay() - from.toEpochDay() > 6
         val bars = weekdays.mapIndexed { i, d ->
             val n = if (averaged) occurrences[i].coerceAtLeast(1) else 1
             DayBarUi(
@@ -147,9 +150,11 @@ class InsightsViewModel(
             ?.let { weekdays[it.index].getDisplayName(TextStyle.FULL, Locale.getDefault()) }
 
         return InsightsUi(
-            period = p,
-            filterId = filterId,
-            habits = allHabits.map { it.id to it.name },
+            rangeLabel = rangeLabel(from, to),
+            from = from,
+            to = to,
+            filter = filterIds,
+            options = allHabits.map { HabitFilterOption(it.id, it.name, HabitIcon.fromKey(it.icon).drawable, it.colorHue.toFloat()) },
             scorePercent = (score(allCredits) * 100).roundToInt(),
             doneCount = done.sum(),
             partialCount = partial.sum(),
@@ -159,5 +164,17 @@ class InsightsViewModel(
             bars = bars,
             rates = rates,
         )
+    }
+
+    companion object {
+        /** "21 – 27 Sep 2026", "28 Sep – 4 Oct 2026", "29 Dec 2025 – 4 Jan 2026". */
+        fun rangeLabel(from: LocalDate, to: LocalDate): String {
+            val dm = java.time.format.DateTimeFormatter.ofPattern("d MMM")
+            return when {
+                from.year != to.year -> "${from.format(dm)} ${from.year} – ${to.format(dm)} ${to.year}"
+                from.month == to.month -> "${from.dayOfMonth} – ${to.format(dm)} ${to.year}"
+                else -> "${from.format(dm)} – ${to.format(dm)} ${to.year}"
+            }
+        }
     }
 }

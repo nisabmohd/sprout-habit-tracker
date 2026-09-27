@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -109,13 +110,23 @@ fun TodayScreen(
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).padding(bottom = fabLift),
             )
         }
-        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp))
+        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp)) { data ->
+            // Dark inverse surface with 14 dp corners, as in the design.
+            Snackbar(
+                data,
+                shape = RoundedCornerShape(14.dp),
+                containerColor = MaterialTheme.colorScheme.inverseSurface,
+                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                actionColor = MaterialTheme.colorScheme.inversePrimary,
+            )
+        }
     }
     val logSheet by viewModel.logSheet.collectAsStateWithLifecycle()
     logSheet?.let { sheet ->
         LogSheet(
             sheet,
             onSave = { status, amount, note -> viewModel.saveLog(sheet, status, amount, note) },
+            onUndo = { viewModel.clearFromSheet(sheet) },
             onDismiss = viewModel::dismissLogSheet,
         )
     }
@@ -139,7 +150,6 @@ private fun TodayContent(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item(key = "header") { Header(state, onAddHabit) }
-        item(key = "week") { WeekStrip(state.week, onSelectDay) }
         item(key = "score") { ScoreCard(state) }
         if (!state.loading && state.habits.isEmpty()) {
             item(key = "empty") { EmptyState() }
@@ -179,62 +189,6 @@ private fun Header(state: TodayUiState, onAddHabit: () -> Unit) {
             colors = IconButtonDefaults.iconButtonColors(containerColor = colors.surfaceContainerHigh, contentColor = colors.onSurface),
         ) {
             Icon(painterResource(R.drawable.ic_plus), contentDescription = "New habit", modifier = Modifier.size(22.dp))
-        }
-    }
-}
-
-@Composable
-private fun WeekStrip(week: List<WeekDayUi>, onSelect: (LocalDate) -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Row(
-        Modifier.fillMaxWidth().padding(horizontal = 2.dp).padding(bottom = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        week.forEach { day ->
-            val enabled = day.progress != null
-            Column(
-                Modifier
-                    .width(44.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable(enabled = enabled) { onSelect(day.date) }
-                    .semantics(mergeDescendants = true) {
-                        selected = day.isSelected
-                        contentDescription = "${day.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${day.dayOfMonth}" +
-                            (day.progress?.let { ", ${(it * 100).toInt()}%" } ?: "")
-                    },
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Text(
-                    day.letter,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (day.isSelected) colors.onBackground else colors.onSurfaceVariant,
-                )
-                Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
-                    ProgressRing(
-                        progress = day.progress ?: 0f,
-                        color = colors.primary,
-                        trackColor = colors.outlineVariant,
-                        strokeWidth = 3.5.dp,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                    Box(
-                        Modifier
-                            .size(33.dp)
-                            .background(if (day.isSelected) colors.primary else colors.background, CircleShape),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        // The circle can't grow, so the number stops scaling at 1.3x.
-                        CappedFontScale {
-                            Text(
-                                day.dayOfMonth.toString(),
-                                style = MaterialTheme.typography.titleSmall,
-                                color = if (day.isSelected) colors.onPrimary else colors.onBackground,
-                            )
-                        }
-                    }
-                }
-            }
         }
     }
 }

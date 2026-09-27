@@ -1,6 +1,10 @@
 package app.sprout.habits.ui.today
 
 import androidx.compose.foundation.background
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,8 +24,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -62,6 +64,7 @@ import kotlin.math.roundToInt
 fun LogSheet(
     sheet: LogSheetUi,
     onSave: (EntryStatus, Double, String) -> Unit,
+    onUndo: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -98,10 +101,23 @@ fun LogSheet(
                 Box(Modifier.size(48.dp).background(hc.soft, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
                     Icon(painterResource(sheet.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(24.dp))
                 }
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(sheet.name, style = type.titleLarge, color = colors.onSurface)
                     val goal = if (hasAmount) "Goal ${TodayViewModel.formatNumber(sheet.target)} ${sheet.unit} · " else ""
                     Text("$goal${sheet.dayLabel}", style = type.bodyMedium, color = colors.onSurfaceVariant)
+                }
+                // Clears the day back to not logged; only useful when something is logged.
+                if (sheet.hasEntry) {
+                    FilledTonalButton(
+                        onClick = onUndo,
+                        contentPadding = PaddingValues(horizontal = 12.dp),
+                        modifier = Modifier.height(40.dp).semantics { contentDescription = "Clear ${sheet.dayLabel}'s entry for ${sheet.name}" },
+                        colors = ButtonDefaults.filledTonalButtonColors(containerColor = colors.surfaceContainerHigh, contentColor = colors.onSurface),
+                    ) {
+                        Icon(painterResource(R.drawable.ic_undo), contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Undo", style = type.labelLarge)
+                    }
                 }
             }
 
@@ -167,20 +183,6 @@ fun LogSheet(
                             inactiveTickColor = hc.mid,
                         ),
                     )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf(0.25, 0.5, 0.75, 1.0).forEach { fraction ->
-                            val value = (sheet.target * fraction / step).roundToInt() * step
-                            FilterChip(
-                                selected = amount == value,
-                                onClick = { setAmount(value) },
-                                label = { Text(TodayViewModel.formatNumber(value), style = type.titleSmall) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = hc.mid,
-                                    selectedLabelColor = hc.ink,
-                                ),
-                            )
-                        }
-                    }
                 }
             }
 

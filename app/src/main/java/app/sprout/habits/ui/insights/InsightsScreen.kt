@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,15 +45,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.HabitFilterSheet
+import app.sprout.habits.ui.components.HeaderIconButton
 import app.sprout.habits.ui.components.ProgressRing
 import app.sprout.habits.ui.theme.habitColors
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 @Composable
-fun InsightsScreen(viewModel: InsightsViewModel) {
+fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val ui = state ?: return
+    var pickingRange by remember { mutableStateOf(false) }
+    var filtering by remember { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
     LazyColumn(
@@ -62,48 +67,38 @@ fun InsightsScreen(viewModel: InsightsViewModel) {
     ) {
         item(key = "header") {
             Row(Modifier.fillMaxWidth().padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Insights", style = type.headlineMedium, color = colors.onBackground, modifier = Modifier.weight(1f))
-                PeriodMenu(ui.period, viewModel::setPeriod)
-            }
-        }
-        item(key = "chips") {
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Chip("All habits", ui.filterId == null) { viewModel.setFilter(null) }
-                ui.habits.forEach { (id, name) -> Chip(name, ui.filterId == id) { viewModel.setFilter(id) } }
+                Column(Modifier.weight(1f)) {
+                    Text(ui.rangeLabel, style = type.titleSmall, color = colors.onSurfaceVariant)
+                    Text("Insights", style = type.headlineMedium, color = colors.onBackground)
+                }
+                HeaderIconButton(R.drawable.ic_calendar, "Change date range") { pickingRange = true }
+                Spacer(Modifier.width(8.dp))
+                HeaderIconButton(R.drawable.ic_filter, "Filter by habit", active = ui.filter.isNotEmpty()) { filtering = true }
             }
         }
         item(key = "score") { ScoreCard(ui) }
         item(key = "bars") { DayBars(ui) }
-        if (ui.filterId == null && ui.rates.isNotEmpty()) item(key = "rates") { ByHabit(ui.rates) }
+        if (ui.rates.size > 1) item(key = "rates") { ByHabit(ui.rates) }
     }
-}
 
-@Composable
-private fun Chip(label: String, selected: Boolean, onClick: () -> Unit) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = { Text(label, style = MaterialTheme.typography.titleSmall) },
-        colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        ),
-    )
-}
-
-@Composable
-private fun PeriodMenu(period: InsightsPeriod, onSelect: (InsightsPeriod) -> Unit) {
-    var open by remember { mutableStateOf(false) }
-    Box {
-        OutlinedButton(onClick = { open = true }, shape = RoundedCornerShape(12.dp), contentPadding = PaddingValues(horizontal = 12.dp)) {
-            Text(period.label, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
-            Icon(painterResource(R.drawable.ic_chevron_down), contentDescription = null, modifier = Modifier.padding(start = 6.dp).size(18.dp))
-        }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            InsightsPeriod.entries.forEach { p ->
-                DropdownMenuItem(text = { Text(p.label) }, onClick = { onSelect(p); open = false })
-            }
-        }
+    if (pickingRange) {
+        DateRangeSheet(
+            from = ui.from,
+            to = ui.to,
+            weekStart = weekStart,
+            onApply = { a, b -> viewModel.setRange(a, b); pickingRange = false },
+            onThisWeek = { viewModel.setRange(null, null); pickingRange = false },
+            onDismiss = { pickingRange = false },
+        )
+    }
+    if (filtering) {
+        HabitFilterSheet(
+            options = ui.options,
+            selected = ui.filter,
+            applyLabel = { n -> if (n == 0) "Show all habits" else if (n == 1) "Show 1 habit" else "Show $n habits" },
+            onApply = { ids -> viewModel.setFilter(ids); filtering = false },
+            onDismiss = { filtering = false },
+        )
     }
 }
 

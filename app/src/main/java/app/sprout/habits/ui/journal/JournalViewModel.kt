@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.HabitRepository
+import app.sprout.habits.ui.components.HabitFilterOption
 import app.sprout.habits.ui.detail.HabitDetailViewModel
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
@@ -25,33 +26,27 @@ data class JournalNoteUi(
     val text: String,
 )
 
-/** A habit you can filter the Journal by, with how many notes it has. */
-@Immutable
-data class JournalFilterOption(val habitId: Long, val name: String, val icon: Int, val hue: Float, val noteCount: Int)
-
 @Immutable
 data class JournalUi(
     /** Newest first, already filtered. */
     val notes: List<JournalNoteUi>,
-    val filter: JournalFilterOption?,
-    val options: List<JournalFilterOption>,
+    /** Empty = every habit. */
+    val filter: Set<Long>,
+    val options: List<HabitFilterOption>,
 )
 
 class JournalViewModel(repository: HabitRepository) : ViewModel() {
-    private val filterId = MutableStateFlow<Long?>(null)
+    private val filterIds = MutableStateFlow<Set<Long>>(emptySet())
 
     /** Null while loading. */
     val state: StateFlow<JournalUi?> =
-        combine(repository.observeNotes(), repository.observeAllHabits(), filterId) { notes, habits, filter ->
+        combine(repository.observeNotes(), repository.observeAllHabits(), filterIds) { notes, habits, filter ->
             val byId = habits.associateBy { it.id }
-            val counts = notes.groupingBy { it.habitId }.eachCount()
+            val withNotes = notes.mapTo(HashSet()) { it.habitId }
             val today = LocalDate.now()
-            val options = habits
-                .filter { !it.archived || (counts[it.id] ?: 0) > 0 }
-                .map { JournalFilterOption(it.id, it.name, HabitIcon.fromKey(it.icon).drawable, it.colorHue.toFloat(), counts[it.id] ?: 0) }
             JournalUi(
                 notes = notes
-                    .filter { filter == null || it.habitId == filter }
+                    .filter { filter.isEmpty() || it.habitId in filter }
                     .mapNotNull { note ->
                         val habit = byId[note.habitId] ?: return@mapNotNull null
                         JournalNoteUi(
@@ -63,15 +58,16 @@ class JournalViewModel(repository: HabitRepository) : ViewModel() {
                             text = note.text,
                         )
                     },
-                filter = options.firstOrNull { it.habitId == filter },
-                options = options,
+                filter = filter,
+                // Active habits, plus archived ones that still have notes.
+                options = habits.filter { !it.archived || it.id in withNotes }
+                    .map { HabitFilterOption(it.id, it.name, HabitIcon.fromKey(it.icon).drawable, it.colorHue.toFloat()) },
             )
         }
             .flowOn(Dispatchers.Default)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    /** Null shows every habit's notes. */
-    fun setFilter(habitId: Long?) {
-        filterId.value = habitId
+    fun setFilter(habitIds: Set<Long>) {
+        filterIds.value = habitIds
     }
 }
