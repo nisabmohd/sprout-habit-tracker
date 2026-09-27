@@ -8,27 +8,26 @@ import androidx.glance.GlanceTheme
 import androidx.glance.material3.ColorProviders
 import app.sprout.habits.MainActivity
 import app.sprout.habits.SproutApp
-import app.sprout.habits.ui.theme.ThemeSettings
+import app.sprout.habits.ui.theme.DEFAULT_ACCENT_HUE
 import app.sprout.habits.ui.theme.seedColorScheme
-import kotlinx.coroutines.flow.first
 
-/** Dynamic color on Android 12+ when it's on in settings, otherwise the seed palette. */
+/**
+ * Widgets live on the home screen, so they follow the system: wallpaper colors on Android 12+
+ * and Sprout's default palette below that. The in-app theme and accent only change the app.
+ */
 @Composable
-fun SproutGlanceTheme(theme: ThemeSettings, content: @Composable () -> Unit) {
-    val useDynamic = theme.dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+fun SproutGlanceTheme(content: @Composable () -> Unit) {
     GlanceTheme(
-        colors = if (useDynamic) {
+        colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             GlanceTheme.colors
         } else {
-            ColorProviders(light = seedColorScheme(theme.accentHue, false), dark = seedColorScheme(theme.accentHue, true))
+            ColorProviders(light = seedColorScheme(DEFAULT_ACCENT_HUE, false), dark = seedColorScheme(DEFAULT_ACCENT_HUE, true))
         },
         content = content,
     )
 }
 
 val Context.container get() = (applicationContext as SproutApp).container
-
-suspend fun Context.themeSettings(): ThemeSettings = container.settings.settings.first().theme
 
 fun Context.openAppIntent(): Intent = Intent(this, MainActivity::class.java)
     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)

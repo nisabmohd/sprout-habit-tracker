@@ -47,12 +47,10 @@ class TodayWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val data = WidgetDataSource(context.container.repository, context.container.settings).today()
-        val theme = context.themeSettings()
         val bitmaps = WidgetBitmaps(context)
         provideContent {
             val live by liveWidgetData(context, data) { it.today() }
-            val liveTheme by liveTheme(context, theme)
-            SproutGlanceTheme(liveTheme) { TodayContent(live, bitmaps) }
+            SproutGlanceTheme { TodayContent(live, bitmaps) }
         }
     }
 }

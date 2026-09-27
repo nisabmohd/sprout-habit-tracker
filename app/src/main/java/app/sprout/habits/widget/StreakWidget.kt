@@ -49,12 +49,10 @@ class StreakWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val habitId = getAppWidgetState(context, PreferencesGlanceStateDefinition, id)[HabitKey]
         val data = WidgetDataSource(context.container.repository, context.container.settings).streak(habitId)
-        val theme = context.themeSettings()
         val bitmaps = WidgetBitmaps(context)
         provideContent {
             val live by liveWidgetData(context, data) { it.streak(habitId) }
-            val liveTheme by liveTheme(context, theme)
-            SproutGlanceTheme(liveTheme) { StreakContent(live, bitmaps) }
+            SproutGlanceTheme { StreakContent(live, bitmaps) }
         }
     }
 

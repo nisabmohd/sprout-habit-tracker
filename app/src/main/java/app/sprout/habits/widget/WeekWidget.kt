@@ -45,12 +45,10 @@ class WeekWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val data = WidgetDataSource(context.container.repository, context.container.settings).week()
-        val theme = context.themeSettings()
         val bitmaps = WidgetBitmaps(context)
         provideContent {
             val live by liveWidgetData(context, data) { it.week() }
-            val liveTheme by liveTheme(context, theme)
-            SproutGlanceTheme(liveTheme) { WeekContent(context, live, bitmaps) }
+            SproutGlanceTheme { WeekContent(context, live, bitmaps) }
         }
     }
 }

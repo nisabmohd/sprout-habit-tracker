@@ -28,6 +28,7 @@ These rules apply to every change, whether a person or an AI agent makes it. The
 - Use only the Material 3 typography slots, which map to these sizes: 40, 28, 22, 16, 14, 12 and 11 sp. Headings use Outfit; body text uses the chosen font (Lexend by default).
 - Text must grow with the user's font size. Only text inside a fixed-size shape (rings, segmented buttons, the navigation bar, the week columns) may cap its scaling, using `CappedFontScale`.
 - Filters and choices (dates, habits, amounts) open in a bottom sheet, never inline chips or menus. Full screens are only for creating or editing (New habit, New note).
+- Widgets follow the system: wallpaper colors on Android 12+ and the system light or dark mode. Never apply the in-app theme, accent or dynamic-color setting to them.
 - Every clickable element is at least 48 dp and has a label TalkBack can read. Gestures such as swipe and press and hold also get an accessibility action.
 - Write UI text the way a person would say it: short, specific and plain. No marketing words, no exclamation marks.
 

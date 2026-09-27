@@ -5,7 +5,7 @@ description: The four Glance home-screen widgets (This week, Today, Today strip,
 
 # Widgets
 
-**Code:** `widget/` — `WidgetData.kt` (data from the repository; habits with "Show on widget" off are excluded), `WidgetBitmaps.kt` (Glance has no Canvas, so rings, marks and strips are drawn into bitmaps with the app's own drawing code), `WeekWidget`, `TodayWidget` (circle = `MarkDoneAction`), `StripWidget`, `StreakWidget` (+ `StreakWidgetConfigActivity`; with no choice it follows the longest current streak), `WidgetUpdater` (refreshes all widgets after any change), `WidgetTheme.kt`.
+**Code:** `widget/` — `WidgetData.kt` (data from the repository; habits with "Show on widget" off are excluded), `WidgetBitmaps.kt` (Glance has no Canvas, so rings, marks and strips are drawn into bitmaps with the app's own drawing code), `WeekWidget`, `TodayWidget` (circle = `MarkDoneAction`), `StripWidget`, `StreakWidget` (+ `StreakWidgetConfigActivity`; with no choice it follows the longest current streak), `WidgetUpdater` (refreshes all widgets after any change), `WidgetTheme.kt` (widgets always use the system colors and light or dark mode, never the in-app theme settings).
 
 **Verify:** debug builds include `PinWidgetActivity`:
 ```sh
