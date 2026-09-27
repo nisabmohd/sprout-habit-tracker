@@ -57,7 +57,7 @@ data class Entry(
     val date: Long,
     val status: EntryStatus,
     val amount: Double = 0.0,
-    /** Epoch millis when the outcome was last set, or null for entries from before 0.2.0. */
+    /** Epoch millis when the outcome was last set, or null for entries from before 0.3.0. */
     val loggedAt: Long? = null,
 ) {
     /** Same outcome and amount; the time it was logged doesn't count. */

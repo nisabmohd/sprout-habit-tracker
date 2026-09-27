@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0
+## 0.3.0
 
 New:
 
@@ -8,16 +8,24 @@ New:
 - Done cards say when: "Done at 6:52 AM".
 - Skipping a habit with "Ask for a note when I skip" on opens the note right away.
 - Duration habits can be set in minutes or hours ("1.5 / 2 h", steps of a quarter hour).
-- Journal filters: pick a date range or one or more habits from the two buttons at the top. Filters always open in a bottom sheet.
-- Insights shows any date range (this week by default) for all habits or the ones you pick.
-- Swiping a done or skipped habit the other way undoes it. The press-and-hold sheet has an Undo button too.
-- A Sponsor link in About, and in the Play build a Rate on Play Store link. After a week of use Sprout asks once whether you'd like to support it.
 - The note date, reminder times and week start are picked in bottom sheets instead of dialogs.
-- Refreshed look from the new design: Today without the week strip, a clearer Undo snackbar, and the habit picker in a sheet when writing a note.
 
 Fixed:
 
 - On Android 8 and 9, the keyboard jumped back to the Name field after tapping an option in New habit.
+
+## 0.2.0
+
+New:
+
+- Journal filters: pick a date range or one or more habits from the two buttons at the top. Filters always open in a bottom sheet.
+- Insights shows any date range (this week by default) for all habits or the ones you pick.
+- Swiping a done or skipped habit the other way undoes it. The press-and-hold sheet has an Undo button too.
+- A Sponsor link in About, and in the Play build a Rate on Play Store link. After a week of use Sprout asks once whether you'd like to support it.
+- Refreshed look from the new design: Today without the week strip, a clearer Undo snackbar, and the habit picker in a sheet when writing a note.
+
+Fixed:
+
 - Widgets showed old data after changes in the app. They now update right away.
 - Marking a habit done from the Today widget sometimes did nothing.
 - Widgets took a long time to appear when first added. They show a placeholder while loading.

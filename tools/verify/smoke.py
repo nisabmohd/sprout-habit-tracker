@@ -315,7 +315,10 @@ def note_date_in_a_sheet():
         return  # no earlier day in this month to pick
     d.nav("Journal")
     d.tap("Add note")
-    d.back()  # hide the keyboard
+    time.sleep(1)
+    # Hide the keyboard, but only once it's up: Back without it would close the screen.
+    if "mInputShown=true" in d.shell("dumpsys input_method"):
+        d.back()
     d.tap(today.strftime("%A, ") + str(today.day), contains=True)
     assert d.exists("Use ", contains=True), "note date didn't open the date sheet"
     d.tap(str(today.day - 1))

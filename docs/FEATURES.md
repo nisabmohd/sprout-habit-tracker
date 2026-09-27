@@ -6,7 +6,7 @@ What Sprout does today, and where each part lives in the code. Paths are under `
 
 The home screen shows the date, a score card for today, and every habit scheduled for today.
 
-A habit card has four looks: open (an empty circle), done (filled with the habit's color and a check), partial (filled as far as the amount goes, with a percentage ring) and skipped (dimmed). Swipe right to mark it done, swipe left to skip it, tap the circle to toggle done, and press and hold to log an amount, pick an outcome and add a note. Each change can be undone from the snackbar. Swiping the opposite way also undoes: swipe left on a done habit or right on a skipped one to clear it. The press-and-hold sheet has an Undo button when the day already has an entry.
+A habit card has four looks: open (an empty circle), done (filled with the habit's color and a check), partial (filled as far as the amount goes, with a percentage ring) and skipped (dimmed). Swipe right to mark it done, swipe left to skip it, tap the circle to toggle done, and press and hold to log an amount, pick an outcome and add a note. Each change can be undone from the snackbar. Swiping the opposite way also undoes: swipe left on a done habit or right on a skipped one to clear it. The press-and-hold sheet has an Undo button when the day already has an entry. A done check-off card shows when it was logged ("Done at 6:52 AM"). Skipping a habit that asks for a note opens the sheet with the cursor in the note field.
 
 Code: `ui/today/`, scoring in `domain/Scoring.kt`.
 
@@ -14,7 +14,9 @@ Code: `ui/today/`, scoring in `domain/Scoring.kt`.
 
 Habits are created and edited on one screen: name, icon, color, how it's tracked (check off, an amount with a unit, or minutes), the days it's scheduled, a reminder, whether to ask for a note after a skip, and whether it appears on widgets. Manage habits lets you drag to reorder, archive, restore and delete.
 
-The Habits tab has a Week view (seven day marks per habit, with arrows to earlier weeks) and an Overall view (a 26-week heatmap per habit with its score and best streak). Tapping a habit opens its detail screen with this month's score, best streak, note count, a month calendar and its notes.
+Duration habits are set in minutes or hours; amounts are stored in minutes and shown in the chosen unit ("1.5 / 2 h").
+
+The Habits tab has a Week view (seven day marks per habit, with arrows to earlier weeks; tap any past day to edit it in the same sheet as Today) and an Overall view (a 26-week heatmap per habit with its score and best streak). Tapping a habit opens its detail screen with this month's score, best streak, note count, a month calendar (tap a past day to edit it) and its notes.
 
 Code: `ui/edit/`, `ui/manage/`, `ui/habits/`, `ui/detail/`, statistics in `domain/Stats.kt`.
 

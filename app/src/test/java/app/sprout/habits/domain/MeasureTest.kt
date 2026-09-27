@@ -37,4 +37,14 @@ class MeasureTest {
         assertEquals("1.25", formatNumber(1.25))
         assertEquals("0.83", formatNumber(50.0 / 60))
     }
+
+    @Test fun switchingToHoursConvertsOnlyWholeQuarterHours() {
+        val form = app.sprout.habits.ui.edit.HabitForm(trackType = TrackType.DURATION, target = "90")
+        assertEquals("1.5", form.withDurationUnit(DurationUnit.HOURS).target)
+        // Typed "2", then picked Hours: they meant 2 hours.
+        assertEquals("2", form.copy(target = "2").withDurationUnit(DurationUnit.HOURS).target)
+        assertEquals("120", form.copy(target = "2", durationUnit = DurationUnit.HOURS).withDurationUnit(DurationUnit.MINUTES).target)
+        // Typed "45" with Hours still selected, then picked Minutes: they meant 45 minutes.
+        assertEquals("45", form.copy(target = "45", durationUnit = DurationUnit.HOURS).withDurationUnit(DurationUnit.MINUTES).target)
+    }
 }

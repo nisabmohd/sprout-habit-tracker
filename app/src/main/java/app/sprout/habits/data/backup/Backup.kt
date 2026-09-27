@@ -51,7 +51,7 @@ data class HabitDto(
     val trackType: String,
     val target: Double,
     val unit: String = "",
-    /** MINUTES or HOURS; absent in backups from 0.1.0. */
+    /** MINUTES or HOURS; absent in backups made before 0.3.0. */
     val durationUnit: String = "MINUTES",
     val daysMask: Int,
     val reminderMinutes: Int? = null,
@@ -69,7 +69,7 @@ data class EntryDto(
     @SerialName("date") val date: String,
     val status: String,
     val amount: Double = 0.0,
-    /** Epoch millis; absent in backups from 0.1.0. */
+    /** Epoch millis; absent in backups made before 0.3.0. */
     val loggedAt: Long? = null,
 )
 

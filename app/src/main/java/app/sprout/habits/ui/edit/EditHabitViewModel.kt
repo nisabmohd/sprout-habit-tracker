@@ -44,11 +44,18 @@ data class HabitForm(
 ) {
     val targetValue: Double? get() = target.replace(',', '.').toDoubleOrNull()
 
-    /** Switching minutes and hours converts the typed target, so 90 min becomes 1.5 h. */
+    /**
+     * Switching minutes and hours converts the target when it reads as a whole number of quarter
+     * hours (90 min becomes 1.5 h), and to minutes when it could be hours in a day (2 h becomes
+     * 120 min). Otherwise the number stays as typed: typing 2 and then tapping Hours means
+     * 2 hours, not 0.03, and typing 45 and then tapping Minutes means 45 minutes.
+     */
     fun withDurationUnit(unit: DurationUnit): HabitForm {
         if (unit == durationUnit) return this
-        val converted = targetValue?.let { v -> app.sprout.habits.domain.formatNumber(if (unit == DurationUnit.HOURS) v / 60 else v * 60) } ?: target
-        return copy(durationUnit = unit, target = converted)
+        val v = targetValue ?: return copy(durationUnit = unit)
+        val converted = if (unit == DurationUnit.HOURS) v / 60 else v * 60
+        val keep = if (unit == DurationUnit.HOURS) (converted * 4) % 1.0 != 0.0 else v > 24
+        return copy(durationUnit = unit, target = if (keep) target else app.sprout.habits.domain.formatNumber(converted))
     }
 
     val canSave: Boolean
