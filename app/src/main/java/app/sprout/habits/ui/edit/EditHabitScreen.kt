@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -51,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -66,6 +68,8 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
 import app.sprout.habits.ui.components.CappedFontScale
+import app.sprout.habits.ui.components.ColorSwatchRow
+import app.sprout.habits.ui.components.Swatch
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.TrackType
 import app.sprout.habits.notify.Notifications
@@ -113,6 +117,13 @@ private fun EditHabitContent(
     val type = MaterialTheme.typography
     val hc = habitColors(form.hue.toFloat())
     var pickingTime by rememberSaveable { mutableStateOf(false) }
+    // Tapping anything that isn't a text field ends typing, so the keyboard doesn't come back
+    // on the Name field when a dialog closes or a switch flips.
+    val focusManager = LocalFocusManager.current
+    fun edit(change: (HabitForm) -> HabitForm) {
+        focusManager.clearFocus()
+        onEdit(change)
+    }
     val notifications = rememberNotificationPermission()
     val context = LocalContext.current
     var exactAlarms by remember { mutableStateOf(canScheduleExactAlarms(context)) }
@@ -167,7 +178,7 @@ private fun EditHabitContent(
             }
 
             Section("Icon") {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     HabitIcon.entries.forEach { icon ->
                         val selected = icon == form.icon
                         Box(
@@ -177,7 +188,7 @@ private fun EditHabitContent(
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(if (selected) hc.soft else colors.surfaceContainerLowest)
                                 .then(if (selected) Modifier.border(2.dp, hc.solid, RoundedCornerShape(12.dp)) else Modifier)
-                                .clickable(role = Role.RadioButton) { onEdit { it.copy(icon = icon) } }
+                                .clickable(role = Role.RadioButton) { edit { it.copy(icon = icon) } }
                                 .semantics { contentDescription = icon.key; this.selected = selected },
                             contentAlignment = Alignment.Center,
                         ) {
@@ -193,26 +204,14 @@ private fun EditHabitContent(
             }
 
             Section("Color") {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    HABIT_HUES.forEach { hue ->
-                        val selected = hue == form.hue
-                        val swatch = habitColors(hue.toFloat())
-                        Box(
-                            Modifier
-                                .size(38.dp)
-                                .clip(CircleShape)
-                                .background(swatch.solid)
-                                .border(3.dp, if (selected) colors.onBackground else Color.Transparent, CircleShape)
-                                .clickable(role = Role.RadioButton) { onEdit { it.copy(hue = hue) } }
-                                .semantics { contentDescription = "Color $hue"; this.selected = selected },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            if (selected) {
-                                Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = swatch.on, modifier = Modifier.size(16.dp))
-                            }
-                        }
-                    }
-                }
+                ColorSwatchRow(
+                    swatches = HABIT_HUES.map { hue ->
+                        val c = habitColors(hue.toFloat())
+                        Swatch(c.solid, c.on, colorName(hue))
+                    },
+                    selected = HABIT_HUES.indexOf(form.hue),
+                    onSelect = { i -> edit { it.copy(hue = HABIT_HUES[i]) } },
+                )
             }
 
             Section("How do you track it?") {
@@ -223,7 +222,7 @@ private fun EditHabitContent(
                     options.forEachIndexed { index, (value, label) ->
                         SegmentedButton(
                             selected = form.trackType == value,
-                            onClick = { onEdit { it.copy(trackType = value) } },
+                            onClick = { edit { it.copy(trackType = value) } },
                             shape = SegmentedButtonDefaults.itemShape(index, options.size),
                             icon = {},
                         ) { Text(label, style = type.labelLarge) }
@@ -254,34 +253,39 @@ private fun EditHabitContent(
                     Text("Days", style = type.titleSmall, color = colors.onBackground, modifier = Modifier.weight(1f))
                     Text(daysLabel(form.daysMask), style = type.bodyMedium, color = colors.onSurfaceVariant)
                 }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(Modifier.fillMaxWidth()) {
                     orderedDays(form.weekStart).forEach { day ->
                         val on = form.daysMask and (1 shl (day.value - 1)) != 0
-                        // 48 dp touch target around the 44 dp circle from the design.
+                        // Seven equal cells, so the row fits narrow phones; each is a 48 dp target.
                         Box(
                             Modifier
-                                .size(48.dp)
+                                .weight(1f)
+                                .height(48.dp)
                                 .clip(CircleShape)
                                 .semantics { contentDescription = day.getDisplayName(TextStyle.FULL, Locale.getDefault()) }
-                                .toggleable(value = on, role = Role.Checkbox) { onToggleDay(day) },
+                                .toggleable(value = on, role = Role.Checkbox) { focusManager.clearFocus(); onToggleDay(day) },
                             contentAlignment = Alignment.Center,
                         ) {
                             Box(
                                 Modifier
                                     .size(44.dp)
+                                    .padding(2.dp)
+                                    .aspectRatio(1f)
                                     .clip(CircleShape)
                                     .background(if (on) hc.solid else colors.surfaceContainerLowest)
                                     .border(1.dp, if (on) hc.solid else colors.outlineVariant, CircleShape),
                                 contentAlignment = Alignment.Center,
                             ) {
-                                Text(
-                                    day.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
-                                    style = type.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (on) hc.on else colors.onSurface,
-                                    // The full day name is on the toggle; don't also read "M".
-                                    modifier = Modifier.clearAndSetSemantics {},
-                                )
+                                CappedFontScale {
+                                    Text(
+                                        day.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                                        style = type.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (on) hc.on else colors.onSurface,
+                                        // The full day name is on the toggle; don't also read "M".
+                                        modifier = Modifier.clearAndSetSemantics {},
+                                    )
+                                }
                             }
                         }
                     }
@@ -291,7 +295,7 @@ private fun EditHabitContent(
             Section("Reminder") {
                 Card {
                     Row(
-                        Modifier.fillMaxWidth().clickable { pickingTime = true }.padding(horizontal = 16.dp, vertical = 12.dp),
+                        Modifier.fillMaxWidth().clickable { focusManager.clearFocus(); pickingTime = true }.padding(horizontal = 16.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(painterResource(R.drawable.ic_bell), contentDescription = null, tint = colors.onSurface, modifier = Modifier.size(22.dp))
@@ -299,7 +303,7 @@ private fun EditHabitContent(
                             Text(TodayViewModel.formatTime(form.reminderMinutes), style = type.titleLarge, color = colors.onSurface)
                             Text("On the days above · tap to change", style = type.bodyMedium, color = colors.onSurfaceVariant)
                         }
-                        Switch(checked = form.reminderOn, onCheckedChange = { v -> needsNotifications(v); onEdit { it.copy(reminderOn = v) } })
+                        Switch(checked = form.reminderOn, onCheckedChange = { v -> needsNotifications(v); edit { it.copy(reminderOn = v) } })
                     }
                 }
             }
@@ -328,9 +332,9 @@ private fun EditHabitContent(
             }
 
             Card {
-                ToggleRow("Ask for a note when I skip", "A reminder to write why", form.askForNote) { v -> needsNotifications(v); onEdit { it.copy(askForNote = v) } }
+                ToggleRow("Ask for a note when I skip", "A reminder to write why", form.askForNote) { v -> needsNotifications(v); edit { it.copy(askForNote = v) } }
                 HorizontalDivider(color = colors.surfaceContainerHigh)
-                ToggleRow("Show on home screen widget", "Week view and Today widget", form.showOnWidget) { v -> onEdit { it.copy(showOnWidget = v) } }
+                ToggleRow("Show on home screen widget", "Week view and Today widget", form.showOnWidget) { v -> edit { it.copy(showOnWidget = v) } }
             }
 
             if (!form.isNew) {
@@ -351,7 +355,7 @@ private fun EditHabitContent(
             initialMinutes = form.reminderMinutes,
             onConfirm = { minutes ->
                 needsNotifications(true)
-                onEdit { it.copy(reminderMinutes = minutes, reminderOn = true) }
+                edit { it.copy(reminderMinutes = minutes, reminderOn = true) }
                 pickingTime = false
             },
             onDismiss = { pickingTime = false },
@@ -430,3 +434,16 @@ private fun daysLabel(mask: Int): String = when (mask) {
 private fun canScheduleExactAlarms(context: android.content.Context): Boolean =
     android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S ||
         context.getSystemService(android.app.AlarmManager::class.java).canScheduleExactAlarms()
+
+/** Names TalkBack reads for the habit colors. */
+private fun colorName(hue: Int) = when (hue) {
+    275 -> "Purple"
+    215 -> "Blue"
+    192 -> "Teal"
+    150 -> "Green"
+    95 -> "Lime"
+    38 -> "Gold"
+    12 -> "Rust"
+    330 -> "Pink"
+    else -> "Color"
+}

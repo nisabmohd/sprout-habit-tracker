@@ -200,8 +200,11 @@ class HabitsViewModel(
             0b111_1111 -> "Every day"
             0b001_1111 -> "Weekdays"
             0b110_0000 -> "Weekends"
-            else -> DayOfWeek.entries.filter { mask and (1 shl (it.value - 1)) != 0 }
-                .joinToString(", ") { it.getDisplayName(TextStyle.SHORT, Locale.getDefault()) }
+            // A few days read best by name ("Mon, Wed, Fri"); more than three get too long.
+            else -> DayOfWeek.entries.filter { mask and (1 shl (it.value - 1)) != 0 }.let { days ->
+                if (days.size <= 3) days.joinToString(", ") { it.getDisplayName(TextStyle.SHORT, Locale.getDefault()) }
+                else "${days.size} days a week"
+            }
         }
 
         private fun rangeLabel(from: LocalDate, to: LocalDate): String = if (from.month == to.month) {

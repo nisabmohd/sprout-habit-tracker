@@ -57,6 +57,8 @@ import app.sprout.habits.data.Settings
 import app.sprout.habits.data.SettingsRepository
 import app.sprout.habits.data.backup.BackupManager
 import app.sprout.habits.notify.Notifications
+import app.sprout.habits.ui.components.ColorSwatchRow
+import app.sprout.habits.ui.components.Swatch
 import app.sprout.habits.ui.theme.BodyFont
 import app.sprout.habits.ui.theme.ThemeMode
 import app.sprout.habits.ui.theme.family
@@ -70,6 +72,9 @@ import kotlinx.coroutines.launch
 
 /** Accent choices when dynamic color is off: the app's green first, then the habit hues. */
 private val ACCENT_HUES = listOf(150f, 192f, 215f, 275f, 330f, 12f, 38f)
+private val ACCENT_NAMES = mapOf(
+    150f to "Green", 192f to "Teal", 215f to "Blue", 275f to "Purple", 330f to "Pink", 12f to "Rust", 38f to "Gold",
+)
 
 private val TEXT_SCALES = listOf(0.85f to "Small", 1f to "Default", 1.15f to "Large", 1.3f to "Largest")
 
@@ -215,23 +220,16 @@ fun MoreScreen(
 
 @Composable
 private fun AccentPicker(selectedHue: Float, onSelect: (Float) -> Unit) {
-    Column(Modifier.padding(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("Accent", style = MaterialTheme.typography.titleMedium)
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            ACCENT_HUES.forEach { hue ->
-                val selected = hue == selectedHue
-                val color = seedColorScheme(hue, false).primary
-                Box(
-                    Modifier
-                        .size(38.dp)
-                        .clip(CircleShape)
-                        .background(color)
-                        .border(3.dp, if (selected) MaterialTheme.colorScheme.onBackground else Color.Transparent, CircleShape)
-                        .selectable(selected, role = Role.RadioButton) { onSelect(hue) }
-                        .semantics { contentDescription = "Accent color" },
-                )
-            }
-        }
+    Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text("Accent", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 8.dp))
+        ColorSwatchRow(
+            swatches = ACCENT_HUES.map { hue ->
+                val scheme = seedColorScheme(hue, false)
+                Swatch(scheme.primary, scheme.onPrimary, ACCENT_NAMES.getValue(hue))
+            },
+            selected = ACCENT_HUES.indexOf(selectedHue),
+            onSelect = { i -> onSelect(ACCENT_HUES[i]) },
+        )
     }
 }
 

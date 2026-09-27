@@ -1,6 +1,13 @@
 package app.sprout.habits.ui.note
 
 import androidx.compose.foundation.background
+import androidx.compose.ui.semantics.Role
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -147,16 +154,6 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, onClose: () -> Unit) {
                             Icon(painterResource(R.drawable.ic_chevron_down), contentDescription = "Choose habit", tint = hc.ink, modifier = Modifier.size(22.dp))
                         }
                     }
-                    DropdownMenu(expanded = pickingHabit, onDismissRequest = { pickingHabit = false }) {
-                        habits.forEach { h ->
-                            val c = habitColors(h.colorHue.toFloat())
-                            DropdownMenuItem(
-                                text = { Text(h.name) },
-                                leadingIcon = { Icon(painterResource(HabitIcon.fromKey(h.icon).drawable), contentDescription = null, tint = c.solid, modifier = Modifier.size(20.dp)) },
-                                onClick = { viewModel.setHabit(h.id); pickingHabit = false },
-                            )
-                        }
-                    }
                 }
             }
 
@@ -175,6 +172,15 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, onClose: () -> Unit) {
                 modifier = Modifier.fillMaxWidth().weight(1f, fill = false).height(420.dp).focusRequester(focus),
             )
         }
+    }
+
+    if (pickingHabit) {
+        HabitPickerSheet(
+            habits = habits,
+            selectedId = form.habitId,
+            onPick = { id -> viewModel.setHabit(id); pickingHabit = false },
+            onDismiss = { pickingHabit = false },
+        )
     }
 
     if (pickingDate) {
@@ -212,4 +218,53 @@ private fun EntryStatus.label() = when (this) {
     EntryStatus.DONE -> "Done"
     EntryStatus.PARTIAL -> "Partial"
     EntryStatus.SKIP -> "Skipped"
+}
+
+/** Every habit in a scrollable sheet; a dropdown got cut off with more than a handful. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HabitPickerSheet(
+    habits: List<app.sprout.habits.data.Habit>,
+    selectedId: Long,
+    onPick: (Long) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.surfaceContainerLowest) {
+        Text(
+            "Choose habit",
+            style = MaterialTheme.typography.titleLarge,
+            color = colors.onSurface,
+            modifier = Modifier.padding(start = 24.dp, bottom = 8.dp),
+        )
+        LazyColumn(contentPadding = PaddingValues(start = 12.dp, end = 12.dp, bottom = 24.dp)) {
+            items(habits, key = { it.id }) { h ->
+                val c = habitColors(h.colorHue.toFloat())
+                val selected = h.id == selectedId
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(if (selected) c.soft else colors.surfaceContainerLowest)
+                        .selectable(selected, role = Role.RadioButton) { onPick(h.id) }
+                        .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(Modifier.size(36.dp).background(c.soft, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+                        Icon(painterResource(HabitIcon.fromKey(h.icon).drawable), contentDescription = null, tint = c.ink, modifier = Modifier.size(20.dp))
+                    }
+                    Text(
+                        h.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = colors.onSurface,
+                        modifier = Modifier.weight(1f).padding(start = 14.dp),
+                    )
+                    if (selected) {
+                        Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = c.solid, modifier = Modifier.size(20.dp))
+                    }
+                }
+            }
+        }
+    }
 }

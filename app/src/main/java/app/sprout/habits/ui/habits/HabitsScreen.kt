@@ -174,14 +174,15 @@ private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit) {
         CardHeader(habit.icon, habit.hue, habit.name, null) {
             Text(habit.goal, style = MaterialTheme.typography.bodyLarge, color = colors.onSurfaceVariant)
         }
-        // Seven fixed columns: the day labels stop scaling at 1.3x so they don't wrap.
+        // Seven equal columns that share the card's width, so they fit narrow phones; the day
+        // labels stop scaling at 1.3x so they never wrap.
         CappedFontScale {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
             habit.marks.forEachIndexed { i, mark ->
                 val isToday = i == week.todayIndex
                 Column(
                     Modifier
-                        .width(44.dp)
+                        .weight(1f)
                         .clip(RoundedCornerShape(16.dp))
                         .background(if (isToday) colors.surfaceContainerHigh else colors.surfaceContainerLowest)
                         .padding(vertical = 6.dp)
@@ -193,8 +194,10 @@ private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit) {
                         week.dayLabels[i],
                         style = MaterialTheme.typography.labelMedium,
                         color = if (isToday) colors.onSurface else colors.onSurfaceVariant,
+                        maxLines = 1,
+                        softWrap = false,
                     )
-                    DayMarkView(mark, hc, mc, Modifier.size(34.dp))
+                    DayMarkView(mark, hc, mc, Modifier.size(32.dp))
                 }
             }
         }
