@@ -1,6 +1,6 @@
 # Design tokens (extracted from `Habit Tracker UI.html`)
 
-PNGs in this folder are rendered from that file (390 dp wide artboards at 2x).
+The designs are in `Habit Tracker UI.html` in this folder: open it in a browser to see every screen as a 390 dp wide artboard.
 
 ## Colors
 `tone(h, s, l)` = `hsl(h s% l%)`. App seed hue = **150**.

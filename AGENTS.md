@@ -24,7 +24,7 @@ These rules apply to every change, whether a person or an AI agent makes it. The
 
 ## Design and text
 
-- Screens follow the designs in `design/`. Exact colors and icon paths are in `design/TOKENS.md`.
+- Screens follow the designs in `design/Habit Tracker UI.html` (open it in a browser). Exact colors and icon paths are in `design/TOKENS.md`.
 - Use only the Material 3 typography slots, which map to these sizes: 40, 28, 22, 16, 14, 12 and 11 sp. Headings use Outfit; body text uses the chosen font (Lexend by default).
 - Text must grow with the user's font size. Only text inside a fixed-size shape (rings, segmented buttons, the navigation bar, the week columns) may cap its scaling, using `CappedFontScale`.
 - Every clickable element is at least 48 dp and has a label TalkBack can read. Gestures such as swipe and press and hold also get an accessibility action.
