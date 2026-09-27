@@ -10,6 +10,8 @@ import app.sprout.habits.MainActivity
 import app.sprout.habits.R
 import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.data.Habit
+import app.sprout.habits.domain.measure
+import app.sprout.habits.domain.toShown
 import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.data.TrackType
 import app.sprout.habits.ui.today.TodayViewModel.Companion.formatNumber
@@ -72,14 +74,11 @@ class ReminderNotifier(
 
         /** Title and line for a reminder, given how much is already logged today. */
         fun reminderText(habit: Habit, amount: Double): Pair<String, String> {
-            val unit = if (habit.trackType == TrackType.DURATION) "min" else habit.unit
-            /** "20 pages", or just "20" when the habit has no unit. */
-            fun measure(value: Double) = listOf(formatNumber(value), unit).filter { it.isNotBlank() }.joinToString(" ")
             return when {
                 habit.trackType == TrackType.CHECK -> habit.name to "Time to check it off."
-                amount > 0 -> "${habit.name} · ${measure((habit.target - amount).coerceAtLeast(0.0))} to go" to
-                    "You're at ${formatNumber(amount)} of ${measure(habit.target)} today."
-                else -> habit.name to "Goal today: ${measure(habit.target)}."
+                amount > 0 -> "${habit.name} · ${habit.measure((habit.target - amount).coerceAtLeast(0.0))} to go" to
+                    "You're at ${formatNumber(habit.toShown(amount))} of ${habit.measure(habit.target)} today."
+                else -> habit.name to "Goal today: ${habit.measure(habit.target)}."
             }
         }
     }

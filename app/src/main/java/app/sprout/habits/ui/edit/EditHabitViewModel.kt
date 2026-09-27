@@ -3,7 +3,9 @@ package app.sprout.habits.ui.edit
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.sprout.habits.data.DurationUnit
 import app.sprout.habits.data.Habit
+import app.sprout.habits.domain.toShown
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.data.SettingsRepository
@@ -31,6 +33,8 @@ data class HabitForm(
     /** Text of the target field, kept as typed. */
     val target: String = "",
     val unit: String = "",
+    /** For Duration: whether the target (and logging) is in minutes or hours. */
+    val durationUnit: DurationUnit = DurationUnit.MINUTES,
     val daysMask: Int = Habit.EVERY_DAY,
     val reminderOn: Boolean = false,
     val reminderMinutes: Int = 9 * 60,
@@ -39,6 +43,13 @@ data class HabitForm(
     val weekStart: DayOfWeek = DayOfWeek.MONDAY,
 ) {
     val targetValue: Double? get() = target.replace(',', '.').toDoubleOrNull()
+
+    /** Switching minutes and hours converts the typed target, so 90 min becomes 1.5 h. */
+    fun withDurationUnit(unit: DurationUnit): HabitForm {
+        if (unit == durationUnit) return this
+        val converted = targetValue?.let { v -> app.sprout.habits.domain.formatNumber(if (unit == DurationUnit.HOURS) v / 60 else v * 60) } ?: target
+        return copy(durationUnit = unit, target = converted)
+    }
 
     val canSave: Boolean
         get() = name.isNotBlank() && daysMask != 0 &&
@@ -76,8 +87,9 @@ class EditHabitViewModel(
                     icon = HabitIcon.fromKey(habit.icon),
                     hue = habit.colorHue,
                     trackType = habit.trackType,
-                    target = if (habit.trackType == TrackType.CHECK) "" else formatTarget(habit.target),
+                    target = if (habit.trackType == TrackType.CHECK) "" else formatTarget(habit.toShown(habit.target)),
                     unit = habit.unit,
+                    durationUnit = habit.durationUnit,
                     daysMask = habit.daysMask,
                     reminderOn = habit.reminderMinutes != null,
                     reminderMinutes = habit.reminderMinutes ?: s.defaultReminderMinutes,
@@ -102,8 +114,13 @@ class EditHabitViewModel(
             icon = f.icon.key,
             colorHue = f.hue,
             trackType = f.trackType,
-            target = if (f.trackType == TrackType.CHECK) 1.0 else f.targetValue!!,
+            target = when {
+                f.trackType == TrackType.CHECK -> 1.0
+                f.trackType == TrackType.DURATION && f.durationUnit == DurationUnit.HOURS -> f.targetValue!! * 60
+                else -> f.targetValue!!
+            },
             unit = if (f.trackType == TrackType.AMOUNT) f.unit.trim() else "",
+            durationUnit = f.durationUnit,
             daysMask = f.daysMask,
             reminderMinutes = if (f.reminderOn) f.reminderMinutes else null,
             askForNote = f.askForNote,
@@ -133,6 +150,5 @@ class EditHabitViewModel(
 
     val isArchived: Boolean get() = original?.archived == true
 
-    private fun formatTarget(value: Double) =
-        if (value == value.toLong().toDouble()) value.toLong().toString() else value.toString()
+    private fun formatTarget(value: Double) = app.sprout.habits.domain.formatNumber(value)
 }

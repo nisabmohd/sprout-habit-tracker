@@ -10,6 +10,9 @@ enum class TrackType { CHECK, AMOUNT, DURATION }
 
 enum class EntryStatus { DONE, PARTIAL, SKIP }
 
+/** How a DURATION habit is shown and entered. Amounts are always stored in minutes. */
+enum class DurationUnit { MINUTES, HOURS }
+
 @Entity(tableName = "habit")
 data class Habit(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -21,6 +24,8 @@ data class Habit(
     /** Daily goal for AMOUNT (in [unit]) and DURATION (in minutes); 1 for CHECK. */
     val target: Double = 1.0,
     val unit: String = "",
+    /** For DURATION habits: shown in minutes or hours; [target] and amounts stay in minutes. */
+    @ColumnInfo(defaultValue = "MINUTES") val durationUnit: DurationUnit = DurationUnit.MINUTES,
     /** Scheduled weekdays, Monday = bit 0 … Sunday = bit 6. */
     val daysMask: Int = EVERY_DAY,
     /** Minutes after midnight, or null for no reminder. */
@@ -52,7 +57,13 @@ data class Entry(
     val date: Long,
     val status: EntryStatus,
     val amount: Double = 0.0,
-)
+    /** Epoch millis when the outcome was last set, or null for entries from before 0.2.0. */
+    val loggedAt: Long? = null,
+) {
+    /** Same outcome and amount; the time it was logged doesn't count. */
+    fun sameOutcomeAs(other: Entry?): Boolean =
+        other != null && habitId == other.habitId && date == other.date && status == other.status && amount == other.amount
+}
 
 @Entity(
     tableName = "note",

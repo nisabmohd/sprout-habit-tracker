@@ -37,7 +37,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @Immutable
-data class CalendarDayUi(val day: Int, val mark: DayMark, val isToday: Boolean)
+data class CalendarDayUi(val date: LocalDate, val mark: DayMark, val isToday: Boolean) {
+    val day: Int get() = date.dayOfMonth
+}
 
 @Immutable
 data class NoteUi(val id: Long, val dateLabel: String, val status: EntryStatus?, val text: String)
@@ -65,6 +67,11 @@ class HabitDetailViewModel(
     settings: app.sprout.habits.data.SettingsRepository,
     private val habitId: Long,
 ) : ViewModel() {
+    /** Tapping a past day in the calendar opens the log sheet for that day. */
+    val logger = app.sprout.habits.ui.today.DayLogger(repository, settings, viewModelScope)
+
+    fun editDay(date: LocalDate) = logger.open(habitId, date)
+
     private val month = MutableStateFlow(YearMonth.now())
 
     val state: StateFlow<HabitDetailUi?> = combine(
@@ -109,7 +116,7 @@ class HabitDetailViewModel(
             val entry = history.entries[day]
             val credit = dayCredit(entry, habit.target, day, todayDay) ?: 0.0
             CalendarDayUi(
-                day = LocalDate.ofEpochDay(day).dayOfMonth,
+                date = LocalDate.ofEpochDay(day),
                 mark = markFor(scheduled, outcomeOf(entry, day, todayDay), credit.toFloat(), day > todayDay),
                 isToday = day == todayDay,
             )

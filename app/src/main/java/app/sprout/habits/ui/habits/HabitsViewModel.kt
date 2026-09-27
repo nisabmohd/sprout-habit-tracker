@@ -12,11 +12,13 @@ import app.sprout.habits.data.TrackType
 import app.sprout.habits.domain.bestStreak
 import app.sprout.habits.domain.dayCredit
 import app.sprout.habits.domain.history
+import app.sprout.habits.domain.measure
 import app.sprout.habits.domain.outcomeOf
 import app.sprout.habits.domain.score
 import app.sprout.habits.domain.weekOf
 import app.sprout.habits.ui.components.DayMark
 import app.sprout.habits.ui.components.markFor
+import app.sprout.habits.ui.today.DayLogger
 import app.sprout.habits.ui.today.TodayViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -53,6 +55,9 @@ data class WeekUi(
     val label: String,
     val percent: Int,
     val dayLabels: List<String>,
+    /** Full names for TalkBack and the edit label ("Friday 25 September"). */
+    val dayNames: List<String>,
+    val dates: List<LocalDate>,
     /** Index of today in the week, or -1 when today is in another week. */
     val todayIndex: Int,
     val canGoForward: Boolean,
@@ -85,6 +90,9 @@ class HabitsViewModel(
     private val repository: HabitRepository,
     settings: SettingsRepository,
 ) : ViewModel() {
+    /** Tapping a past day mark opens the log sheet for that day. */
+    val logger = DayLogger(repository, settings, viewModelScope)
+
     val mode = MutableStateFlow(HabitsMode.WEEK)
     private val weekOffset = MutableStateFlow(0)
     private val today = MutableStateFlow(LocalDate.now())
@@ -147,6 +155,8 @@ class HabitsViewModel(
             label = rangeLabel(days.first(), days.last()),
             percent = (score(credits) * 100).roundToInt(),
             dayLabels = days.map { it.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()) },
+            dayNames = days.map { it.format(DateTimeFormatter.ofPattern("EEEE d MMMM")) },
+            dates = days,
             todayIndex = days.indexOf(today),
             canGoForward = offset < 0,
             habits = rows,
@@ -191,8 +201,7 @@ class HabitsViewModel(
 
     companion object {
         fun goalLabel(habit: Habit): String = when (habit.trackType) {
-            TrackType.AMOUNT -> "${TodayViewModel.formatNumber(habit.target)} ${habit.unit}".trim()
-            TrackType.DURATION -> "${TodayViewModel.formatNumber(habit.target)} min"
+            TrackType.AMOUNT, TrackType.DURATION -> habit.measure(habit.target)
             TrackType.CHECK -> daysLabel(habit.daysMask)
         }
 

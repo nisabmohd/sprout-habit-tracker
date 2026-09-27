@@ -25,14 +25,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -61,7 +56,6 @@ import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.ui.components.ProgressRing
 import app.sprout.habits.ui.theme.habitColors
 import java.time.LocalDate
-import kotlinx.coroutines.flow.collectLatest
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -90,13 +84,7 @@ fun TodayScreen(
             onLater = { viewModel.supportPromptClosed(dismissed = true) },
         )
     }
-    LaunchedEffect(viewModel) {
-        viewModel.changes.collectLatest { change ->
-            snackbar.currentSnackbarData?.dismiss()
-            val result = snackbar.showSnackbar(change.message, actionLabel = "Undo", duration = SnackbarDuration.Short)
-            if (result == SnackbarResult.ActionPerformed) viewModel.undo(change)
-        }
-    }
+    DayLogHost(viewModel.logger, snackbar)
     Box(Modifier.fillMaxSize()) {
         TodayContent(
             state,
@@ -127,25 +115,7 @@ fun TodayScreen(
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).padding(bottom = fabLift),
             )
         }
-        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp)) { data ->
-            // Dark inverse surface with 14 dp corners, as in the design.
-            Snackbar(
-                data,
-                shape = RoundedCornerShape(14.dp),
-                containerColor = MaterialTheme.colorScheme.inverseSurface,
-                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-                actionColor = MaterialTheme.colorScheme.inversePrimary,
-            )
-        }
-    }
-    val logSheet by viewModel.logSheet.collectAsStateWithLifecycle()
-    logSheet?.let { sheet ->
-        LogSheet(
-            sheet,
-            onSave = { status, amount, note -> viewModel.saveLog(sheet, status, amount, note) },
-            onUndo = { viewModel.clearFromSheet(sheet) },
-            onDismiss = viewModel::dismissLogSheet,
-        )
+        UndoSnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp))
     }
 }
 

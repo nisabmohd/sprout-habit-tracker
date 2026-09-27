@@ -42,6 +42,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.material3.SnackbarHostState
+import app.sprout.habits.ui.today.DayLogHost
+import app.sprout.habits.ui.today.UndoSnackbarHost
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
@@ -67,6 +72,8 @@ fun HabitDetailScreen(
     val hc = habitColors(ui.habit.colorHue.toFloat())
     var menuOpen by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
+    val snackbar = remember { SnackbarHostState() }
+    DayLogHost(viewModel.logger, snackbar)
 
     Box(Modifier.fillMaxSize().background(colors.background).statusBarsPadding()) {
         LazyColumn(
@@ -119,7 +126,7 @@ fun HabitDetailScreen(
                     StatTile("${ui.noteCount}", if (ui.noteCount == 1) "note" else "notes", hc, Modifier.weight(1f))
                 }
             }
-            item(key = "calendar") { MonthCalendar(ui, hc, viewModel::previousMonth, viewModel::nextMonth) }
+            item(key = "calendar") { MonthCalendar(ui, hc, viewModel::previousMonth, viewModel::nextMonth, viewModel::editDay) }
             item(key = "notes-header") {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text("Notes", style = type.titleLarge, color = colors.onBackground, modifier = Modifier.weight(1f))
@@ -134,6 +141,8 @@ fun HabitDetailScreen(
             items(ui.notes.take(5), key = { it.id }) { note -> NoteCard(note, onOpenNote) }
         }
         // Hidden during a long screenshot, or it would be stamped into every captured frame.
+        // Lift the button above the Undo snackbar while it shows, so the two never overlap.
+        val fabLift by animateDpAsState(if (snackbar.currentSnackbarData != null) 72.dp else 0.dp, label = "fabLift")
         if (onAddNote != null && !LocalScrollCaptureInProgress.current) {
             ExtendedFloatingActionButton(
                 onClick = onAddNote,
@@ -142,9 +151,10 @@ fun HabitDetailScreen(
                 containerColor = colors.primaryContainer,
                 contentColor = colors.onPrimaryContainer,
                 shape = RoundedCornerShape(18.dp),
-                modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(16.dp),
+                modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(16.dp).padding(bottom = fabLift),
             )
         }
+        UndoSnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 8.dp))
     }
 
     if (deleting) {
@@ -168,7 +178,7 @@ private fun StatTile(value: String, label: String, hc: HabitColors, modifier: Mo
 }
 
 @Composable
-private fun MonthCalendar(ui: HabitDetailUi, hc: HabitColors, onPrevious: () -> Unit, onNext: () -> Unit) {
+private fun MonthCalendar(ui: HabitDetailUi, hc: HabitColors, onPrevious: () -> Unit, onNext: () -> Unit, onEditDay: (java.time.LocalDate) -> Unit) {
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
     Column(
@@ -202,8 +212,18 @@ private fun MonthCalendar(ui: HabitDetailUi, hc: HabitColors, onPrevious: () -> 
                     }
                 } else {
                     for (i in 0 until 7) {
-                        Box(Modifier.weight(1f).aspectRatio(1.1f), contentAlignment = Alignment.Center) {
-                            week.getOrNull(i)?.let { CalendarDay(it, hc) }
+                        val day = week.getOrNull(i)
+                        // Any scheduled day up to today can be edited; future and unscheduled days can't.
+                        val editable = day != null && day.mark.kind != MarkKind.FUTURE && day.mark.kind != MarkKind.NOT_SCHEDULED
+                        Box(
+                            Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .clip(CircleShape)
+                                .then(if (editable) Modifier.clickable(onClickLabel = "Edit this day") { onEditDay(day!!.date) } else Modifier),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            day?.let { CalendarDay(it, hc, editable) { onEditDay(it.date) } }
                         }
                     }
                 }
@@ -213,7 +233,7 @@ private fun MonthCalendar(ui: HabitDetailUi, hc: HabitColors, onPrevious: () -> 
 }
 
 @Composable
-private fun CalendarDay(day: CalendarDayUi, hc: HabitColors) {
+private fun CalendarDay(day: CalendarDayUi, hc: HabitColors, editable: Boolean, onEdit: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val (bg, fg) = when (day.mark.kind) {
         MarkKind.DONE -> hc.solid to hc.on
@@ -237,7 +257,10 @@ private fun CalendarDay(day: CalendarDayUi, hc: HabitColors) {
             .clip(CircleShape)
             .background(bg)
             .then(if (day.isToday) Modifier.border(2.dp, colors.primary, CircleShape) else Modifier)
-            .clearAndSetSemantics { contentDescription = "${day.day}: $description" },
+            .clearAndSetSemantics {
+                contentDescription = "${day.date.format(java.time.format.DateTimeFormatter.ofPattern("EEEE d MMMM"))}: $description"
+                if (editable) onClick("Edit this day") { onEdit(); true }
+            },
         contentAlignment = Alignment.Center,
     ) {
         Text("${day.day}", style = MaterialTheme.typography.titleSmall, color = fg)

@@ -46,10 +46,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.foundation.focusable
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -68,6 +71,7 @@ import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.ui.components.ColorSwatchRow
 import app.sprout.habits.ui.components.Swatch
 import app.sprout.habits.data.HabitIcon
+import app.sprout.habits.data.DurationUnit
 import app.sprout.habits.data.TrackType
 import app.sprout.habits.notify.Notifications
 import app.sprout.habits.notify.rememberNotificationPermission
@@ -116,10 +120,17 @@ private fun EditHabitContent(
     val hc = habitColors(form.hue.toFloat())
     var pickingTime by rememberSaveable { mutableStateOf(false) }
     // Tapping anything that isn't a text field ends typing, so the keyboard doesn't come back
-    // on the Name field when a dialog closes or a switch flips.
-    val focusManager = LocalFocusManager.current
+    // on the Name field when a dialog closes or a switch flips. Focus moves to the screen itself
+    // rather than being cleared: before Android 9, clearing focus hands it straight back to the
+    // first text field and the keyboard pops up again.
+    val focusSink = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
+    fun endTyping() {
+        focusSink.requestFocus()
+        keyboard?.hide()
+    }
     fun edit(change: (HabitForm) -> HabitForm) {
-        focusManager.clearFocus()
+        endTyping()
         onEdit(change)
     }
     val notifications = rememberNotificationPermission()
@@ -131,7 +142,7 @@ private fun EditHabitContent(
         if (on && !notifications.granted) notifications.request()
     }
 
-    Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().imePadding()) {
+    Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().imePadding().focusRequester(focusSink).focusable()) {
         Row(
             Modifier.fillMaxWidth().height(64.dp).padding(start = 8.dp, end = 16.dp, top = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -237,10 +248,26 @@ private fun EditHabitContent(
                             placeholder = { Text("pages") },
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.weight(2f),
+                            modifier = Modifier.weight(1f),
                         )
                     }
-                    TrackType.DURATION -> NumberField("Minutes", form.target, Modifier.fillMaxWidth()) { v -> onEdit { it.copy(target = v) } }
+                    TrackType.DURATION -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
+                        NumberField("Target", form.target, Modifier.weight(1f)) { v -> onEdit { it.copy(target = v) } }
+                        val units = listOf(DurationUnit.MINUTES to "Minutes", DurationUnit.HOURS to "Hours")
+                        CappedFontScale {
+                        SingleChoiceSegmentedButtonRow(Modifier.weight(1.3f)) {
+                            units.forEachIndexed { index, (value, label) ->
+                                SegmentedButton(
+                                    selected = form.durationUnit == value,
+                                    onClick = { edit { it.withDurationUnit(value) } },
+                                    shape = SegmentedButtonDefaults.itemShape(index, units.size),
+                                    icon = {},
+                                    modifier = Modifier.height(56.dp),
+                                ) { Text(label, style = type.labelLarge, maxLines = 1) }
+                            }
+                        }
+                        }
+                    }
                     TrackType.CHECK -> Unit
                 }
                 Text("You can always log part of it with a long press.", style = type.labelMedium, fontWeight = FontWeight.Normal, color = colors.onSurfaceVariant)
@@ -261,7 +288,7 @@ private fun EditHabitContent(
                                 .height(48.dp)
                                 .clip(CircleShape)
                                 .semantics { contentDescription = day.getDisplayName(TextStyle.FULL, Locale.getDefault()) }
-                                .toggleable(value = on, role = Role.Checkbox) { focusManager.clearFocus(); onToggleDay(day) },
+                                .toggleable(value = on, role = Role.Checkbox) { endTyping(); onToggleDay(day) },
                             contentAlignment = Alignment.Center,
                         ) {
                             Box(
@@ -293,7 +320,7 @@ private fun EditHabitContent(
             Section("Reminder") {
                 Card {
                     Row(
-                        Modifier.fillMaxWidth().clickable { focusManager.clearFocus(); pickingTime = true }.padding(horizontal = 16.dp, vertical = 12.dp),
+                        Modifier.fillMaxWidth().clickable { endTyping(); pickingTime = true }.padding(horizontal = 16.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(painterResource(R.drawable.ic_bell), contentDescription = null, tint = colors.onSurface, modifier = Modifier.size(22.dp))
@@ -330,7 +357,7 @@ private fun EditHabitContent(
             }
 
             Card {
-                ToggleRow("Ask for a note when I skip", "A reminder to write why", form.askForNote) { v -> needsNotifications(v); edit { it.copy(askForNote = v) } }
+                ToggleRow("Ask for a note when I skip", "Opens a note when you skip, and reminds you at 9 PM if it's empty", form.askForNote) { v -> needsNotifications(v); edit { it.copy(askForNote = v) } }
                 HorizontalDivider(color = colors.surfaceContainerHigh)
                 ToggleRow("Show on home screen widget", "Week view and Today widget", form.showOnWidget) { v -> edit { it.copy(showOnWidget = v) } }
             }

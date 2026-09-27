@@ -43,7 +43,9 @@ object DevData {
             }
         }
         val d = today.toEpochDay()
-        repository.setEntry(Entry(ids[0], d, EntryStatus.DONE, 1.0))
+        // Logged at 6:52 this morning, so the card reads "Done at 6:52 AM".
+        val sixFiftyTwo = today.atTime(6, 52).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+        repository.setEntry(Entry(ids[0], d, EntryStatus.DONE, 1.0, loggedAt = sixFiftyTwo))
         repository.setEntry(Entry(ids[1], d, EntryStatus.PARTIAL, 15.0))
         repository.setEntry(Entry(ids[2], d, EntryStatus.PARTIAL, 5.0))
         repository.setEntry(Entry(ids[3], d, EntryStatus.SKIP))

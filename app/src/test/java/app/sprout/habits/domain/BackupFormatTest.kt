@@ -68,4 +68,22 @@ class BackupFormatTest {
         assertEquals("Walk", file.habits.single().name)
         assertEquals("2026-09-27", file.entries.single().date)
     }
+
+    @Test fun entriesKeepTheTimeTheyWereLogged() {
+        val file = BackupManager.parse(
+            """{"app":"sprout","version":1,"exportedAt":0,"habits":[],"notes":[],
+               "entries":[{"habitId":2,"date":"2026-09-27","status":"DONE","amount":20,"loggedAt":1790000000000},
+                          {"habitId":2,"date":"2026-09-26","status":"SKIP"}]}""".byteInputStream(),
+        )
+        assertEquals(1790000000000L, file.entries[0].loggedAt)
+        // Backups from 0.1.0 have no time; the entry still reads.
+        assertEquals(null, file.entries[1].loggedAt)
+    }
+
+    @Test fun sameOutcomeIgnoresWhenItWasLogged() {
+        val a = Entry(2, day, EntryStatus.DONE, 20.0, loggedAt = 1)
+        assertEquals(true, a.sameOutcomeAs(a.copy(loggedAt = 2)))
+        assertEquals(false, a.sameOutcomeAs(a.copy(status = EntryStatus.PARTIAL)))
+        assertEquals(false, a.sameOutcomeAs(null))
+    }
 }

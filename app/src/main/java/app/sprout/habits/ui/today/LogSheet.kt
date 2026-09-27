@@ -39,7 +39,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -58,7 +63,7 @@ import app.sprout.habits.data.TrackType
 import app.sprout.habits.ui.theme.habitColors
 import kotlin.math.roundToInt
 
-/** Press-and-hold sheet: outcome, amount (stepper, slider, quick chips) and an optional note. */
+/** Log sheet for one habit on one day: outcome, amount (stepper, slider) and an optional note. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogSheet(
@@ -71,11 +76,20 @@ fun LogSheet(
     val type = MaterialTheme.typography
     val hc = habitColors(sheet.hue)
     val hasAmount = sheet.trackType != TrackType.CHECK
-    val step = if (sheet.trackType == TrackType.DURATION) 5.0 else 1.0
+    val step = sheet.step
 
-    var status by rememberSaveable(sheet.habitId) { mutableStateOf(sheet.status) }
-    var amount by rememberSaveable(sheet.habitId) { mutableDoubleStateOf(sheet.amount) }
-    var note by rememberSaveable(sheet.habitId) { mutableStateOf(sheet.noteText) }
+    var status by rememberSaveable(sheet.habitId, sheet.day) { mutableStateOf(sheet.status) }
+    var amount by rememberSaveable(sheet.habitId, sheet.day) { mutableDoubleStateOf(sheet.amount) }
+    var note by rememberSaveable(sheet.habitId, sheet.day) { mutableStateOf(sheet.noteText) }
+
+    // Right after a skip on a habit that asks for a note, the cursor waits in the note field.
+    val noteFocus = remember { FocusRequester() }
+    LaunchedEffect(sheet.habitId, sheet.day) {
+        if (sheet.focusNote) {
+            delay(300)
+            noteFocus.requestFocus()
+        }
+    }
 
     fun setAmount(value: Double) {
         amount = value.coerceIn(0.0, sheet.target)
@@ -103,15 +117,14 @@ fun LogSheet(
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(sheet.name, style = type.titleLarge, color = colors.onSurface)
-                    val goal = if (hasAmount) "Goal ${TodayViewModel.formatNumber(sheet.target)} ${sheet.unit} · " else ""
-                    Text("$goal${sheet.dayLabel}", style = type.bodyMedium, color = colors.onSurfaceVariant)
+                    Text(sheet.subtitle, style = type.bodyMedium, color = colors.onSurfaceVariant)
                 }
                 // Clears the day back to not logged; only useful when something is logged.
                 if (sheet.hasEntry) {
                     FilledTonalButton(
                         onClick = onUndo,
                         contentPadding = PaddingValues(horizontal = 12.dp),
-                        modifier = Modifier.height(40.dp).semantics { contentDescription = "Clear ${sheet.dayLabel}'s entry for ${sheet.name}" },
+                        modifier = Modifier.height(40.dp).semantics { contentDescription = if (sheet.isToday) "Clear today's entry for ${sheet.name}" else "Clear the entry for ${sheet.name} on ${sheet.dayLabel}" },
                         colors = ButtonDefaults.filledTonalButtonColors(containerColor = colors.surfaceContainerHigh, contentColor = colors.onSurface),
                     ) {
                         Icon(painterResource(R.drawable.ic_undo), contentDescription = null, modifier = Modifier.size(18.dp))
@@ -198,7 +211,7 @@ fun LogSheet(
                     focusedContainerColor = colors.background,
                     unfocusedBorderColor = colors.outlineVariant,
                 ),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().focusRequester(noteFocus),
             )
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {

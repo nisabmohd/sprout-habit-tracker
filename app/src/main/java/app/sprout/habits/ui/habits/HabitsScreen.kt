@@ -32,6 +32,10 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.material3.SnackbarHostState
+import app.sprout.habits.ui.today.DayLogHost
+import app.sprout.habits.ui.today.UndoSnackbarHost
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +46,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -67,7 +72,10 @@ fun HabitsScreen(
     val overall by viewModel.overall.collectAsStateWithLifecycle()
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshToday() }
     val colors = MaterialTheme.colorScheme
+    val snackbar = remember { SnackbarHostState() }
+    DayLogHost(viewModel.logger, snackbar)
 
+    Box(Modifier.fillMaxSize()) {
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
@@ -99,13 +107,15 @@ fun HabitsScreen(
         when (mode) {
             HabitsMode.WEEK -> week?.let { w ->
                 item(key = "week-nav") { WeekNavigator(w, viewModel::previousWeek, viewModel::nextWeek) }
-                items(w.habits, key = { "w${it.id}" }) { WeekCard(it, w, onOpenHabit) }
+                items(w.habits, key = { "w${it.id}" }) { WeekCard(it, w, onOpenHabit) { i -> viewModel.logger.open(it.id, w.dates[i]) } }
             }
             HabitsMode.OVERALL -> overall?.let { o ->
                 item(key = "legend") { Legend() }
                 items(o.habits, key = { "o${it.id}" }) { OverallCard(it, o, onOpenHabit) }
             }
         }
+    }
+    UndoSnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp))
     }
 }
 
@@ -158,7 +168,7 @@ private fun markColors() = MaterialTheme.colorScheme.let {
 }
 
 @Composable
-private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit) {
+private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit, onEditDay: (Int) -> Unit) {
     val colors = MaterialTheme.colorScheme
     val hc = habitColors(habit.hue)
     val mc = markColors()
@@ -180,13 +190,19 @@ private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
             habit.marks.forEachIndexed { i, mark ->
                 val isToday = i == week.todayIndex
+                // Any scheduled day up to today can be edited; future and unscheduled days can't.
+                val editable = mark.kind != MarkKind.FUTURE && mark.kind != MarkKind.NOT_SCHEDULED
                 Column(
                     Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(16.dp))
                         .background(if (isToday) colors.surfaceContainerHigh else colors.surfaceContainerLowest)
+                        .then(if (editable) Modifier.clickable(onClickLabel = "Edit ${week.dayNames[i]}") { onEditDay(i) } else Modifier)
                         .padding(vertical = 6.dp)
-                        .clearAndSetSemantics { contentDescription = "${week.dayLabels[i]}: ${describe(mark.kind, mark.fraction)}" },
+                        .clearAndSetSemantics {
+                            contentDescription = "${habit.name}, ${week.dayNames[i]}: ${describe(mark.kind, mark.fraction)}"
+                            if (editable) onClick("Edit ${week.dayNames[i]}") { onEditDay(i); true }
+                        },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {

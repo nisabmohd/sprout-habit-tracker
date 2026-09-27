@@ -1,5 +1,6 @@
 package app.sprout.habits.data.backup
 
+import app.sprout.habits.data.DurationUnit
 import app.sprout.habits.data.Entry
 import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.data.Habit
@@ -50,6 +51,8 @@ data class HabitDto(
     val trackType: String,
     val target: Double,
     val unit: String = "",
+    /** MINUTES or HOURS; absent in backups from 0.1.0. */
+    val durationUnit: String = "MINUTES",
     val daysMask: Int,
     val reminderMinutes: Int? = null,
     val askForNote: Boolean = false,
@@ -66,6 +69,8 @@ data class EntryDto(
     @SerialName("date") val date: String,
     val status: String,
     val amount: Double = 0.0,
+    /** Epoch millis; absent in backups from 0.1.0. */
+    val loggedAt: Long? = null,
 )
 
 @Serializable
@@ -97,11 +102,11 @@ class BackupManager(
             exportedAt = now,
             habits = habits.map {
                 HabitDto(
-                    it.id, it.name, it.icon, it.colorHue, it.trackType.name, it.target, it.unit, it.daysMask,
+                    it.id, it.name, it.icon, it.colorHue, it.trackType.name, it.target, it.unit, it.durationUnit.name, it.daysMask,
                     it.reminderMinutes, it.askForNote, it.showOnWidget, it.sortOrder, it.archived, it.createdAt,
                 )
             },
-            entries = entries.map { EntryDto(it.habitId, LocalDate.ofEpochDay(it.date).toString(), it.status.name, it.amount) },
+            entries = entries.map { EntryDto(it.habitId, LocalDate.ofEpochDay(it.date).toString(), it.status.name, it.amount, it.loggedAt) },
             notes = notes.map { NoteDto(it.id, it.habitId, LocalDate.ofEpochDay(it.date).toString(), it.text, it.updatedAt) },
             settings = settings.settings.first().let {
                 SettingsDto(
@@ -128,6 +133,7 @@ class BackupManager(
             Habit(
                 id = it.id, name = it.name, icon = it.icon, colorHue = it.colorHue,
                 trackType = enumOr(it.trackType, TrackType.CHECK), target = it.target, unit = it.unit,
+                durationUnit = enumOr(it.durationUnit, DurationUnit.MINUTES),
                 daysMask = it.daysMask and 0b111_1111, reminderMinutes = it.reminderMinutes?.takeIf { m -> m in 0 until 24 * 60 },
                 askForNote = it.askForNote, showOnWidget = it.showOnWidget, sortOrder = it.sortOrder,
                 archived = it.archived, createdAt = it.createdAt,
@@ -137,7 +143,7 @@ class BackupManager(
         if (ids.size != habits.size) throw BackupException("This backup is damaged and can't be imported.")
         val entries = backup.entries
             .filter { it.habitId in ids }
-            .map { Entry(it.habitId, parseDate(it.date), enumOr(it.status, EntryStatus.DONE), it.amount) }
+            .map { Entry(it.habitId, parseDate(it.date), enumOr(it.status, EntryStatus.DONE), it.amount, it.loggedAt) }
             .distinctBy { it.habitId to it.date }
         val notes = backup.notes
             .filter { it.habitId in ids }

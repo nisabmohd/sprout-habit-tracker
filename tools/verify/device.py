@@ -104,7 +104,18 @@ def scroll_to(label, contains=False, max_swipes=6):
     w, h = screen_size()
     for _ in range(max_swipes + 1):
         n = find(label, contains, timeout=0.5)
+        # Off-screen nodes can still be listed, with empty bounds; they aren't on screen yet.
+        if n and n.bounds[3] <= n.bounds[1]:
+            n = None
+        if n and n.center[1] < h * 0.7:
+            return n
         if n:
+            # Found low on screen, where a nav bar or button may cover it: bring it up.
+            for _ in range(3):
+                swipe(w // 2, int(h * 0.6), w // 2, int(h * 0.4), 300)
+                n = find(label, contains, timeout=1.0) or n
+                if n.center[1] < h * 0.7:
+                    break
             return n
         swipe(w // 2, int(h * 0.75), w // 2, int(h * 0.35), 300)
     return None
@@ -127,14 +138,24 @@ def back():
     time.sleep(0.8)
 
 
+def _read(cmd, pattern):
+    """Runs a `wm` query, retrying: adb now and then returns nothing."""
+    for _ in range(5):
+        out = shell(cmd).strip()
+        m = re.search(pattern, out.splitlines()[-1] if out else "")
+        if m:
+            return m
+        time.sleep(0.5)
+    raise AssertionError(f"no answer from `{cmd}`")
+
+
 def screen_size():
-    m = re.search(r"(\d+)x(\d+)", shell("wm size"))
+    m = _read("wm size", r"(\d+)x(\d+)")
     return int(m.group(1)), int(m.group(2))
 
 
 def density():
-    m = re.search(r"(\d+)", shell("wm density").splitlines()[-1])
-    return int(m.group(1)) / 160
+    return int(_read("wm density", r"(\d+)").group(1)) / 160
 
 
 def nav(tab):
