@@ -126,7 +126,7 @@ fun SproutNavHost(
                 val vm = viewModel {
                     WriteNoteViewModel(container.repository, route.noteId, route.habitId, route.epochDay.takeIf { it >= 0 })
                 }
-                WriteNoteScreen(vm, onClose = { navController.popBackStack() })
+                WriteNoteScreen(vm, settings.weekStart, onClose = { navController.popBackStack() })
             }
             composable<EditHabitRoute> { entry ->
                 val id = entry.toRoute<EditHabitRoute>().habitId

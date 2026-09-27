@@ -26,8 +26,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,10 +34,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,15 +55,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
 import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.data.HabitIcon
+import app.sprout.habits.ui.components.DatePickerSheet
 import app.sprout.habits.ui.theme.habitColors
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneOffset
+import java.time.DayOfWeek
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WriteNoteScreen(viewModel: WriteNoteViewModel, onClose: () -> Unit) {
+fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose: () -> Unit) {
     val form by viewModel.form.collectAsStateWithLifecycle()
     val habits by viewModel.habits.collectAsStateWithLifecycle()
     val status by viewModel.status.collectAsStateWithLifecycle()
@@ -185,24 +180,12 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, onClose: () -> Unit) {
     }
 
     if (pickingDate) {
-        val today = LocalDate.now()
-        val state = rememberDatePickerState(
-            initialSelectedDateMillis = form.date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
-            selectableDates = object : SelectableDates {
-                override fun isSelectableDate(utcTimeMillis: Long) =
-                    !Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneOffset.UTC).toLocalDate().isAfter(today)
-            },
+        DatePickerSheet(
+            date = form.date,
+            weekStart = weekStart,
+            onApply = { viewModel.setDate(it); pickingDate = false },
+            onDismiss = { pickingDate = false },
         )
-        DatePickerDialog(
-            onDismissRequest = { pickingDate = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    state.selectedDateMillis?.let { viewModel.setDate(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()) }
-                    pickingDate = false
-                }) { Text("OK") }
-            },
-            dismissButton = { TextButton(onClick = { pickingDate = false }) { Text("Cancel") } },
-        ) { DatePicker(state) }
     }
 
     if (confirmDelete) {

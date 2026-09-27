@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,9 +29,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +65,10 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
+import app.sprout.habits.ui.components.TimePickerSheet
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 /** Accent choices when dynamic color is off: the app's green first, then the habit hues. */
 private val ACCENT_HUES = listOf(150f, 192f, 215f, 275f, 330f, 12f, 38f)
@@ -86,6 +86,7 @@ private val FONT_INFO = mapOf(
     BodyFont.ATKINSON to ("Atkinson Hyperlegible" to "Designed for low vision"),
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreScreen(
     settings: Settings,
@@ -184,35 +185,47 @@ fun MoreScreen(
     }
 
     if (pickingWeekStart) {
-        AlertDialog(
+        ModalBottomSheet(
             onDismissRequest = { pickingWeekStart = false },
-            title = { Text("Week starts on") },
-            text = {
-                Column {
-                    listOf(DayOfWeek.MONDAY, DayOfWeek.SUNDAY, DayOfWeek.SATURDAY).forEach { day ->
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 48.dp)
-                                .selectable(settings.weekStart == day, role = Role.RadioButton) {
-                                    save { setWeekStart(day) }
-                                    pickingWeekStart = false
-                                },
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            RadioButton(selected = settings.weekStart == day, onClick = null)
-                            Text(day.getDisplayName(TextStyle.FULL, Locale.getDefault()), modifier = Modifier.padding(start = 12.dp))
-                        }
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        ) {
+            Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 24.dp).navigationBarsPadding()) {
+                Text(
+                    "Week starts on",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(start = 12.dp, bottom = 8.dp),
+                )
+                listOf(DayOfWeek.MONDAY, DayOfWeek.SUNDAY, DayOfWeek.SATURDAY).forEach { day ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 56.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .selectable(settings.weekStart == day, role = Role.RadioButton) {
+                                save { setWeekStart(day) }
+                                pickingWeekStart = false
+                            }
+                            .padding(horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = settings.weekStart == day, onClick = null)
+                        Text(
+                            day.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 12.dp),
+                        )
                     }
                 }
-            },
-            confirmButton = { TextButton(onClick = { pickingWeekStart = false }) { Text("Close") } },
-        )
+            }
+        }
     }
     if (pickingReminder) {
-        ReminderTimeDialog(
-            settings.defaultReminderMinutes,
-            onConfirm = { minutes -> save { setDefaultReminderMinutes(minutes) }; pickingReminder = false },
+        TimePickerSheet(
+            title = "Default reminder",
+            initialMinutes = settings.defaultReminderMinutes,
+            onApply = { minutes -> save { setDefaultReminderMinutes(minutes) }; pickingReminder = false },
             onDismiss = { pickingReminder = false },
         )
     }
@@ -274,14 +287,3 @@ private fun TextSizeRow(scale: Float, onChange: (Float) -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ReminderTimeDialog(initialMinutes: Int, onConfirm: (Int) -> Unit, onDismiss: () -> Unit) {
-    val state = rememberTimePickerState(initialHour = initialMinutes / 60, initialMinute = initialMinutes % 60)
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = { onConfirm(state.hour * 60 + state.minute) }) { Text("OK") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
-        text = { TimePicker(state) },
-    )
-}

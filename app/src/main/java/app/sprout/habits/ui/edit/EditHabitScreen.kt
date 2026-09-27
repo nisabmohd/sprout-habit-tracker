@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -38,8 +37,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -80,6 +77,7 @@ import app.sprout.habits.ui.today.TodayViewModel
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
+import app.sprout.habits.ui.components.TimePickerSheet
 
 @Composable
 fun EditHabitScreen(viewModel: EditHabitViewModel, onClose: () -> Unit) {
@@ -351,9 +349,10 @@ private fun EditHabitContent(
     }
 
     if (pickingTime) {
-        TimeDialog(
+        TimePickerSheet(
+            title = "Reminder time",
             initialMinutes = form.reminderMinutes,
-            onConfirm = { minutes ->
+            onApply = { minutes ->
                 needsNotifications(true)
                 edit { it.copy(reminderMinutes = minutes, reminderOn = true) }
                 pickingTime = false
@@ -409,17 +408,6 @@ private fun NumberField(label: String, value: String, modifier: Modifier, onChan
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TimeDialog(initialMinutes: Int, onConfirm: (Int) -> Unit, onDismiss: () -> Unit) {
-    val state = rememberTimePickerState(initialHour = initialMinutes / 60, initialMinute = initialMinutes % 60)
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = { onConfirm(state.hour * 60 + state.minute) }) { Text("OK") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
-        text = { TimePicker(state) },
-    )
-}
 
 private fun orderedDays(weekStart: DayOfWeek): List<DayOfWeek> = List(7) { weekStart.plus(it.toLong()) }
 

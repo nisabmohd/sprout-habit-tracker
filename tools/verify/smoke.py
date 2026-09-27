@@ -193,6 +193,24 @@ def journal_filter_by_date():
 
 
 @check
+def note_date_in_a_sheet():
+    import datetime
+    today = datetime.date.today()
+    if today.day == 1:
+        return  # no earlier day in this month to pick
+    d.nav("Journal")
+    d.tap("Add note")
+    d.back()  # hide the keyboard
+    d.tap(today.strftime("%A, ") + str(today.day), contains=True)
+    assert d.exists("Use ", contains=True), "note date didn't open the date sheet"
+    d.tap(str(today.day - 1))
+    d.tap("Use ", contains=True)
+    yesterday = today - datetime.timedelta(days=1)
+    assert d.exists(yesterday.strftime("%A, ") + str(yesterday.day), contains=True), "note date didn't change"
+    d.tap("Close")
+
+
+@check
 def insights_render():
     d.nav("Insights")
     assert d.exists("Average score"), "score card missing"

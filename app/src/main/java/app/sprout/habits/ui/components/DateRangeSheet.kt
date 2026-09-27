@@ -95,21 +95,7 @@ fun DateRangeSheet(
                 style = type.titleSmall,
                 color = colors.onSurfaceVariant,
             )
-            Row(Modifier.fillMaxWidth().padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { month = month.minusMonths(1) }) {
-                    Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = "Previous month", modifier = Modifier.size(20.dp))
-                }
-                Text(
-                    month.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-                    style = type.titleMedium,
-                    color = colors.onSurface,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(1f),
-                )
-                IconButton(onClick = { month = month.plusMonths(1) }, enabled = month < YearMonth.from(today)) {
-                    Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = "Next month", modifier = Modifier.size(20.dp))
-                }
-            }
+            MonthHeader(month, today) { month = it }
             MonthGrid(month, weekStart, today, start, end ?: start) { day ->
                 val a = start
                 if (a == null || end != null) {
@@ -131,6 +117,63 @@ fun DateRangeSheet(
                     style = type.labelLarge,
                 )
             }
+        }
+    }
+}
+
+/** Pick one day, for a note's date. Same month grid as [DateRangeSheet]; future days are disabled. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerSheet(
+    date: LocalDate,
+    weekStart: DayOfWeek,
+    onApply: (LocalDate) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val type = MaterialTheme.typography
+    val today = LocalDate.now()
+    var picked by remember { mutableStateOf(date) }
+    var month by remember { mutableStateOf(YearMonth.from(date)) }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = colors.surfaceContainerLowest,
+    ) {
+        Column(Modifier.padding(horizontal = 20.dp).navigationBarsPadding()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Date", style = type.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
+                TextButton(onClick = { picked = today; month = YearMonth.from(today) }) { Text("Today", style = type.labelLarge) }
+            }
+            Text(picked.format(DateTimeFormatter.ofPattern("EEEE, d MMM yyyy")), style = type.titleSmall, color = colors.onSurfaceVariant)
+            MonthHeader(month, today) { month = it }
+            MonthGrid(month, weekStart, today, picked, picked) { picked = it }
+            Button(
+                onClick = { onApply(picked) },
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(48.dp),
+            ) {
+                Text("Use ${picked.format(DateTimeFormatter.ofPattern("d MMM"))}", style = type.labelLarge)
+            }
+        }
+    }
+}
+
+@Composable
+private fun MonthHeader(month: YearMonth, today: LocalDate, onMonth: (YearMonth) -> Unit) {
+    Row(Modifier.fillMaxWidth().padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = { onMonth(month.minusMonths(1)) }) {
+            Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = "Previous month", modifier = Modifier.size(20.dp))
+        }
+        Text(
+            month.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f),
+        )
+        IconButton(onClick = { onMonth(month.plusMonths(1)) }, enabled = month < YearMonth.from(today)) {
+            Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = "Next month", modifier = Modifier.size(20.dp))
         }
     }
 }

@@ -8,6 +8,7 @@ New:
 - Insights shows any date range (this week by default) for all habits or the ones you pick.
 - Swiping a done or skipped habit the other way undoes it. The press-and-hold sheet has an Undo button too.
 - A Sponsor link in About, and in the Play build a Rate on Play Store link. After a week of use Sprout asks once whether you'd like to support it.
+- The note date, reminder times and week start are picked in bottom sheets instead of dialogs.
 - Refreshed look from the new design: Today without the week strip, a clearer Undo snackbar, and the habit picker in a sheet when writing a note.
 
 Fixed:
