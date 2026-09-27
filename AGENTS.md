@@ -24,7 +24,7 @@ These rules apply to every change, whether a person or an AI agent makes it. The
 
 ## Design and text
 
-- Screens follow the designs in `design/Habit Tracker UI.html` (open it in a browser). Exact colors and icon paths are in `design/TOKENS.md`.
+- Screens follow the designs in `design/` (one PNG per screen, e.g. `today.png`, `journal.png`, `icon-picker.png`). Exact colors and icon paths are in `design/TOKENS.md`.
 - Use only the Material 3 typography slots, which map to these sizes: 40, 28, 22, 16, 14, 12 and 11 sp. Headings use Outfit; body text uses the chosen font (Lexend by default).
 - Text must grow with the user's font size. Only text inside a fixed-size shape (rings, segmented buttons, the navigation bar, the week columns) may cap its scaling, using `CappedFontScale`.
 - Filters, pickers and choices (dates, times, habits, amounts, week start) open in a bottom sheet, never a dialog, inline chips or menus. Use `DateRangeSheet`, `DatePickerSheet`, `TimePickerSheet` and `HabitFilterSheet` in `ui/components`. Dialogs are only for confirming something (delete, import). Every sheet is a `SproutSheet` (ui/components): it opens fully and stops at 90% of the screen, so put long content in a scrolling list with `Modifier.weight(1f, fill = false)` and keep the main button below it. Full screens are only for creating or editing (New habit, New note).
