@@ -29,6 +29,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
+import app.sprout.habits.support.SupportPrompt
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -108,7 +110,7 @@ data class UndoableChange(
 @OptIn(ExperimentalCoroutinesApi::class)
 class TodayViewModel(
     private val repository: HabitRepository,
-    settings: SettingsRepository,
+    private val settings: SettingsRepository,
 ) : ViewModel() {
     private val today = MutableStateFlow(LocalDate.now())
     private val selected = MutableStateFlow(today.value)
@@ -128,6 +130,29 @@ class TodayViewModel(
             }
             .flowOn(Dispatchers.Default)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodayUiState())
+
+    private val _supportPrompt = MutableStateFlow(false)
+
+    /** True while the "Enjoying Sprout?" dialog should show. */
+    val supportPrompt: StateFlow<Boolean> = _supportPrompt
+
+    /** Set after a skip so the prompt never follows one. */
+    private var skippedThisVisit = false
+    private var promptCheckedThisSession = false
+
+    /** Called when Today resumes; shows the support prompt at most once per app session. */
+    fun maybeShowSupportPrompt() {
+        if (promptCheckedThisSession || skippedThisVisit) return
+        promptCheckedThisSession = true
+        viewModelScope.launch {
+            if (SupportPrompt.shouldShow(settings.settings.first(), System.currentTimeMillis())) _supportPrompt.value = true
+        }
+    }
+
+    fun supportPromptClosed(dismissed: Boolean) {
+        _supportPrompt.value = false
+        viewModelScope.launch { settings.supportPromptShown(dismissed) }
+    }
 
     private val _changes = Channel<UndoableChange>(Channel.BUFFERED)
 
@@ -214,6 +239,7 @@ class TodayViewModel(
             val next = Entry(sheet.habitId, sheet.day, finalStatus, finalAmount)
             if (next != previous) {
                 repository.setEntry(next)
+                countCheckIn(next)
                 val message = when (finalStatus) {
                     EntryStatus.DONE -> "${sheet.name} marked done"
                     // "Read · 15 of 20 pages"
@@ -228,6 +254,15 @@ class TodayViewModel(
                     repository.saveNote(Note(id = sheet.noteId ?: 0, habitId = sheet.habitId, date = sheet.day, text = text))
                 text.isEmpty() && sheet.noteId != null -> repository.deleteNote(sheet.noteId)
             }
+        }
+    }
+
+    /** Done or partly done counts toward the support prompt; a skip marks this visit. */
+    private suspend fun countCheckIn(entry: Entry?) {
+        when (entry?.status) {
+            EntryStatus.DONE, EntryStatus.PARTIAL -> settings.addCheckIn()
+            EntryStatus.SKIP -> skippedThisVisit = true
+            null -> Unit
         }
     }
 
@@ -247,6 +282,7 @@ class TodayViewModel(
             val next = build(habit, day)
             if (next == previous) return@launch
             if (next == null) repository.clearEntry(habitId, day) else repository.setEntry(next)
+            countCheckIn(next)
             _changes.send(UndoableChange("${habit.name} $verb", habitId, day, previous))
         }
     }

@@ -32,6 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.sprout.habits.BuildConfig
 import app.sprout.habits.R
+import app.sprout.habits.ui.openUrl
+import app.sprout.habits.ui.theme.habitColors
 
 @Composable
 fun AboutScreen(onBack: () -> Unit, onOpenLicences: () -> Unit) {
@@ -66,8 +68,13 @@ fun AboutScreen(onBack: () -> Unit, onOpenLicences: () -> Unit) {
                     color = colors.onPrimaryContainer,
                 )
             }
+            SettingsCard { SupportRow { openUrl(context, BuildConfig.SPONSOR_URL) } }
             SettingsCard {
                 val repo = BuildConfig.REPO_URL
+                if (BuildConfig.PLAY_STORE) {
+                    LinkRow("Rate on Play Store", "Takes 10 seconds, helps a lot") { openUrl(context, BuildConfig.PLAY_STORE_URL) }
+                    CardDivider()
+                }
                 LinkRow("Source code", repo.removePrefix("https://")) { openUrl(context, repo) }
                 CardDivider()
                 LinkRow("Report a bug or request a feature", "GitHub Issues") { openUrl(context, "$repo/issues") }
@@ -80,6 +87,20 @@ fun AboutScreen(onBack: () -> Unit, onOpenLicences: () -> Unit) {
             }
             Text("Made by the Sprout contributors", style = type.bodyMedium, color = colors.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(bottom = 24.dp))
         }
+    }
+}
+
+/** "Support Sprout" with a pink heart and a small Sponsor pill. */
+@Composable
+private fun SupportRow(onClick: () -> Unit) {
+    val pink = habitColors(330f)
+    SettingsRow("Support Sprout", "Free forever, kept alive by sponsors", onClick = onClick) {
+        Text(
+            "Sponsor",
+            style = MaterialTheme.typography.labelLarge,
+            color = pink.ink,
+            modifier = Modifier.background(pink.soft, RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 6.dp),
+        )
     }
 }
 
@@ -96,13 +117,5 @@ fun TopBar(title: String, onBack: () -> Unit) {
             Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = "Back", modifier = Modifier.size(22.dp))
         }
         Text(title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(start = 8.dp))
-    }
-}
-
-private fun openUrl(context: Context, url: String) {
-    try {
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-    } catch (e: ActivityNotFoundException) {
-        // No browser; nothing to do.
     }
 }

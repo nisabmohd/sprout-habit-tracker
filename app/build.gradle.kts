@@ -19,6 +19,8 @@ android {
         versionName = "0.1.0"
         // Where the About screen's links point. Set once the GitHub repo exists.
         buildConfigField("String", "REPO_URL", "\"https://github.com/nisabmohd/sprout-habit-tracker\"")
+        buildConfigField("String", "SPONSOR_URL", "\"https://github.com/sponsors/nisabmohd\"")
+        buildConfigField("String", "PLAY_STORE_URL", "\"https://play.google.com/store/apps/details?id=app.sprout.habits\"")
     }
 
     flavorDimensions += "distribution"
@@ -26,11 +28,14 @@ android {
         // Google sign-in + Drive appDataFolder backup.
         create("play") {
             dimension = "distribution"
+            // Shows "Rate on Play Store"; the foss build never links to Google Play.
+            buildConfigField("boolean", "PLAY_STORE", "true")
         }
         // No Google or Play Services code at all (F-Droid).
         create("foss") {
             dimension = "distribution"
             versionNameSuffix = "-foss"
+            buildConfigField("boolean", "PLAY_STORE", "false")
         }
     }
 

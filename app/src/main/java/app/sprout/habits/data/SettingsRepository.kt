@@ -31,6 +31,12 @@ data class Settings(
     val lastBackupAt: Long? = null,
     /** False until the welcome screen has been passed once. */
     val onboarded: Boolean = false,
+    /** Epoch millis of the first launch; null until then. */
+    val firstOpenAt: Long? = null,
+    /** Days logged as done or partly done, counted for the support prompt. */
+    val checkInCount: Int = 0,
+    val supportPromptShownAt: Long? = null,
+    val supportPromptDismissCount: Int = 0,
 )
 
 private val Context.dataStore by preferencesDataStore(name = "settings")
@@ -50,6 +56,12 @@ class SettingsRepository(context: Context) {
     suspend fun setBackupEnabled(enabled: Boolean) = store.edit { it[BACKUP_ENABLED] = enabled }
     suspend fun setLastBackupAt(epochMillis: Long) = store.edit { it[LAST_BACKUP_AT] = epochMillis }
     suspend fun setOnboarded() = store.edit { it[ONBOARDED] = true }
+    suspend fun markFirstOpen(now: Long = System.currentTimeMillis()) = store.edit { if (it[FIRST_OPEN_AT] == null) it[FIRST_OPEN_AT] = now }
+    suspend fun addCheckIn() = store.edit { it[CHECK_INS] = (it[CHECK_INS] ?: 0) + 1 }
+    suspend fun supportPromptShown(dismissed: Boolean, now: Long = System.currentTimeMillis()) = store.edit {
+        it[PROMPT_SHOWN_AT] = now
+        if (dismissed) it[PROMPT_DISMISSED] = (it[PROMPT_DISMISSED] ?: 0) + 1
+    }
 
     /** Replaces the user's preferences in one write, e.g. when restoring a backup. */
     suspend fun restore(settings: Settings) = store.edit {
@@ -78,6 +90,10 @@ class SettingsRepository(context: Context) {
             backupEnabled = this[BACKUP_ENABLED] ?: defaults.backupEnabled,
             lastBackupAt = this[LAST_BACKUP_AT],
             onboarded = this[ONBOARDED] ?: false,
+            firstOpenAt = this[FIRST_OPEN_AT],
+            checkInCount = this[CHECK_INS] ?: 0,
+            supportPromptShownAt = this[PROMPT_SHOWN_AT],
+            supportPromptDismissCount = this[PROMPT_DISMISSED] ?: 0,
         )
     }
 
@@ -92,6 +108,10 @@ class SettingsRepository(context: Context) {
         val BACKUP_ENABLED = booleanPreferencesKey("backupEnabled")
         val LAST_BACKUP_AT = longPreferencesKey("lastBackupAt")
         val ONBOARDED = booleanPreferencesKey("onboarded")
+        val FIRST_OPEN_AT = longPreferencesKey("firstOpenAt")
+        val CHECK_INS = intPreferencesKey("checkInCount")
+        val PROMPT_SHOWN_AT = longPreferencesKey("supportPromptShownAt")
+        val PROMPT_DISMISSED = intPreferencesKey("supportPromptDismissCount")
 
         inline fun <reified E : Enum<E>> enumOrDefault(name: String?, default: E): E =
             name?.let { n -> enumValues<E>().firstOrNull { it.name == n } } ?: default

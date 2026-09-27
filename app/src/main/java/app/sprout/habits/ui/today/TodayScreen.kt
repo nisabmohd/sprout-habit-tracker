@@ -52,7 +52,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.sprout.habits.BuildConfig
 import app.sprout.habits.R
+import app.sprout.habits.support.SupportPromptDialog
+import app.sprout.habits.ui.openUrl
 import app.sprout.habits.domain.DayOutcome
 import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.ui.components.ProgressRing
@@ -72,7 +75,21 @@ fun TodayScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshToday() }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.refreshToday()
+        viewModel.maybeShowSupportPrompt()
+    }
+    val showSupport by viewModel.supportPrompt.collectAsStateWithLifecycle()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    if (showSupport) {
+        SupportPromptDialog(
+            showRate = BuildConfig.PLAY_STORE,
+            onRate = { openUrl(context, BuildConfig.PLAY_STORE_URL); viewModel.supportPromptClosed(dismissed = false) },
+            onStar = { openUrl(context, BuildConfig.REPO_URL); viewModel.supportPromptClosed(dismissed = false) },
+            onSponsor = { openUrl(context, BuildConfig.SPONSOR_URL); viewModel.supportPromptClosed(dismissed = false) },
+            onLater = { viewModel.supportPromptClosed(dismissed = true) },
+        )
+    }
     LaunchedEffect(viewModel) {
         viewModel.changes.collectLatest { change ->
             snackbar.currentSnackbarData?.dismiss()

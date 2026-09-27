@@ -15,6 +15,7 @@ class MarkDoneAction : ActionCallback {
         val repository = context.container.repository
         val habit = repository.getHabit(habitId) ?: return
         repository.setEntry(Entry(habit.id, LocalDate.now().toEpochDay(), EntryStatus.DONE, habit.target))
+        context.container.settings.addCheckIn()
         // Refresh every widget now: this process may have just started for the tap, so the
         // app-wide updater can't be relied on to see the change as new.
         context.container.widgets.updateAll()
