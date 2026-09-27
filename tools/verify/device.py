@@ -139,7 +139,12 @@ def density():
 
 def nav(tab):
     """Taps a bottom-bar tab by its label (the bar's labels are always the last matches)."""
-    nodes = [n for n in dump() if n.label == tab and n.package == PACKAGE]
+    end = time.time() + 3
+    while True:  # retry briefly: the bar may still be sliding in after a page transition
+        nodes = [n for n in dump() if n.label == tab and n.package == PACKAGE]
+        if nodes or time.time() > end:
+            break
+        time.sleep(0.4)
     if not nodes:
         raise AssertionError(f"tab not found: {tab}")
     n = max(nodes, key=lambda n: n.bounds[1])

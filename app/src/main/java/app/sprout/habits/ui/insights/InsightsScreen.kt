@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.DateRangeSheet
 import app.sprout.habits.ui.components.HabitFilterSheet
 import app.sprout.habits.ui.components.HeaderIconButton
 import app.sprout.habits.ui.components.ProgressRing
@@ -86,8 +87,9 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek)
             from = ui.from,
             to = ui.to,
             weekStart = weekStart,
+            shortcutLabel = "This week",
             onApply = { a, b -> viewModel.setRange(a, b); pickingRange = false },
-            onThisWeek = { viewModel.setRange(null, null); pickingRange = false },
+            onShortcut = { viewModel.setRange(null, null); pickingRange = false },
             onDismiss = { pickingRange = false },
         )
     }

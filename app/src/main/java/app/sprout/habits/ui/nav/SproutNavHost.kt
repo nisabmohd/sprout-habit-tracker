@@ -169,6 +169,7 @@ fun SproutNavHost(
                 val vm = viewModel { JournalViewModel(container.repository) }
                 JournalScreen(
                     vm,
+                    weekStart = settings.weekStart,
                     onAddNote = { navController.navigate(WriteNoteRoute()) },
                     onOpenNote = { id -> navController.navigate(WriteNoteRoute(noteId = id)) },
                 )

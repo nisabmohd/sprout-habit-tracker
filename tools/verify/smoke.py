@@ -176,6 +176,23 @@ def journal_filter_by_habit():
 
 
 @check
+def journal_filter_by_date():
+    import datetime
+    d.nav("Journal")
+    d.tap("Filter by date")
+    assert d.exists("All dates"), "date sheet didn't open with the All dates shortcut"
+    today = datetime.date.today()
+    d.tap(str(today.day))
+    d.tap("Show", contains=True)
+    time.sleep(1)
+    assert d.exists("Rough morning", contains=True), "today's note missing under a today-only range"
+    assert d.exists(f"{today.day} ", contains=True), "range label missing above the title"
+    d.tap("Filter by date")
+    d.tap("All dates")
+    assert d.exists("Journal"), "Journal missing after clearing dates"
+
+
+@check
 def insights_render():
     d.nav("Insights")
     assert d.exists("Average score"), "score card missing"

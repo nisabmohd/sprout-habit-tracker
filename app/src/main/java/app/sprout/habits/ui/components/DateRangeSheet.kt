@@ -1,4 +1,4 @@
-package app.sprout.habits.ui.insights
+package app.sprout.habits.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.sprout.habits.R
 import app.sprout.habits.domain.weekOf
-import app.sprout.habits.ui.components.CappedFontScale
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -51,17 +50,19 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 /**
- * Pick a date range: tap a first day, then a last day (or apply a single day). Future days are
- * disabled; "This week" jumps back to the current week.
+ * Pick a date range, shared by Insights and Journal: tap a first day, then a last day (or apply
+ * a single day). Future days are disabled. The shortcut is "This week" on Insights and
+ * "All dates" on Journal.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateRangeSheet(
-    from: LocalDate,
-    to: LocalDate,
+    from: LocalDate?,
+    to: LocalDate?,
     weekStart: DayOfWeek,
+    shortcutLabel: String,
     onApply: (LocalDate, LocalDate) -> Unit,
-    onThisWeek: () -> Unit,
+    onShortcut: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -69,7 +70,7 @@ fun DateRangeSheet(
     val today = LocalDate.now()
     var start by remember { mutableStateOf<LocalDate?>(from) }
     var end by remember { mutableStateOf<LocalDate?>(to) }
-    var month by remember { mutableStateOf(YearMonth.from(to)) }
+    var month by remember { mutableStateOf(YearMonth.from(to ?: today)) }
     val dm = DateTimeFormatter.ofPattern("d MMM")
 
     ModalBottomSheet(
@@ -80,7 +81,7 @@ fun DateRangeSheet(
         Column(Modifier.padding(horizontal = 20.dp).navigationBarsPadding()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Date range", style = type.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
-                TextButton(onClick = onThisWeek) { Text("This week", style = type.labelLarge) }
+                TextButton(onClick = onShortcut) { Text(shortcutLabel, style = type.labelLarge) }
             }
             val s = start
             val e = end ?: start

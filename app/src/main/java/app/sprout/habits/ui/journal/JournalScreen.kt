@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.DateRangeSheet
 import app.sprout.habits.ui.components.HabitFilterSheet
 import app.sprout.habits.ui.components.HeaderIconButton
 import app.sprout.habits.ui.theme.habitColors
@@ -50,11 +51,13 @@ import app.sprout.habits.ui.theme.habitColors
 @Composable
 fun JournalScreen(
     viewModel: JournalViewModel,
+    weekStart: java.time.DayOfWeek,
     onAddNote: (() -> Unit)?,
     onOpenNote: ((Long) -> Unit)?,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var choosing by remember { mutableStateOf(false) }
+    var pickingRange by remember { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
     Box(Modifier.fillMaxSize()) {
@@ -65,9 +68,15 @@ fun JournalScreen(
         ) {
             item(key = "title") {
                 Row(Modifier.fillMaxWidth().padding(start = 4.dp, top = 8.dp, bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("Journal", style = type.headlineMedium, color = colors.onBackground, modifier = Modifier.weight(1f))
+                    Column(Modifier.weight(1f)) {
+                        state?.rangeLabel?.let { Text(it, style = type.titleSmall, color = colors.onSurfaceVariant) }
+                        Text("Journal", style = type.headlineMedium, color = colors.onBackground)
+                    }
+                    // Every filter lives in a sheet: dates here, habits next to it.
                     state?.let { ui ->
+                        HeaderIconButton(R.drawable.ic_calendar, "Filter by date", active = ui.from != null) { pickingRange = true }
                         if (ui.options.isNotEmpty()) {
+                            Spacer(Modifier.width(8.dp))
                             HeaderIconButton(R.drawable.ic_filter, "Filter by habit", active = ui.filter.isNotEmpty()) { choosing = true }
                         }
                     }
@@ -75,11 +84,20 @@ fun JournalScreen(
             }
             val list = state?.notes
             val filter = state?.filter.orEmpty()
-            if (list != null && list.isEmpty() && filter.isNotEmpty()) {
+            val dated = state?.from != null
+            if (list != null && list.isEmpty() && (filter.isNotEmpty() || dated)) {
                 item(key = "empty-filter") {
                     Column(Modifier.fillMaxWidth().padding(vertical = 48.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(if (filter.size == 1) "No notes for this habit yet" else "No notes for these habits yet", style = type.titleMedium, color = colors.onSurface)
-                        TextButton(onClick = { viewModel.setFilter(emptySet()) }) { Text("Show all notes") }
+                        Text(
+                            when {
+                                dated && filter.isEmpty() -> "No notes in these dates"
+                                filter.size == 1 -> "No notes for this habit yet"
+                                else -> "No notes for these habits yet"
+                            },
+                            style = type.titleMedium,
+                            color = colors.onSurface,
+                        )
+                        TextButton(onClick = { viewModel.setFilter(emptySet()); viewModel.setRange(null, null) }) { Text("Show all notes") }
                     }
                 }
             } else if (list != null && list.isEmpty()) {
@@ -106,6 +124,17 @@ fun JournalScreen(
         }
     }
     val ui = state
+    if (pickingRange && ui != null) {
+        DateRangeSheet(
+            from = ui.from,
+            to = ui.to,
+            weekStart = weekStart,
+            shortcutLabel = "All dates",
+            onApply = { a, b -> viewModel.setRange(a, b); pickingRange = false },
+            onShortcut = { viewModel.setRange(null, null); pickingRange = false },
+            onDismiss = { pickingRange = false },
+        )
+    }
     if (choosing && ui != null) {
         HabitFilterSheet(
             options = ui.options,
