@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -40,15 +42,24 @@ android {
     }
 
     signingConfigs {
-        // Set by CI (see docs/RELEASING.md). Without them, release builds use the debug key so
-        // they can still be installed locally.
+        // Set by CI (see docs/RELEASING.md), or locally by the gitignored keystore/keystore.properties.
+        // Without either, release builds use the debug key so they can still be installed locally.
         val keystore = System.getenv("SPROUT_KEYSTORE_PATH")
+        val local = rootProject.file("keystore/keystore.properties")
         if (keystore != null) {
             create("release") {
                 storeFile = file(keystore)
                 storePassword = System.getenv("SPROUT_KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("SPROUT_KEY_ALIAS")
                 keyPassword = System.getenv("SPROUT_KEY_PASSWORD")
+            }
+        } else if (local.exists()) {
+            val props = Properties().apply { local.inputStream().use { load(it) } }
+            create("release") {
+                storeFile = rootProject.file("keystore/" + props.getProperty("storeFile"))
+                storePassword = props.getProperty("storePassword")
+                keyAlias = props.getProperty("keyAlias")
+                keyPassword = props.getProperty("keyPassword")
             }
         }
     }

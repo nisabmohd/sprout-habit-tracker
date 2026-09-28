@@ -36,6 +36,9 @@ Releases are built by GitHub Actions (`.github/workflows/release.yml`) when a ta
 
 ## Signing locally
 
+The maintainer's key lives in `keystore/` at the repo root (`sprout-release.jks` and `keystore.properties` with its alias and passwords). The folder is gitignored; keep a backup of both files outside the repo. When `keystore/keystore.properties` exists, `./gradlew :app:assembleFossRelease` signs with it automatically.
+
+
 The build reads the same values from environment variables, so a local signed build is:
 
 ```sh

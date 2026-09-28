@@ -15,3 +15,6 @@ build/
 # Private planning notes, kept out of the public repo
 /CLAUDE.md
 /docs/PLAN.md
+
+# Release signing key and its passwords. Never commit; back them up elsewhere.
+/keystore/
