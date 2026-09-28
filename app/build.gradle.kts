@@ -17,8 +17,8 @@ android {
         applicationId = "app.sprout.habits"
         minSdk = 26
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.0.0"
+        versionCode = 6
+        versionName = "1.1.0"
         // Where the About screen's links point. Set once the GitHub repo exists.
         buildConfigField("String", "REPO_URL", "\"https://github.com/nisabmohd/sprout-habit-tracker\"")
         buildConfigField("String", "SPONSOR_URL", "\"https://github.com/sponsors/nisabmohd\"")

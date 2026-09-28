@@ -274,6 +274,10 @@
     <string name="date">Date</string>
     <string name="use_value">Choisir le %1$s</string>
     <string name="set_time">Valider l\'heure</string>
+    <string name="time_hour">Heure</string>
+    <string name="time_minute">Minute</string>
+    <string name="time_later">Plus tard</string>
+    <string name="time_earlier">Plus tôt</string>
     <string name="clear">Effacer</string>
     <string name="delete_habit_title">Supprimer %1$s ?</string>
     <string name="delete_habit_text">L\'habitude sera supprimée avec tout son historique et ses notes. Archivez-la plutôt pour les garder.</string>

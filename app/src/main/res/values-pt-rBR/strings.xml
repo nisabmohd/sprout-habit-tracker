@@ -274,6 +274,10 @@
     <string name="date">Data</string>
     <string name="use_value">Usar %1$s</string>
     <string name="set_time">Definir horário</string>
+    <string name="time_hour">Hora</string>
+    <string name="time_minute">Minuto</string>
+    <string name="time_later">Mais tarde</string>
+    <string name="time_earlier">Mais cedo</string>
     <string name="clear">Limpar</string>
     <string name="delete_habit_title">Excluir %1$s?</string>
     <string name="delete_habit_text">O hábito será excluído com todo o histórico e as notas. Arquive-o se quiser mantê-los.</string>

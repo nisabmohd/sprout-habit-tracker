@@ -274,6 +274,10 @@
     <string name="date">Datum</string>
     <string name="use_value">%1$s übernehmen</string>
     <string name="set_time">Zeit festlegen</string>
+    <string name="time_hour">Stunde</string>
+    <string name="time_minute">Minute</string>
+    <string name="time_later">Später</string>
+    <string name="time_earlier">Früher</string>
     <string name="clear">Zurücksetzen</string>
     <string name="delete_habit_title">%1$s löschen?</string>
     <string name="delete_habit_text">Die Gewohnheit wird mit ihrem gesamten Verlauf und allen Notizen gelöscht. Archiviere sie stattdessen, um beides zu behalten.</string>

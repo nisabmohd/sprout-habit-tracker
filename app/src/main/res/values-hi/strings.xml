@@ -274,6 +274,10 @@
     <string name="date">तारीख</string>
     <string name="use_value">%1$s चुनें</string>
     <string name="set_time">समय तय करें</string>
+    <string name="time_hour">घंटा</string>
+    <string name="time_minute">मिनट</string>
+    <string name="time_later">बाद में</string>
+    <string name="time_earlier">पहले</string>
     <string name="clear">हटाएं</string>
     <string name="delete_habit_title">%1$s मिटाएं?</string>
     <string name="delete_habit_text">इससे आदत अपने पूरे इतिहास और नोट के साथ मिट जाएगी। इन्हें रखने के लिए इसे संग्रह में डालें।</string>

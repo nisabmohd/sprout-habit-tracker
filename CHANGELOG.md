@@ -1,10 +1,11 @@
 # Changelog
 
-## Unreleased
+## 1.1.0
 
 New:
 
 - Check for updates (GitHub build): About has a "Check for updates" button, Sprout looks once a day on its own, and "Update" downloads the new version and opens Android's installer. More → About Sprout shows "Update available" when there is one. The F-Droid and Play builds are updated by their stores.
+- A simpler time picker for reminders (New habit and More → Default reminder): hour and minute tiles with arrows above and below, and an AM/PM switch. Tap an arrow, hold it to move faster, or drag a number up or down. Phones set to the 24-hour clock get 00–23 and no AM/PM.
 
 ## 1.0.0
 

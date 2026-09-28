@@ -34,7 +34,7 @@ Code: `ui/insights/`.
 
 ## Reminders
 
-Each habit can have one daily reminder on its scheduled days. The notification shows what's left for today and opens the habit when tapped. Reminders are exact when the user allows "Alarms & reminders", and otherwise arrive within 10 minutes. At 9 PM, habits that were skipped and ask for a note get a short prompt to add one.
+Each habit can have one daily reminder on its scheduled days. The time is set in a sheet with hour and minute steppers (tap or hold the arrows, or drag a number) and an AM/PM switch on 12-hour phones (`ui/components/TimePickerSheet.kt`). The notification shows what's left for today and opens the habit when tapped. Reminders are exact when the user allows "Alarms & reminders", and otherwise arrive within 10 minutes. At 9 PM, habits that were skipped and ask for a note get a short prompt to add one.
 
 Code: `notify/`, timing in `domain/ReminderTime.kt`.
 

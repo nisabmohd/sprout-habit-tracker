@@ -274,6 +274,10 @@
     <string name="date">日付</string>
     <string name="use_value">%1$s にする</string>
     <string name="set_time">時刻を設定</string>
+    <string name="time_hour">時</string>
+    <string name="time_minute">分</string>
+    <string name="time_later">遅く</string>
+    <string name="time_earlier">早く</string>
     <string name="clear">クリア</string>
     <string name="delete_habit_title">%1$s を削除しますか？</string>
     <string name="delete_habit_text">この習慣と、そのすべての記録とメモが削除されます。残したい場合はアーカイブしてください。</string>

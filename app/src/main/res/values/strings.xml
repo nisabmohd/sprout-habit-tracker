@@ -277,6 +277,10 @@
     <string name="date">Date</string>
     <string name="use_value">Use %1$s</string>
     <string name="set_time">Set time</string>
+    <string name="time_hour">Hour</string>
+    <string name="time_minute">Minute</string>
+    <string name="time_later">Later</string>
+    <string name="time_earlier">Earlier</string>
     <string name="clear">Clear</string>
     <string name="delete_habit_title">Delete %1$s?</string>
     <string name="delete_habit_text">This removes the habit with all its history and notes. Archive it instead to keep them.</string>
