@@ -98,9 +98,6 @@
     <string name="new_habit">New habit</string>
     <string name="of_today">of today</string>
     <string name="of_the_day">of the day</string>
-    <string name="count_done">%1$d\u00A0done</string>
-    <string name="count_partial">%1$d\u00A0partial</string>
-    <string name="count_left">%1$d\u00A0left</string>
     <string name="today_empty">Nothing scheduled for this day</string>
     <string name="today_empty_hint">Tap + to add a habit.</string>
     <string name="manage_habits">Manage habits</string>
@@ -168,7 +165,6 @@
     <string name="accent">Accent</string>
     <string name="text_size">Text size</string>
     <string name="language">Language</string>
-    <string name="language_desc">Choose the language Sprout uses</string>
     <string name="backup_error_damaged">This backup is damaged and can\'t be imported.</string>
     <string name="backup_error_not_sprout">This isn\'t a Sprout backup file.</string>
     <string name="backup_error_newer">This backup was made by a newer version of Sprout. Update the app, then try again.</string>
@@ -318,6 +314,9 @@
     <string name="day_streak">day streak</string>
     <string name="last_7_days">Last 7 days</string>
     <string name="pick_a_habit">Pick a habit</string>
+    <string name="language_system">System default</string>
+    <string name="help_translate">Help translate Sprout</string>
+    <string name="help_translate_desc">Add or improve a language</string>
     <plurals name="journal_show_for_habits">
         <item quantity="one">Show notes for %1$d habit</item>
         <item quantity="other">Show notes for %1$d habits</item>
@@ -361,5 +360,17 @@
     <plurals name="note_count">
         <item quantity="one">%1$d note</item>
         <item quantity="other">%1$d notes</item>
+    </plurals>
+    <plurals name="count_done">
+        <item quantity="one">%1$d\u00A0done</item>
+        <item quantity="other">%1$d\u00A0done</item>
+    </plurals>
+    <plurals name="count_partial">
+        <item quantity="one">%1$d\u00A0partial</item>
+        <item quantity="other">%1$d\u00A0partial</item>
+    </plurals>
+    <plurals name="count_left">
+        <item quantity="one">%1$d\u00A0left</item>
+        <item quantity="other">%1$d\u00A0left</item>
     </plurals>
 </resources>

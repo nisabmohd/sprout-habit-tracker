@@ -67,7 +67,10 @@ android {
 
     androidResources {
         // Only the languages the app ships; drops every other locale from AndroidX resources.
-        localeFilters += listOf("en")
+        // Keep in step with the values-* folders.
+        localeFilters += listOf("en", "de", "es", "fr", "hi", "ja", "pt-rBR")
+        // Lists those languages in Android 13+'s per-app language setting.
+        generateLocaleConfig = true
     }
 
     packaging {

@@ -1,5 +1,7 @@
 package app.sprout.habits
 
+import app.sprout.habits.notify.Notifications
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -26,8 +28,14 @@ class MainActivity : ComponentActivity() {
     /** A habit to open, from a tapped notification or widget; consumed by the nav host. */
     private val openHabit = MutableStateFlow<Long?>(null)
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLanguage.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Channel names follow the app language, which may have just changed.
+        Notifications.createChannels(this)
         if (savedInstanceState == null) handleIntent(intent)
         enableEdgeToEdge()
         val container = (application as SproutApp).container

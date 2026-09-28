@@ -4,7 +4,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.res.stringResource
 import app.sprout.habits.ui.components.SproutSheet
+import android.app.Activity
 import android.os.Build
+import app.sprout.habits.AppLanguage
+import app.sprout.habits.ui.components.ChoiceRow
+import app.sprout.habits.ui.components.ChoiceSheet
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -104,6 +108,7 @@ fun MoreScreen(
     val theme = settings.theme
     var pickingWeekStart by remember { mutableStateOf(false) }
     var pickingReminder by remember { mutableStateOf(false) }
+    var pickingLanguage by remember { mutableStateOf(false) }
     fun save(block: suspend SettingsRepository.() -> Unit) { scope.launch { repository.block() } }
 
     Box(Modifier.fillMaxSize()) {
@@ -163,6 +168,12 @@ fun MoreScreen(
             item(key = "general") {
                 SectionLabel(stringResource(R.string.general))
                 SettingsCard {
+                    SettingsRow(stringResource(R.string.language), onClick = { pickingLanguage = true }) {
+                        val tag = AppLanguage.current(context)
+                        TrailingValue(AppLanguage.LANGUAGES.firstOrNull { it.tag == tag }?.nativeName ?: stringResource(R.string.language_system))
+                        Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null, modifier = Modifier.padding(start = 4.dp).size(20.dp))
+                    }
+                    CardDivider()
                     SettingsRow(stringResource(R.string.week_starts_on), onClick = { pickingWeekStart = true }) {
                         TrailingValue(settings.weekStart.getDisplayName(TextStyle.FULL, Locale.getDefault()))
                     }
@@ -172,13 +183,6 @@ fun MoreScreen(
                     }
                     CardDivider()
                     SettingsRow(stringResource(R.string.notifications), onClick = { Notifications.openSettings(context) }) { TrailingValue(stringResource(R.string.system_settings)) }
-                    // Android 13+ keeps a language per app in system settings; older versions follow the phone.
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        CardDivider()
-                        SettingsRow(stringResource(R.string.language), stringResource(R.string.language_desc), onClick = { openLanguageSettings(context) }) {
-                            TrailingValue(Locale.getDefault().getDisplayLanguage(Locale.getDefault()).replaceFirstChar { it.titlecase(Locale.getDefault()) })
-                        }
-                    }
                 }
             }
 
@@ -195,39 +199,28 @@ fun MoreScreen(
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
 
+    if (pickingLanguage) {
+        LanguageSheet(
+            current = AppLanguage.current(context),
+            onPick = { tag ->
+                pickingLanguage = false
+                (context as? Activity)?.let { AppLanguage.set(it, tag) }
+            },
+            onDismiss = { pickingLanguage = false },
+        )
+    }
+
     if (pickingWeekStart) {
-        SproutSheet(onDismissRequest = { pickingWeekStart = false }) {
-            Column(Modifier.verticalScroll(rememberScrollState()).padding(start = 12.dp, end = 12.dp, bottom = 24.dp).navigationBarsPadding()) {
-                Text(
-                    stringResource(R.string.week_starts_on),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(start = 12.dp, bottom = 8.dp),
-                )
-                listOf(DayOfWeek.MONDAY, DayOfWeek.SUNDAY, DayOfWeek.SATURDAY).forEach { day ->
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 56.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .selectable(settings.weekStart == day, role = Role.RadioButton) {
-                                save { setWeekStart(day) }
-                                pickingWeekStart = false
-                            }
-                            .padding(horizontal = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        RadioButton(selected = settings.weekStart == day, onClick = null)
-                        Text(
-                            day.getDisplayName(TextStyle.FULL, Locale.getDefault()),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 12.dp),
-                        )
-                    }
+        ChoiceSheet(title = stringResource(R.string.week_starts_on), onDismiss = { pickingWeekStart = false }) {
+            listOf(DayOfWeek.MONDAY, DayOfWeek.SUNDAY, DayOfWeek.SATURDAY).forEach { day ->
+                ChoiceRow(day.getDisplayName(TextStyle.FULL, Locale.getDefault()), null, settings.weekStart == day) {
+                    save { setWeekStart(day) }
+                    pickingWeekStart = false
                 }
             }
         }
     }
+
     if (pickingReminder) {
         TimePickerSheet(
             title = stringResource(R.string.default_reminder),
@@ -298,8 +291,3 @@ private fun TextSizeRow(scale: Float, onChange: (Float) -> Unit) {
 }
 
 
-/** The system's per-app language page (Android 13+). */
-private fun openLanguageSettings(context: android.content.Context) {
-    val intent = android.content.Intent(android.provider.Settings.ACTION_APP_LOCALE_SETTINGS, android.net.Uri.parse("package:${context.packageName}"))
-    runCatching { context.startActivity(intent) }
-}

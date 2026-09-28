@@ -46,6 +46,15 @@ adb shell settings put system font_scale 2.0
 3. Add a check to `tools/verify/smoke.py` and describe the feature in `.claude/skills/<feature>/SKILL.md` (what it does, where the code is, how to verify it, anything that tripped you up). The existing skills are good examples.
 4. Update `docs/FEATURES.md` if users will notice the change.
 
+## Translations
+
+Sprout ships in English, Hindi, Spanish, German, French, Portuguese (Brazil) and Japanese. All UI text is in `app/src/main/res/values/strings.xml`; each language has its own `values-xx/strings.xml` with the same keys.
+
+- **Improve a language:** edit its `values-xx/strings.xml` and open a pull request.
+- **Add a language:** copy `values/strings.xml` to `values-xx/` (for example `values-ta` for Tamil), translate every string, then add the tag to `localeFilters` in `app/build.gradle.kts` and to `AppLanguage.LANGUAGES` (native name and English name) so it shows in the Language sheet.
+- Keep every placeholder (`%1$s`, `%2$d`, `%%`) and keep plurals as `<plurals>`. You can change the order of placeholders to suit the sentence.
+- Use the app's words: Done, Partial, Skip / Skipped, Note, Add note, Journal. Never "reflect" or "reflection". Keep it short and plain.
+
 ## Pull requests
 
 Keep each pull request to one change, explain what it does and why, and include a screenshot for anything visual. CI runs the unit tests and builds both flavors on every pull request.

@@ -39,6 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
@@ -221,9 +222,9 @@ private fun ScoreCard(state: TodayUiState) {
 /** "1 done · 2 partial · 3 left"; each count stays on one line with its word when text wraps. */
 @Composable
 private fun summary(state: TodayUiState): String = buildList {
-    add(stringResource(R.string.count_done, state.doneCount))
-    if (state.partialCount > 0) add(stringResource(R.string.count_partial, state.partialCount))
-    if (state.openCount > 0) add(stringResource(R.string.count_left, state.openCount))
+    add(pluralStringResource(R.plurals.count_done, state.doneCount, state.doneCount))
+    if (state.partialCount > 0) add(pluralStringResource(R.plurals.count_partial, state.partialCount, state.partialCount))
+    if (state.openCount > 0) add(pluralStringResource(R.plurals.count_left, state.openCount, state.openCount))
 }.joinToString(" · ")
 
 /** One bar per habit: solid when done, part-filled when partial, faint when skipped. */

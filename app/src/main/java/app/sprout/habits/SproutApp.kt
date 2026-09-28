@@ -1,11 +1,16 @@
 package app.sprout.habits
 
+import android.content.Context
 import android.app.Application
 import app.sprout.habits.notify.Notifications
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SproutApp : Application() {
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(AppLanguage.wrap(base))
+    }
+
     lateinit var container: AppContainer
         private set
 
