@@ -5,17 +5,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import app.sprout.habits.ui.components.NoteCard
-import androidx.compose.foundation.background
-import androidx.compose.ui.semantics.Role
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.clickable
@@ -36,20 +28,31 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalScrollCaptureInProgress
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.TabHeader
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.ui.graphics.Color
+import app.sprout.habits.ui.today.UndoSnackbarHost
+import app.sprout.habits.ui.components.SproutSheet
+import app.sprout.habits.ui.components.NoteCardUi
+import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
+import android.content.Intent
 import app.sprout.habits.ui.components.DateRangeSheet
 import app.sprout.habits.ui.components.HabitFilterSheet
 import app.sprout.habits.ui.components.HeaderIconButton
-import app.sprout.habits.ui.theme.habitColors
 
 @Composable
 fun JournalScreen(
@@ -61,6 +64,17 @@ fun JournalScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var choosing by remember { mutableStateOf(false) }
     var pickingRange by remember { mutableStateOf(false) }
+    var actionsFor by remember { mutableStateOf<NoteCardUi?>(null) }
+    val snackbar = remember { SnackbarHostState() }
+    val deletedText = stringResource(R.string.note_deleted)
+    val undo = stringResource(R.string.action_undo)
+    LaunchedEffect(viewModel) {
+        viewModel.deleted.collectLatest { note ->
+            snackbar.currentSnackbarData?.dismiss()
+            val result = snackbar.showSnackbar(deletedText, actionLabel = undo, duration = SnackbarDuration.Short)
+            if (result == SnackbarResult.ActionPerformed) viewModel.restoreNote(note)
+        }
+    }
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
     val res = LocalContext.current.resources
@@ -72,16 +86,11 @@ fun JournalScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item(key = "title") {
-                Row(Modifier.fillMaxWidth().padding(start = 4.dp, top = 8.dp, bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        state?.rangeLabel?.let { Text(it, style = type.titleSmall, color = colors.onSurfaceVariant) }
-                        Text(stringResource(R.string.journal_title), style = type.headlineMedium, color = colors.onBackground)
-                    }
-                    // Every filter lives in a sheet: dates here, habits next to it.
+                // Every filter lives in a sheet: dates here, habits next to it.
+                TabHeader(stringResource(R.string.journal_title), subtitle = state?.rangeLabel, listSpacing = 8.dp) {
                     state?.let { ui ->
                         HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.filter_by_date), active = ui.from != null) { pickingRange = true }
                         if (ui.options.isNotEmpty()) {
-                            Spacer(Modifier.width(8.dp))
                             HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty()) { choosing = true }
                         }
                     }
@@ -122,7 +131,7 @@ fun JournalScreen(
                         modifier = Modifier.padding(start = 4.dp, top = 8.dp),
                     )
                 }
-                items(day.notes, key = { it.id }) { note -> NoteCard(note, onOpenNote) }
+                items(day.notes, key = { it.id }) { note -> NoteCard(note, onOpenNote, onLongPress = { actionsFor = it }) }
             }
         }
         // Hidden during a long screenshot, or it would be stamped into every captured frame.
@@ -134,9 +143,15 @@ fun JournalScreen(
                 containerColor = colors.primaryContainer,
                 contentColor = colors.onPrimaryContainer,
                 shape = RoundedCornerShape(18.dp),
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).semantics { contentDescription = addNote },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+                    // Moves up while the Undo snackbar shows, like on Today.
+                    .padding(bottom = if (snackbar.currentSnackbarData != null) 64.dp else 0.dp)
+                    .semantics { contentDescription = addNote },
             )
         }
+        UndoSnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp))
     }
     val ui = state
     if (pickingRange && ui != null) {
@@ -150,6 +165,14 @@ fun JournalScreen(
             onDismiss = { pickingRange = false },
         )
     }
+    actionsFor?.let { note ->
+        NoteActionsSheet(
+            note,
+            onEdit = onOpenNote?.let { open -> { actionsFor = null; open(note.id) } },
+            onDelete = { actionsFor = null; viewModel.deleteNote(note.id) },
+            onDismiss = { actionsFor = null },
+        )
+    }
     if (choosing && ui != null) {
         HabitFilterSheet(
             options = ui.options,
@@ -158,5 +181,43 @@ fun JournalScreen(
             onApply = { ids -> viewModel.setFilter(ids); choosing = false },
             onDismiss = { choosing = false },
         )
+    }
+}
+
+/** Long-press on a note: its habit and text on top, then Edit, Share and Delete. */
+@Composable
+private fun NoteActionsSheet(note: NoteCardUi, onEdit: (() -> Unit)?, onDelete: () -> Unit, onDismiss: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val type = MaterialTheme.typography
+    val context = LocalContext.current
+    val shareTitle = stringResource(R.string.action_share)
+    SproutSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(note.habitName, style = type.titleLarge, color = colors.onSurface)
+            Text(note.text, style = type.bodyMedium, color = colors.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+        if (onEdit != null) ActionRow(R.drawable.ic_habit_pen, stringResource(R.string.edit_note), colors.onSurface, onEdit)
+        ActionRow(R.drawable.ic_share, shareTitle, colors.onSurface) {
+            onDismiss()
+            val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, "${note.habitName}\n${note.text}")
+            context.startActivity(Intent.createChooser(send, shareTitle))
+        }
+        ActionRow(R.drawable.ic_delete, stringResource(R.string.delete_note), colors.error, onDelete)
+        Spacer(Modifier.padding(bottom = 12.dp).navigationBarsPadding())
+    }
+}
+
+@Composable
+private fun ActionRow(icon: Int, label: String, color: Color, onClick: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 24.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(painterResource(icon), contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
+        Text(label, style = MaterialTheme.typography.bodyLarge, color = color, modifier = Modifier.padding(start = 16.dp))
     }
 }

@@ -1,6 +1,5 @@
 package app.sprout.habits.ui.journal
 
-import app.sprout.habits.ui.datePattern
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,18 +7,23 @@ import app.sprout.habits.R
 import app.sprout.habits.Strings
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.HabitRepository
+import app.sprout.habits.data.Note
 import app.sprout.habits.ui.components.HabitFilterOption
 import app.sprout.habits.ui.components.NoteCardUi
+import app.sprout.habits.ui.datePattern
 import app.sprout.habits.ui.insights.InsightsViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Notes of one day under its header ("Today", "Yesterday", "Thursday, 24 Sep"). */
 @Immutable
@@ -39,7 +43,12 @@ data class JournalUi(
     val rangeLabel: String?,
 )
 
-class JournalViewModel(repository: HabitRepository, private val strings: Strings) : ViewModel() {
+class JournalViewModel(private val repository: HabitRepository, private val strings: Strings) : ViewModel() {
+    private val _deleted = Channel<Note>(Channel.CONFLATED)
+
+    /** Each note deleted from the long-press sheet, for the Undo snackbar. */
+    val deleted = _deleted.receiveAsFlow()
+
     private val filterIds = MutableStateFlow<Set<Long>>(emptySet())
     private val range = MutableStateFlow<Pair<LocalDate, LocalDate>?>(null)
 
@@ -85,6 +94,18 @@ class JournalViewModel(repository: HabitRepository, private val strings: Strings
 
     fun setFilter(habitIds: Set<Long>) {
         filterIds.value = habitIds
+    }
+
+    fun deleteNote(id: Long) {
+        viewModelScope.launch {
+            val note = repository.getNote(id) ?: return@launch
+            repository.deleteNote(id)
+            _deleted.send(note)
+        }
+    }
+
+    fun restoreNote(note: Note) {
+        viewModelScope.launch { repository.restoreNote(note) }
     }
 
     companion object {

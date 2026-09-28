@@ -90,16 +90,40 @@ fun HabitFilterSheet(
     }
 }
 
-/** A 48 dp round header button (calendar, filter), filled in when its filter is active. */
+/**
+ * A 48 dp round header button (back, close, save, edit, delete, calendar, filter), filled in when
+ * its filter is active. [primary] is the screen's main action (Save): filled with the primary color.
+ * Every screen header uses it so they all look the same.
+ */
 @Composable
-fun HeaderIconButton(icon: Int, label: String, active: Boolean = false, onClick: () -> Unit) {
+fun HeaderIconButton(
+    icon: Int,
+    label: String,
+    active: Boolean = false,
+    danger: Boolean = false,
+    primary: Boolean = false,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
     val colors = MaterialTheme.colorScheme
     IconButton(
         onClick = onClick,
+        enabled = enabled,
         modifier = Modifier.size(48.dp),
         colors = IconButtonDefaults.iconButtonColors(
-            containerColor = if (active) colors.primaryContainer else colors.surfaceContainerHigh,
-            contentColor = if (active) colors.onPrimaryContainer else colors.onSurface,
+            containerColor = when {
+                primary -> colors.primary
+                active -> colors.primaryContainer
+                else -> colors.surfaceContainerHigh
+            },
+            contentColor = when {
+                primary -> colors.onPrimary
+                active -> colors.onPrimaryContainer
+                danger -> colors.error
+                else -> colors.onSurface
+            },
+            disabledContainerColor = colors.surfaceContainerHigh,
+            disabledContentColor = colors.onSurface.copy(alpha = 0.38f),
         ),
     ) {
         Icon(painterResource(icon), contentDescription = label, modifier = Modifier.size(22.dp))

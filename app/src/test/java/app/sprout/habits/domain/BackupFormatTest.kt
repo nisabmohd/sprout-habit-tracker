@@ -86,4 +86,27 @@ class BackupFormatTest {
         assertEquals(false, a.sameOutcomeAs(a.copy(status = EntryStatus.PARTIAL)))
         assertEquals(false, a.sameOutcomeAs(null))
     }
+
+    @Test fun oldDurationHabitsImportAsAmounts() {
+        val file = BackupManager.parse(
+            """{"app":"sprout","version":1,"exportedAt":5,
+               "habits":[
+                 {"id":1,"name":"Workout","icon":"dumbbell","colorHue":12,"trackType":"DURATION","target":45,"durationUnit":"MINUTES","daysMask":127,"createdAt":0},
+                 {"id":2,"name":"Sleep","icon":"bed","colorHue":215,"trackType":"DURATION","target":420,"durationUnit":"HOURS","daysMask":127,"createdAt":0},
+                 {"id":3,"name":"Walk","icon":"leaf","colorHue":150,"trackType":"AMOUNT","target":8000,"unit":"steps","step":500,"daysMask":127,"createdAt":0}],
+               "entries":[
+                 {"habitId":1,"date":"2026-09-27","status":"PARTIAL","amount":30},
+                 {"habitId":2,"date":"2026-09-27","status":"PARTIAL","amount":390}],"notes":[]}""".byteInputStream(),
+        )
+        val (habits, entries, _) = BackupManager.toDatabase(file)
+        val (workout, sleep, walk) = habits
+        assertEquals(TrackType.AMOUNT, workout.trackType)
+        assertEquals("45 min", workout.measure(workout.target))
+        assertEquals(5.0, workout.step, 0.0)
+        assertEquals("7 h", sleep.measure(sleep.target))
+        assertEquals(0.25, sleep.step, 0.0)
+        assertEquals(500.0, walk.step, 0.0)
+        assertEquals(30.0, entries.first { it.habitId == 1L }.amount, 0.0)
+        assertEquals(6.5, entries.first { it.habitId == 2L }.amount, 0.0)
+    }
 }

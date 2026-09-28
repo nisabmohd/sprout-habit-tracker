@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,14 +23,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.res.pluralStringResource
@@ -55,7 +52,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.getValue
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.HeaderIconButton
+import app.sprout.habits.ui.components.TabHeader
 import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.ui.components.DayMarkView
 import app.sprout.habits.ui.components.MarkColors
@@ -84,11 +84,9 @@ fun HabitsScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "header") {
-            Row(Modifier.fillMaxWidth().padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.tab_habits), style = MaterialTheme.typography.headlineMedium, color = colors.onBackground, modifier = Modifier.weight(1f))
-                HeaderButton(R.drawable.ic_drag, stringResource(R.string.manage_habits), onManage)
-                Spacer(Modifier.width(8.dp))
-                HeaderButton(R.drawable.ic_plus, stringResource(R.string.new_habit), onAddHabit)
+            TabHeader(stringResource(R.string.tab_habits), listSpacing = 12.dp) {
+                HeaderIconButton(R.drawable.ic_drag, stringResource(R.string.manage_habits), onClick = onManage)
+                HeaderIconButton(R.drawable.ic_plus, stringResource(R.string.new_habit), onClick = onAddHabit)
             }
         }
         item(key = "mode") {
@@ -118,17 +116,6 @@ fun HabitsScreen(
         }
     }
     UndoSnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp))
-    }
-}
-
-@Composable
-private fun HeaderButton(icon: Int, label: String, onClick: () -> Unit) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier.size(48.dp),
-        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-    ) {
-        Icon(painterResource(icon), contentDescription = label, modifier = Modifier.size(22.dp))
     }
 }
 

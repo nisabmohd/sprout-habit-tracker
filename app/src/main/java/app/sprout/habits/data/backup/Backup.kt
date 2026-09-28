@@ -1,6 +1,5 @@
 package app.sprout.habits.data.backup
 
-import app.sprout.habits.data.DurationUnit
 import app.sprout.habits.data.Entry
 import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.data.Habit
@@ -51,8 +50,10 @@ data class HabitDto(
     val trackType: String,
     val target: Double,
     val unit: String = "",
-    /** MINUTES or HOURS; absent in backups made before 0.3.0. */
+    /** Only for legacy DURATION habits (before 1.1): MINUTES or HOURS. */
     val durationUnit: String = "MINUTES",
+    /** Amount step; absent in backups made before 1.1. */
+    val step: Double = 1.0,
     val daysMask: Int,
     val reminderMinutes: Int? = null,
     val askForNote: Boolean = false,
@@ -111,7 +112,7 @@ class BackupManager(
             exportedAt = now,
             habits = habits.map {
                 HabitDto(
-                    it.id, it.name, it.icon, it.colorHue, it.trackType.name, it.target, it.unit, it.durationUnit.name, it.daysMask,
+                    it.id, it.name, it.icon, it.colorHue, it.trackType.name, it.target, it.unit, it.durationUnit.name, it.step, it.daysMask,
                     it.reminderMinutes, it.askForNote, it.showOnWidget, it.sortOrder, it.archived, it.createdAt,
                 )
             },
@@ -138,27 +139,10 @@ class BackupManager(
 
     /** Replaces everything in the database with [backup]. Validates first; on error nothing changes. */
     suspend fun restore(backup: BackupFile) {
-        val habits = backup.habits.map {
-            Habit(
-                id = it.id, name = it.name, icon = it.icon, colorHue = it.colorHue,
-                trackType = enumOr(it.trackType, TrackType.CHECK), target = it.target, unit = it.unit,
-                durationUnit = enumOr(it.durationUnit, DurationUnit.MINUTES),
-                daysMask = it.daysMask and 0b111_1111, reminderMinutes = it.reminderMinutes?.takeIf { m -> m in 0 until 24 * 60 },
-                askForNote = it.askForNote, showOnWidget = it.showOnWidget, sortOrder = it.sortOrder,
-                archived = it.archived, createdAt = it.createdAt,
-            )
-        }
-        val ids = habits.mapTo(HashSet()) { it.id }
-        if (ids.size != habits.size) throw BackupException(BackupException.Reason.DAMAGED, "This backup is damaged and can't be imported.")
-        val entries = backup.entries
-            .filter { it.habitId in ids }
-            .map { Entry(it.habitId, parseDate(it.date), enumOr(it.status, EntryStatus.DONE), it.amount, it.loggedAt) }
-            .distinctBy { it.habitId to it.date }
-        val notes = backup.notes
-            .filter { it.habitId in ids }
-            .map { Note(it.id, it.habitId, parseDate(it.date), it.text, it.updatedAt) }
-            .distinctBy { it.id }
+        val (habits, entries, notes) = toDatabase(backup)
         repository.replaceAll(habits, entries, notes)
+        // The restored habits replace the sample ones; their ids may match, so forget them.
+        settings.setSampleHabitIds(emptySet())
         backup.settings?.let { dto ->
             val current = settings.settings.first()
             settings.restore(
@@ -190,6 +174,46 @@ class BackupManager(
             encodeDefaults = true
         }
 
+        /** The rows [backup] restores. Throws [BackupException] when habit ids repeat. */
+        fun toDatabase(backup: BackupFile): Triple<List<Habit>, List<Entry>, List<Note>> {
+            // Backups from before 1.1 can hold DURATION habits, stored in minutes. They become AMOUNT
+            // habits in "min" or "h", like database migration 3→4 does; hours divide amounts by 60.
+            val legacyHours = backup.habits.filter { it.trackType == "DURATION" && it.durationUnit == "HOURS" }.mapTo(HashSet()) { it.id }
+            val habits = backup.habits.map {
+                val duration = it.trackType == "DURATION"
+                val hours = it.id in legacyHours
+                Habit(
+                    id = it.id, name = it.name, icon = it.icon, colorHue = it.colorHue,
+                    trackType = if (duration) TrackType.AMOUNT else enumOr(it.trackType, TrackType.CHECK),
+                    target = if (hours) it.target / 60 else it.target,
+                    unit = when {
+                        hours -> "h"
+                        duration -> "min"
+                        else -> it.unit
+                    },
+                    step = when {
+                        hours -> 0.25
+                        duration -> 5.0
+                        else -> it.step.takeIf { s -> s > 0 } ?: 1.0
+                    },
+                    daysMask = it.daysMask and 0b111_1111, reminderMinutes = it.reminderMinutes?.takeIf { m -> m in 0 until 24 * 60 },
+                    askForNote = it.askForNote, showOnWidget = it.showOnWidget, sortOrder = it.sortOrder,
+                    archived = it.archived, createdAt = it.createdAt,
+                )
+            }
+            val ids = habits.mapTo(HashSet()) { it.id }
+            if (ids.size != habits.size) throw BackupException(BackupException.Reason.DAMAGED, "This backup is damaged and can't be imported.")
+            val entries = backup.entries
+                .filter { it.habitId in ids }
+                .map { Entry(it.habitId, parseDate(it.date), enumOr(it.status, EntryStatus.DONE), if (it.habitId in legacyHours) it.amount / 60 else it.amount, it.loggedAt) }
+                .distinctBy { it.habitId to it.date }
+            val notes = backup.notes
+                .filter { it.habitId in ids }
+                .map { Note(it.id, it.habitId, parseDate(it.date), it.text, it.updatedAt) }
+                .distinctBy { it.id }
+            return Triple(habits, entries, notes)
+        }
+
         /** Reads and checks a backup file without touching the database. */
         @OptIn(ExperimentalSerializationApi::class)
         fun parse(input: InputStream): BackupFile {
@@ -215,11 +239,10 @@ class BackupManager(
                 appendLine("date,habit,status,amount,target,unit,note")
                 for (e in rows) {
                     val h = byId[e.habitId] ?: continue
-                    val unit = if (h.trackType == TrackType.DURATION) "min" else h.unit
                     appendLine(
                         listOf(
                             LocalDate.ofEpochDay(e.date).toString(), h.name, e.status.name.lowercase(),
-                            number(e.amount), number(h.target), unit, noteFor[h.id to e.date].orEmpty(),
+                            number(e.amount), number(h.target), h.unit, noteFor[h.id to e.date].orEmpty(),
                         ).joinToString(",") { field(it) },
                     )
                 }

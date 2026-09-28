@@ -3,7 +3,6 @@ package app.sprout.habits.ui.today
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,22 +17,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalScrollCaptureInProgress
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -42,20 +36,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.BuildConfig
+import androidx.compose.runtime.getValue
 import app.sprout.habits.R
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.TextButton
+import app.sprout.habits.ui.components.HeaderIconButton
+import app.sprout.habits.ui.components.TabHeader
 import app.sprout.habits.support.SupportPromptDialog
 import app.sprout.habits.ui.openUrl
 import app.sprout.habits.domain.DayOutcome
-import app.sprout.habits.ui.components.CappedFontScale
-import app.sprout.habits.ui.components.ProgressRing
 import app.sprout.habits.ui.theme.habitColors
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -68,6 +63,9 @@ fun TodayScreen(
     onOpenHabit: (Long) -> Unit,
     /** Habit to preselect (0 = none) and the epoch day shown. */
     onAddNote: (Long, Long) -> Unit,
+    /** True while the sample habits a fresh install starts with are still there. */
+    hasSampleData: Boolean = false,
+    onRemoveSampleData: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
@@ -98,6 +96,11 @@ fun TodayScreen(
             onToggle = viewModel::toggleDone,
             onLongPress = viewModel::openLogSheet,
             onOpen = onOpenHabit,
+            sampleCard = if (hasSampleData) {
+                { SampleDataCard(onRemove = onRemoveSampleData) }
+            } else {
+                null
+            },
         )
         val addNote = stringResource(R.string.add_note)
         // Lift the button above the Undo snackbar while it shows, so the two never overlap.
@@ -133,6 +136,7 @@ private fun TodayContent(
     onToggle: (Long) -> Unit,
     onLongPress: (Long) -> Unit,
     onOpen: (Long) -> Unit,
+    sampleCard: (@Composable () -> Unit)?,
 ) {
     LazyColumn(
         Modifier.fillMaxSize(),
@@ -140,6 +144,7 @@ private fun TodayContent(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item(key = "header") { Header(state, onAddHabit) }
+        if (sampleCard != null) item(key = "sample") { sampleCard() }
         item(key = "score") { ScoreCard(state) }
         if (!state.loading && state.habits.isEmpty()) {
             item(key = "empty") { EmptyState() }
@@ -160,26 +165,12 @@ private fun TodayContent(
 
 @Composable
 private fun Header(state: TodayUiState, onAddHabit: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Row(
-        Modifier.fillMaxWidth().padding(horizontal = 4.dp).padding(bottom = 10.dp),
-        verticalAlignment = Alignment.Bottom,
+    TabHeader(
+        title = if (state.isToday) stringResource(R.string.today) else state.selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+        subtitle = state.dateLabel,
+        listSpacing = 8.dp,
     ) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(state.dateLabel, style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant)
-            Text(
-                if (state.isToday) stringResource(R.string.today) else state.selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
-                style = MaterialTheme.typography.headlineMedium,
-                color = colors.onBackground,
-            )
-        }
-        IconButton(
-            onClick = onAddHabit,
-            modifier = Modifier.size(48.dp),
-            colors = IconButtonDefaults.iconButtonColors(containerColor = colors.surfaceContainerHigh, contentColor = colors.onSurface),
-        ) {
-            Icon(painterResource(R.drawable.ic_plus), contentDescription = stringResource(R.string.new_habit), modifier = Modifier.size(22.dp))
-        }
+        HeaderIconButton(R.drawable.ic_plus, stringResource(R.string.new_habit), onClick = onAddHabit)
     }
 }
 
@@ -267,5 +258,29 @@ private fun EmptyState() {
     ) {
         Text(stringResource(R.string.today_empty), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
         Text(stringResource(R.string.today_empty_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/** Shown while the sample habits are there: what they are, and one tap to remove them. */
+@Composable
+private fun SampleDataCard(onRemove: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val type = MaterialTheme.typography
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .background(colors.primaryContainer, RoundedCornerShape(24.dp))
+            .padding(start = 16.dp, end = 8.dp, top = 14.dp, bottom = 6.dp),
+    ) {
+        Text(stringResource(R.string.sample_card_title), style = type.titleSmall, color = colors.onPrimaryContainer)
+        Text(
+            stringResource(R.string.sample_card_body),
+            style = type.bodyMedium,
+            color = colors.onPrimaryContainer,
+            modifier = Modifier.padding(top = 2.dp, end = 8.dp),
+        )
+        TextButton(onClick = onRemove, modifier = Modifier.align(Alignment.End).heightIn(min = 48.dp)) {
+            Text(stringResource(R.string.sample_remove), style = type.labelLarge, color = colors.onPrimaryContainer)
+        }
     }
 }

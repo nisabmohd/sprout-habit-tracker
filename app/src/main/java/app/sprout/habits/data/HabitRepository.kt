@@ -63,6 +63,9 @@ class HabitRepository(private val db: SproutDatabase) {
     }
     suspend fun deleteNote(id: Long) = notes.delete(id)
 
+    /** Puts a deleted note back exactly as it was (same id and time), for Undo. */
+    suspend fun restoreNote(note: Note) { notes.upsert(note) }
+
     // Backup
 
     suspend fun snapshot(): Triple<List<Habit>, List<Entry>, List<Note>> = db.withTransaction {

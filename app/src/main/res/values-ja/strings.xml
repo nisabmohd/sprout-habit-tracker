@@ -55,6 +55,9 @@
     <string name="amount_of_goal">%1$s / %2$s</string>
     <string name="not_logged_yet">未記録</string>
     <string name="edit_note">メモを編集</string>
+    <string name="action_share">共有</string>
+    <string name="delete_note">ノートを削除</string>
+    <string name="note_deleted">ノートを削除しました</string>
     <string name="new_note">新しいメモ</string>
     <string name="note_no_habits">まず習慣を追加してから、メモを書いてください。</string>
     <string name="choose_habit">習慣を選ぶ</string>
@@ -207,14 +210,13 @@
     <string name="color">色</string>
     <string name="how_track">どう記録しますか？</string>
     <string name="track_check">チェック</string>
-    <string name="track_amount">量</string>
-    <string name="track_duration">時間</string>
+    <string name="track_amount">数値</string>
     <string name="target">目標</string>
     <string name="unit">単位</string>
     <string name="unit_placeholder">ページ</string>
-    <string name="minutes">分</string>
-    <string name="hours">時間</string>
     <string name="partial_hint">長押しすれば、いつでも一部だけ記録できます。</string>
+    <string name="step">刻み</string>
+    <string name="step_hint">習慣を長押しすると一部だけ記録できます。− / + とスライダーは刻みごとに動きます(1ページ、500歩、0.25時間など)。</string>
     <string name="days">曜日</string>
     <string name="reminder">リマインダー</string>
     <string name="reminder_hint">上で選んだ曜日・タップして変更</string>
@@ -381,4 +383,28 @@
     <plurals name="note_count">
         <item quantity="other">メモ %1$d 件</item>
     </plurals>
+
+    <!-- Sample data a fresh install starts with (data/SampleData.kt) -->
+    <string name="sample_wake">7時に起きる</string>
+    <string name="sample_read">読書</string>
+    <string name="sample_water">水を飲む</string>
+    <string name="sample_calm">落ち着く</string>
+    <string name="sample_workout">運動</string>
+    <string name="sample_vitamins">ビタミン</string>
+    <string name="sample_walk">外を歩く</string>
+    <string name="sample_journal">夜の日記</string>
+    <string name="sample_unit_pages">ページ</string>
+    <string name="sample_unit_glasses">杯</string>
+    <string name="sample_note_calm_today">つらい朝だったけど、いつもより早く気づけた。</string>
+    <string name="sample_note_read">8ページだけ。寝落ちした。22時前に始める。</string>
+    <string name="sample_note_workout">脚の日。調子が良く、スクワットを5kg増やした。</string>
+    <string name="sample_note_journal">今週のことを1ページ書いた。思ったより落ち着いている。</string>
+    <string name="sample_note_calm">デプロイが失敗して同僚にきつく当たった。疲れていて何も食べていなかった。</string>
+    <string name="sample_note_walk">仕事のあと湖のほとりを長く散歩。スマホはポケットのまま。</string>
+    <string name="sample_note_water">忙しい日で、ボトルを家に忘れた。</string>
+    <string name="sample_card_title">これはサンプルの習慣です</string>
+    <string name="sample_card_body">スワイプ、長押し、ノートの追加を試してみてください。自分の習慣を追加するときに削除できます。</string>
+    <string name="sample_remove">サンプルデータを削除</string>
+    <string name="sample_removed">サンプルデータを削除しました</string>
+    <string name="sample_remove_subtitle">サンプルの習慣と記録、ノートを削除します</string>
 </resources>

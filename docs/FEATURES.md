@@ -10,19 +10,25 @@ A habit card has four looks: open (an empty circle), done (filled with the habit
 
 Code: `ui/today/`, scoring in `domain/Scoring.kt`.
 
+Every tab starts with the same header (`ui/components/TabHeader.kt`): the title, the date or date range under it, and 48 dp round buttons on the right. Other screens use the same round buttons (`HeaderIconButton`) for back, close, edit, archive and delete.
+
+## Sample data
+
+A fresh install starts with eight sample habits (from the designs), two weeks of history and notes on several days, in the app language (`data/SampleData.kt`). They're added only on the very first launch, never on an update or after a restore. A card on Today and a More → General row remove them (only the sample habits, with their entries and notes); their ids are kept in DataStore (`sampleHabitIds`). Sample habits have reminders only in debug builds.
+
 ## Habits
 
-Habits are created and edited on one screen: name, icon (7 suggestions, or any of 29 in a searchable sheet), color, how it's tracked (check off, an amount with a unit, or minutes), the days it's scheduled, a reminder, whether to ask for a note after a skip, and whether it appears on widgets. Manage habits lets you drag to reorder, archive, restore and delete.
+Habits are created and edited on one screen: name, icon (7 suggestions, or any of 29 in a searchable sheet), color, how it's tracked (Check off, or Measure: a target in any unit, like 20 pages, 8000 steps, 45 min or 7 h), the days it's scheduled, a reminder, whether to ask for a note after a skip, and whether it appears on widgets. Manage habits lets you drag to reorder, archive, restore and delete.
 
-Duration habits are set in minutes or hours; amounts are stored in minutes and shown in the chosen unit ("1.5 / 2 h").
+Measure habits have a step: how far − / + and the slider move when logging (1 page, 500 steps, 0.25 h). Before 1.1 there was a separate Duration type; the database migration and backup import turn those habits into Measure habits in "min" (step 5) or "h" (step 0.25).
 
-The Habits tab has a Week view (seven day marks per habit, with arrows to earlier weeks; tap any past day to edit it in the same sheet as Today) and an Overall view (a 26-week heatmap per habit with its current and best streak). Tapping a habit opens its detail screen with the days done this month, best streak, note count, a month calendar (tap a past day to edit it) and its notes.
+The Habits tab has a Week view (seven day marks per habit, with arrows to earlier weeks; tap any past day to edit it in the same sheet as Today) and an Overall view (a 26-week heatmap per habit with its current and best streak). Tapping a habit opens its detail screen (round back, edit, archive and delete buttons in the header) with the days done this month, best streak, note count, a month calendar (tap a past day to edit it) and its notes.
 
 Code: `ui/edit/`, `ui/manage/`, `ui/habits/`, `ui/detail/`, statistics in `domain/Stats.kt`.
 
 ## Journal and notes
 
-A note belongs to one habit and one day. The Journal tab lists every note, newest first, under date headers; each card shows the habit, that day's outcome and when the note was written. The two buttons at the top open bottom sheets to filter by date range and by one or more habits. Notes can be added from Today, the Journal, a habit's detail screen or the press-and-hold sheet, and edited or deleted later.
+A note belongs to one habit and one day. The Journal tab lists every note, newest first, under date headers; each card shows the habit, that day's outcome and when the note was written. The two buttons at the top open bottom sheets to filter by date range and by one or more habits. Notes can be added from Today, the Journal, a habit's detail screen or the press-and-hold sheet, and edited or deleted later. Press and hold a note card in the Journal for a sheet with Edit note, Share and Delete note; deleting shows an Undo snackbar.
 
 Code: `ui/journal/`, `ui/note/`.
 

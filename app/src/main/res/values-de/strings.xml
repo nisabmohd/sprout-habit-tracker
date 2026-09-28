@@ -55,6 +55,9 @@
     <string name="amount_of_goal">%1$s von %2$s</string>
     <string name="not_logged_yet">Noch nicht eingetragen</string>
     <string name="edit_note">Notiz bearbeiten</string>
+    <string name="action_share">Teilen</string>
+    <string name="delete_note">Notiz löschen</string>
+    <string name="note_deleted">Notiz gelöscht</string>
     <string name="new_note">Neue Notiz</string>
     <string name="note_no_habits">Füge zuerst eine Gewohnheit hinzu und schreib dann eine Notiz dazu.</string>
     <string name="choose_habit">Gewohnheit wählen</string>
@@ -207,14 +210,13 @@
     <string name="color">Farbe</string>
     <string name="how_track">Wie erfasst du es?</string>
     <string name="track_check">Abhaken</string>
-    <string name="track_amount">Menge</string>
-    <string name="track_duration">Dauer</string>
+    <string name="track_amount">Messen</string>
     <string name="target">Ziel</string>
     <string name="unit">Einheit</string>
     <string name="unit_placeholder">Seiten</string>
-    <string name="minutes">Minuten</string>
-    <string name="hours">Stunden</string>
     <string name="partial_hint">Mit langem Drücken kannst du jederzeit einen Teil eintragen.</string>
+    <string name="step">Schritt</string>
+    <string name="step_hint">Mit langem Drücken trägst du einen Teil ein. − / + und der Regler bewegen sich um den Schritt: 1 Seite, 500 Schritte, 0,25 h.</string>
     <string name="days">Tage</string>
     <string name="reminder">Erinnerung</string>
     <string name="reminder_hint">An den Tagen oben · zum Ändern tippen</string>
@@ -395,4 +397,28 @@
         <item quantity="one">%1$d Notiz</item>
         <item quantity="other">%1$d Notizen</item>
     </plurals>
+
+    <!-- Sample data a fresh install starts with (data/SampleData.kt) -->
+    <string name="sample_wake">Um 7 aufstehen</string>
+    <string name="sample_read">Lesen</string>
+    <string name="sample_water">Wasser trinken</string>
+    <string name="sample_calm">Ruhig bleiben</string>
+    <string name="sample_workout">Training</string>
+    <string name="sample_vitamins">Vitamine</string>
+    <string name="sample_walk">Draußen spazieren</string>
+    <string name="sample_journal">Abendtagebuch</string>
+    <string name="sample_unit_pages">Seiten</string>
+    <string name="sample_unit_glasses">Gläser</string>
+    <string name="sample_note_calm_today">Schwieriger Morgen, aber ich habe es früher bemerkt als sonst.</string>
+    <string name="sample_note_read">Nur 8 Seiten, bin eingeschlafen. Vor 22 Uhr anfangen.</string>
+    <string name="sample_note_workout">Beintag. Fühlte mich stark, 5 kg mehr bei Kniebeugen.</string>
+    <string name="sample_note_journal">Eine ganze Seite über die Woche geschrieben. Ruhiger als erwartet.</string>
+    <string name="sample_note_calm">Einen Kollegen angefahren, als das Deployment scheiterte. Ich war müde und hungrig.</string>
+    <string name="sample_note_walk">Langer Spaziergang am See nach der Arbeit. Das Handy blieb in der Tasche.</string>
+    <string name="sample_note_water">Voller Tag, die Flasche zu Hause vergessen.</string>
+    <string name="sample_card_title">Das sind Beispiel-Gewohnheiten</string>
+    <string name="sample_card_body">Probier Wischen, Gedrückthalten und Notizen aus. Entferne sie, wenn du deine eigenen anlegen willst.</string>
+    <string name="sample_remove">Beispieldaten entfernen</string>
+    <string name="sample_removed">Beispieldaten entfernt</string>
+    <string name="sample_remove_subtitle">Löscht die Beispiel-Gewohnheiten, ihren Verlauf und ihre Notizen</string>
 </resources>

@@ -41,7 +41,7 @@ class IconsAndNotesTest {
 
     private val today = LocalDate.of(2026, 9, 27).toEpochDay()
     private val read = Habit(name = "Read", icon = "menu_book", colorHue = 215, trackType = TrackType.AMOUNT, target = 20.0, unit = "pages")
-    private val workout = Habit(name = "Workout", icon = "fitness_center", colorHue = 12, trackType = TrackType.DURATION, target = 45.0)
+    private val workout = Habit(name = "Workout", icon = "fitness_center", colorHue = 12, trackType = TrackType.AMOUNT, target = 45.0, unit = "min", step = 5.0)
     private val calm = Habit(name = "Stay calm", icon = "self_improvement", colorHue = 275)
 
     @Test fun noteOutcomesReadLikeTheDesign() {

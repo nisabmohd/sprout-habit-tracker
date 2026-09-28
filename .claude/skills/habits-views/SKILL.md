@@ -7,7 +7,7 @@ description: The Habits tab (Week marks, Overall heatmap) and Habit detail (stat
 
 **Code**
 - `ui/habits/HabitsViewModel.kt` + `HabitsScreen.kt`: Week view queries only the visible week; Overall queries 26 weeks. Best streak in Overall is within that window.
-- `ui/detail/HabitDetailViewModel.kt` + `HabitDetailScreen.kt`: all entries of one habit (all-time best streak), month calendar, notes, archive/delete menu.
+- `ui/detail/HabitDetailViewModel.kt` + `HabitDetailScreen.kt`: all entries of one habit (all-time best streak), month calendar, notes, round header buttons for edit, archive and delete.
 - `ui/components/DayMark.kt`: the shared mark shapes (check, pie, dash, dashed ring, dotted ring, dot) also used by widgets.
 - `domain/Stats.kt`: `HabitHistory`, `score`, `currentStreak`, `bestStreak`, `counts`.
 

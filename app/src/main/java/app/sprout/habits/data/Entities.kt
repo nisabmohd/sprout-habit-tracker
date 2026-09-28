@@ -6,11 +6,15 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-enum class TrackType { CHECK, AMOUNT, DURATION }
+/**
+ * CHECK is done or not; AMOUNT counts toward a target in the habit's own unit (pages, min, h).
+ * Up to 1.0 there was also DURATION; database migration 3→4 and backup import turn it into AMOUNT.
+ */
+enum class TrackType { CHECK, AMOUNT }
 
 enum class EntryStatus { DONE, PARTIAL, SKIP }
 
-/** How a DURATION habit is shown and entered. Amounts are always stored in minutes. */
+/** Legacy (before 1.1): how a Duration habit was shown. Only kept so the habit table keeps its column. */
 enum class DurationUnit { MINUTES, HOURS }
 
 @Entity(tableName = "habit")
@@ -21,11 +25,13 @@ data class Habit(
     val icon: String,
     val colorHue: Int,
     val trackType: TrackType = TrackType.CHECK,
-    /** Daily goal for AMOUNT (in [unit]) and DURATION (in minutes); 1 for CHECK. */
+    /** Daily goal for AMOUNT, in [unit]; 1 for CHECK. Entry amounts are in the same unit. */
     val target: Double = 1.0,
     val unit: String = "",
-    /** For DURATION habits: shown in minutes or hours; [target] and amounts stay in minutes. */
+    /** Legacy, unused since 1.1 (see [DurationUnit]). */
     @ColumnInfo(defaultValue = "MINUTES") val durationUnit: DurationUnit = DurationUnit.MINUTES,
+    /** How much the amount sheet's − / + and slider move for AMOUNT, e.g. 500 steps or 0.25 h. */
+    @ColumnInfo(defaultValue = "1") val step: Double = 1.0,
     /** Scheduled weekdays, Monday = bit 0 … Sunday = bit 6. */
     val daysMask: Int = EVERY_DAY,
     /** Minutes after midnight, or null for no reminder. */

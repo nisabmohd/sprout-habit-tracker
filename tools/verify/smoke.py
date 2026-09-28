@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """End-to-end smoke check of every Sprout feature on a connected emulator or phone.
 
-Installs a fresh debug build (which seeds the sample habits from DevData), then runs one short
+Installs a fresh debug build (which seeds the sample habits from SampleData on first launch), then runs one short
 check per feature and prints PASS/FAIL. Exit code is the number of failures.
 
     ./gradlew :app:assemblePlayDebug
@@ -58,6 +58,16 @@ def today_shows_score_and_habits():
     assert d.exists("of today", timeout=5), "score card missing"
     assert d.exists("Wake up at 7"), "seeded habit missing"
     assert d.exists("done", contains=True), "summary line missing"
+
+
+@check
+def sample_data_on_first_launch():
+    # A fresh install starts with sample habits, a card to remove them, and notes on several days.
+    d.nav("Today")
+    d.scroll_to_top()
+    assert d.exists("These are sample habits"), "sample data card missing on Today"
+    d.nav("Journal")
+    assert d.exists("Yesterday"), "sample notes don't cover earlier days"
 
 
 @check
@@ -131,30 +141,37 @@ def new_habit_is_created():
 
 
 @check
-def duration_in_hours():
+def measure_with_step():
+    # Measure habit in hours with a quarter-hour step: − / + and the slider move by the step.
     d.nav("Today")
     d.scroll_to_top()
     d.tap("New habit")
     d.tap("Name")
     d.type_text("Deep work")
     d.back()
-    d.tap("Duration")
+    d.tap("Measure")
     d.tap_xy(*d.scroll_to("Target").center)
-    d.type_text("90")
+    d.type_text("1.5")
     d.back()
-    d.tap("Hours")
-    assert d.exists("1.5"), "90 minutes didn't convert to 1.5 hours"
+    d.tap("Unit")
+    d.type_text("h")
+    d.back()
+    d.tap_xy(*d.find("Step").center)
+    d.shell("input keyevent KEYCODE_MOVE_END")
+    d.shell("input keyevent KEYCODE_DEL")
+    d.type_text("0.25")
+    d.back()
     d.tap("Save")
     time.sleep(1)
     n = d.scroll_to("Deep work")
-    assert n and d.exists("1.5 h"), "hours habit doesn't show its goal in hours"
+    assert n and d.exists("1.5 h"), "measure habit doesn't show its goal"
     d.long_press("Deep work")
-    assert d.exists("Goal 1.5 h · today"), "sheet header not in hours"
+    assert d.exists("Goal 1.5 h · today"), "sheet header missing the goal"
     d.tap("More")
     d.tap("More")
-    assert d.exists("0.5", contains=True), "stepper doesn't step by a quarter hour"
+    assert d.exists("0.5", contains=True), "stepper doesn't move by the habit's step"
     d.tap("Save")
-    assert d.exists("0.5 / 1.5 h"), "partial hours not shown on the card"
+    assert d.exists("0.5 / 1.5 h"), "partial amount not shown on the card"
 
 
 @check
@@ -311,6 +328,24 @@ def icon_picker():
 
 
 @check
+def journal_long_press_actions():
+    d.nav("Journal")
+    d.long_press("Rough morning, but I noticed it sooner than usual.")
+    for label in ["Edit note", "Share", "Delete note"]:
+        assert d.exists(label), f"long-press sheet missing {label}"
+    d.back()
+
+
+@check
+def detail_header_buttons():
+    d.nav("Habits")
+    d.tap("Wake up at 7")
+    for label in ["Back", "Edit habit", "Archive", "Delete"]:
+        assert d.find(label), f"habit page header missing {label}"
+    d.tap("Back")
+
+
+@check
 def journal_filter_by_habit():
     d.nav("Journal")
     d.tap("Filter by habit")
@@ -322,7 +357,7 @@ def journal_filter_by_habit():
     assert not d.exists("Smoke test note", timeout=1), "another habit's note shown under the filter"
     d.tap("Filter by habit")
     d.tap("Clear")
-    d.tap("Walk outside")  # the one habit no check writes a note for
+    d.tap("Deep work")  # made by measure_with_step; no sample note and no check writes one
     d.tap("Show notes for 1 habit")
     time.sleep(1)
     assert d.exists("No notes for this habit yet"), "empty filter message missing"
@@ -341,7 +376,7 @@ def journal_filter_by_date():
     d.tap("Show", contains=True)
     time.sleep(1)
     assert d.exists("Rough morning", contains=True), "today's note missing under a today-only range"
-    assert d.exists(f"{today.day} ", contains=True), "range label missing above the title"
+    assert d.exists(f"{today.day} ", contains=True), "range label missing under the title"
     d.tap("Filter by date")
     d.tap("All dates")
     assert d.exists("Journal"), "Journal missing after clearing dates"

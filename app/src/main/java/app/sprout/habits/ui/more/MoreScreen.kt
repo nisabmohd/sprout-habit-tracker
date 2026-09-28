@@ -2,18 +2,13 @@ package app.sprout.habits.ui.more
 
 import app.sprout.habits.ui.update.UpdateBadge
 import app.sprout.habits.domain.isNewerVersion
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.res.stringResource
-import app.sprout.habits.ui.components.SproutSheet
 import android.app.Activity
 import android.os.Build
 import app.sprout.habits.AppLanguage
 import app.sprout.habits.ui.components.ChoiceRow
 import app.sprout.habits.ui.components.ChoiceSheet
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,12 +16,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,7 +37,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,7 +49,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import app.sprout.habits.BuildConfig
+import androidx.compose.runtime.setValue
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.TabHeader
 import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.data.Settings
 import app.sprout.habits.data.SettingsRepository
@@ -76,7 +70,6 @@ import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import app.sprout.habits.ui.components.TimePickerSheet
-import androidx.compose.foundation.layout.navigationBarsPadding
 
 /** Accent choices when dynamic color is off: the app's green first, then the habit hues. */
 private val ACCENT_HUES = listOf(150f, 192f, 215f, 275f, 330f, 12f, 38f)
@@ -103,6 +96,7 @@ fun MoreScreen(
     repository: SettingsRepository,
     backup: BackupManager,
     onOpenAbout: () -> Unit,
+    onRemoveSampleData: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -120,7 +114,7 @@ fun MoreScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item(key = "title") {
-                Text(stringResource(R.string.tab_more), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp))
+                TabHeader(stringResource(R.string.tab_more), listSpacing = 8.dp)
             }
 
             item(key = "backup") {
@@ -185,6 +179,16 @@ fun MoreScreen(
                     }
                     CardDivider()
                     SettingsRow(stringResource(R.string.notifications), onClick = { Notifications.openSettings(context) }) { TrailingValue(stringResource(R.string.system_settings)) }
+                    if (settings.sampleHabitIds.isNotEmpty()) {
+                        val removed = stringResource(R.string.sample_removed)
+                        CardDivider()
+                        SettingsRow(stringResource(R.string.sample_remove), stringResource(R.string.sample_remove_subtitle), onClick = {
+                            onRemoveSampleData()
+                            scope.launch { snackbar.showSnackbar(removed) }
+                        }) {
+                            Icon(painterResource(R.drawable.ic_delete), contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+                        }
+                    }
                 }
             }
 

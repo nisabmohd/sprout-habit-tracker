@@ -55,6 +55,9 @@
     <string name="amount_of_goal">%2$s में से %1$s</string>
     <string name="not_logged_yet">अभी दर्ज नहीं</string>
     <string name="edit_note">नोट बदलें</string>
+    <string name="action_share">शेयर करें</string>
+    <string name="delete_note">नोट हटाएं</string>
+    <string name="note_deleted">नोट हटाया गया</string>
     <string name="new_note">नया नोट</string>
     <string name="note_no_habits">पहले एक आदत जोड़ें, फिर उसके बारे में नोट लिखें।</string>
     <string name="choose_habit">आदत चुनें</string>
@@ -207,14 +210,13 @@
     <string name="color">रंग</string>
     <string name="how_track">आप इसे कैसे दर्ज करेंगे?</string>
     <string name="track_check">टिक करें</string>
-    <string name="track_amount">मात्रा</string>
-    <string name="track_duration">समय</string>
+    <string name="track_amount">मापें</string>
     <string name="target">लक्ष्य</string>
     <string name="unit">इकाई</string>
     <string name="unit_placeholder">पन्ने</string>
-    <string name="minutes">मिनट</string>
-    <string name="hours">घंटे</string>
     <string name="partial_hint">दबाकर रखने से आप कभी भी इसका कुछ हिस्सा दर्ज कर सकते हैं।</string>
+    <string name="step">कदम</string>
+    <string name="step_hint">कुछ हिस्सा दर्ज करने के लिए आदत को दबाकर रखें। − / + और स्लाइडर कदम जितना बढ़ते हैं: 1 पेज, 500 कदम, 0.25 घंटा।</string>
     <string name="days">दिन</string>
     <string name="reminder">रिमाइंडर</string>
     <string name="reminder_hint">ऊपर चुने दिनों पर · बदलने के लिए टैप करें</string>
@@ -395,4 +397,28 @@
         <item quantity="one">%1$d नोट</item>
         <item quantity="other">%1$d नोट</item>
     </plurals>
+
+    <!-- Sample data a fresh install starts with (data/SampleData.kt) -->
+    <string name="sample_wake">7 बजे उठना</string>
+    <string name="sample_read">पढ़ना</string>
+    <string name="sample_water">पानी पीना</string>
+    <string name="sample_calm">शांत रहना</string>
+    <string name="sample_workout">व्यायाम</string>
+    <string name="sample_vitamins">विटामिन</string>
+    <string name="sample_walk">बाहर टहलना</string>
+    <string name="sample_journal">शाम की डायरी</string>
+    <string name="sample_unit_pages">पेज</string>
+    <string name="sample_unit_glasses">गिलास</string>
+    <string name="sample_note_calm_today">सुबह मुश्किल थी, पर इस बार मैंने जल्दी ध्यान दिया।</string>
+    <string name="sample_note_read">सिर्फ़ 8 पेज, नींद आ गई। रात 10 बजे से पहले शुरू करना है।</string>
+    <string name="sample_note_workout">पैरों का दिन। अच्छा लगा, स्क्वाट में 5 किलो बढ़ाया।</string>
+    <string name="sample_note_journal">हफ़्ते के बारे में पूरा एक पेज लिखा। उम्मीद से ज़्यादा शांत।</string>
+    <string name="sample_note_calm">डिप्लॉय फ़ेल होने पर एक साथी पर झल्ला गया। थका था और कुछ खाया नहीं था।</string>
+    <string name="sample_note_walk">काम के बाद झील के किनारे लंबी सैर। फ़ोन जेब में ही रहा।</string>
+    <string name="sample_note_water">व्यस्त दिन, बोतल घर पर भूल गया।</string>
+    <string name="sample_card_title">ये उदाहरण वाली आदतें हैं</string>
+    <string name="sample_card_body">स्वाइप करके, दबाकर रखकर और नोट जोड़कर देखें। अपनी आदतें जोड़ने से पहले इन्हें हटा दें।</string>
+    <string name="sample_remove">उदाहरण डेटा हटाएं</string>
+    <string name="sample_removed">उदाहरण डेटा हटाया गया</string>
+    <string name="sample_remove_subtitle">उदाहरण वाली आदतें, उनका इतिहास और नोट मिटाता है</string>
 </resources>

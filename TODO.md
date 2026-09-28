@@ -7,7 +7,7 @@ Open work, roughly in priority order. Pick one, open an issue to say you're on i
 - [ ] Google sign-in and Drive backup in the `play` flavor: built on the `drive-backup` branch (one library, Play Services Auth). Needs the Google Cloud OAuth client, then an end-to-end test and a merge.
 - [ ] In-app review (Play In-App Review library) in the `play` flavor, so Rate doesn't leave the app. Needs approval for the dependency.
 - [ ] Play build: update from Google Play with the In-App Updates library, after the Play Store listing. Needs approval for the dependency.
-
+- [ ] App journey for initial visit
 
 ## Before the first release
 

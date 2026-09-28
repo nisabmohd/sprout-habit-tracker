@@ -13,7 +13,6 @@ import app.sprout.habits.Strings
 import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.data.Habit
 import app.sprout.habits.domain.measure
-import app.sprout.habits.domain.toShown
 import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.data.TrackType
 import app.sprout.habits.ui.today.TodayViewModel.Companion.formatNumber
@@ -79,7 +78,7 @@ class ReminderNotifier(
             return when {
                 habit.trackType == TrackType.CHECK -> habit.name to strings(R.string.reminder_check)
                 amount > 0 -> strings(R.string.reminder_to_go, habit.name, habit.measure((habit.target - amount).coerceAtLeast(0.0))) to
-                    strings(R.string.reminder_progress, formatNumber(habit.toShown(amount)), habit.measure(habit.target))
+                    strings(R.string.reminder_progress, formatNumber(amount), habit.measure(habit.target))
                 else -> habit.name to strings(R.string.reminder_goal, habit.measure(habit.target))
             }
         }

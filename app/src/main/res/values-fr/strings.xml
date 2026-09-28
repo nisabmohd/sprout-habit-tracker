@@ -55,6 +55,9 @@
     <string name="amount_of_goal">%1$s sur %2$s</string>
     <string name="not_logged_yet">Pas encore noté</string>
     <string name="edit_note">Modifier la note</string>
+    <string name="action_share">Partager</string>
+    <string name="delete_note">Supprimer la note</string>
+    <string name="note_deleted">Note supprimée</string>
     <string name="new_note">Nouvelle note</string>
     <string name="note_no_habits">Ajoutez d\'abord une habitude, puis écrivez une note à son sujet.</string>
     <string name="choose_habit">Choisir l\'habitude</string>
@@ -207,14 +210,13 @@
     <string name="color">Couleur</string>
     <string name="how_track">Comment le suivre ?</string>
     <string name="track_check">Cocher</string>
-    <string name="track_amount">Quantité</string>
-    <string name="track_duration">Durée</string>
+    <string name="track_amount">Mesurer</string>
     <string name="target">Objectif</string>
     <string name="unit">Unité</string>
     <string name="unit_placeholder">pages</string>
-    <string name="minutes">Minutes</string>
-    <string name="hours">Heures</string>
     <string name="partial_hint">Vous pouvez toujours en noter une partie par un appui long.</string>
+    <string name="step">Pas</string>
+    <string name="step_hint">Appui long sur une habitude pour en noter une partie. − / + et le curseur avancent du pas : 1 page, 500 pas, 0,25 h.</string>
     <string name="days">Jours</string>
     <string name="reminder">Rappel</string>
     <string name="reminder_hint">Les jours ci-dessus · touchez pour modifier</string>
@@ -409,4 +411,28 @@
         <item quantity="other">%1$d notes</item>
         <item quantity="many">%1$d notes</item>
     </plurals>
+
+    <!-- Sample data a fresh install starts with (data/SampleData.kt) -->
+    <string name="sample_wake">Se lever à 7 h</string>
+    <string name="sample_read">Lire</string>
+    <string name="sample_water">Boire de l\'eau</string>
+    <string name="sample_calm">Rester calme</string>
+    <string name="sample_workout">Sport</string>
+    <string name="sample_vitamins">Vitamines</string>
+    <string name="sample_walk">Marcher dehors</string>
+    <string name="sample_journal">Journal du soir</string>
+    <string name="sample_unit_pages">pages</string>
+    <string name="sample_unit_glasses">verres</string>
+    <string name="sample_note_calm_today">Matinée difficile, mais je l\'ai remarqué plus tôt que d\'habitude.</string>
+    <string name="sample_note_read">Seulement 8 pages, je me suis endormi. Commencer avant 22 h.</string>
+    <string name="sample_note_workout">Jambes. Je me sentais fort, 5 kg de plus au squat.</string>
+    <string name="sample_note_journal">Une page entière sur la semaine. Plus calme que prévu.</string>
+    <string name="sample_note_calm">J\'ai été sec avec un collègue quand le déploiement a échoué. J\'étais fatigué et à jeun.</string>
+    <string name="sample_note_walk">Longue marche au bord du lac après le travail. Le téléphone est resté dans ma poche.</string>
+    <string name="sample_note_water">Journée chargée, gourde oubliée à la maison.</string>
+    <string name="sample_card_title">Ce sont des habitudes d\'exemple</string>
+    <string name="sample_card_body">Essayez de glisser, d\'appuyer longuement et d\'ajouter des notes. Supprimez-les quand vous voulez ajouter les vôtres.</string>
+    <string name="sample_remove">Supprimer les données d\'exemple</string>
+    <string name="sample_removed">Données d\'exemple supprimées</string>
+    <string name="sample_remove_subtitle">Supprime les habitudes d\'exemple, leur historique et leurs notes</string>
 </resources>

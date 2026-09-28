@@ -6,6 +6,19 @@ New:
 
 - Check for updates (GitHub build): About has a "Check for updates" button, Sprout looks once a day on its own, and "Update" downloads the new version and opens Android's installer. More → About Sprout shows "Update available" when there is one. The F-Droid and Play builds are updated by their stores.
 - A simpler time picker for reminders (New habit and More → Default reminder): hour and minute tiles with arrows above and below, and an AM/PM switch. Tap an arrow, hold it to move faster, or drag a number up or down. Phones set to the 24-hour clock get 00–23 and no AM/PM.
+- Amount and Duration are now one type, **Measure**: a target in any unit (20 pages, 8000 steps, 45 min, 7 h) and a **Step** that − / + and the slider move by (1 page, 500 steps, 0.25 h). Your Duration habits become Measure habits in min (step 5) or h (step 0.25), with their history converted; old backups import the same way.
+- New installs start with sample habits, two weeks of history and notes on several days, so every screen has something to show. A card on Today and More → Remove sample data delete them in one tap; your own habits stay. Updates don't get sample data.
+- Press and hold a note in the Journal to edit, share or delete it. Deleting shows Undo.
+- The widget picker shows a preview of each widget instead of the Sprout logo.
+
+Changed:
+
+- One header on every tab: the title on top, the date or date range under it, round buttons on the right, all in the same place.
+- Round buttons in every screen header: back or close on the left, and on New habit, Edit habit and notes, Save is a round ✓ button. A habit's page has Edit, Archive and Delete buttons, and a note has a Delete button, instead of a ⋮ menu.
+
+Fixed:
+
+- On New habit, the icon next to the name sat higher than the name box.
 
 ## 1.0.0
 

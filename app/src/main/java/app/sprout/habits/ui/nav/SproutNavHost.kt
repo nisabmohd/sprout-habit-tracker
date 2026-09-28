@@ -70,6 +70,8 @@ import app.sprout.habits.ui.more.AboutScreen
 import app.sprout.habits.ui.more.LicencesScreen
 import app.sprout.habits.ui.more.MoreScreen
 import app.sprout.habits.R
+import kotlinx.coroutines.launch
+import app.sprout.habits.data.SampleData
 import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.ui.today.TodayScreen
 import app.sprout.habits.ui.today.TodayViewModel
@@ -124,6 +126,8 @@ fun SproutNavHost(
                     onAddHabit = { navController.navigate(EditHabitRoute()) },
                     onOpenHabit = { id -> navController.navigate(HabitDetailRoute(id)) },
                     onAddNote = { habitId, day -> navController.navigate(WriteNoteRoute(habitId = habitId, epochDay = day)) },
+                    hasSampleData = settings.sampleHabitIds.isNotEmpty(),
+                    onRemoveSampleData = { container.appScope.launch { SampleData.remove(container.repository, container.settings) } },
                 )
                 }
             }
@@ -189,7 +193,13 @@ fun SproutNavHost(
             }
             composable<MoreRoute> {
                 TabFrame {
-                MoreScreen(settings, container.settings, container.backup, onOpenAbout = { navController.navigate(AboutRoute) })
+                MoreScreen(
+                    settings,
+                    container.settings,
+                    container.backup,
+                    onOpenAbout = { navController.navigate(AboutRoute) },
+                    onRemoveSampleData = { container.appScope.launch { SampleData.remove(container.repository, container.settings) } },
+                )
                 }
             }
             composable<AboutRoute> {

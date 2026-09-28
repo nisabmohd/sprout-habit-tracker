@@ -10,7 +10,7 @@ description: Build Sprout and check every feature on the emulator with the smoke
    JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew :app:testPlayDebugUnitTest :app:assemblePlayDebug
    ```
 2. Make sure an emulator or phone is connected (`adb devices`). If none: `~/Library/Android/sdk/emulator/emulator -avd Medium_Phone_API_36.1` in the background, then `adb wait-for-device`.
-3. Run the smoke suite. It uninstalls, installs a fresh debug build (sample habits from `DevData`), and runs one check per feature:
+3. Run the smoke suite. It uninstalls, installs a fresh debug build (sample habits from `data/SampleData.kt`, added on first launch), and runs one check per feature:
    ```sh
    python3 tools/verify/smoke.py            # everything
    python3 tools/verify/smoke.py today      # only checks whose name contains "today"

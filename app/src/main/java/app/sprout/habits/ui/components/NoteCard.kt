@@ -1,7 +1,7 @@
 package app.sprout.habits.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,7 +33,6 @@ import app.sprout.habits.data.Note
 import app.sprout.habits.data.TrackType
 import app.sprout.habits.domain.formatNumber
 import app.sprout.habits.domain.measure
-import app.sprout.habits.domain.toShown
 import app.sprout.habits.ui.theme.habitColors
 import java.time.Instant
 import java.time.LocalDate
@@ -82,7 +81,7 @@ data class NoteCardUi(
             EntryStatus.DONE -> DayMark(MarkKind.DONE, 1f) to
                 if (habit.trackType == TrackType.CHECK) strings(R.string.outcome_done) else strings(R.string.outcome_done_amount, habit.measure(entry.amount))
             EntryStatus.PARTIAL -> DayMark(MarkKind.PARTIAL, (entry.amount / habit.target).toFloat().coerceIn(0f, 1f)) to
-                strings(R.string.amount_of_goal, formatNumber(habit.toShown(entry.amount)), habit.measure(habit.target))
+                strings(R.string.amount_of_goal, formatNumber(entry.amount), habit.measure(habit.target))
             EntryStatus.SKIP -> DayMark(MarkKind.SKIP) to strings(R.string.outcome_skipped)
             null -> if (day < today) DayMark(MarkKind.SKIP) to strings(R.string.outcome_skipped) else DayMark(MarkKind.OPEN_TODAY) to strings(R.string.not_logged_yet)
         }
@@ -95,7 +94,7 @@ data class NoteCardUi(
  * and "[outcome] · [dateLabel]".
  */
 @Composable
-fun NoteCard(note: NoteCardUi, onOpen: ((Long) -> Unit)?, showHabit: Boolean = true, dateLabel: String? = null) {
+fun NoteCard(note: NoteCardUi, onOpen: ((Long) -> Unit)?, showHabit: Boolean = true, dateLabel: String? = null, onLongPress: ((NoteCardUi) -> Unit)? = null) {
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
     val hc = habitColors(note.hue)
@@ -105,7 +104,18 @@ fun NoteCard(note: NoteCardUi, onOpen: ((Long) -> Unit)?, showHabit: Boolean = t
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
             .background(colors.surfaceContainerLowest)
-            .then(if (onOpen != null) Modifier.clickable(onClickLabel = stringResource(R.string.edit_note)) { onOpen(note.id) } else Modifier)
+            .then(
+                if (onOpen != null || onLongPress != null) {
+                    Modifier.combinedClickable(
+                        onClickLabel = stringResource(R.string.edit_note),
+                        onLongClickLabel = stringResource(R.string.action_more_options),
+                        onLongClick = onLongPress?.let { { it(note) } },
+                        onClick = { onOpen?.invoke(note.id) },
+                    )
+                } else {
+                    Modifier
+                },
+            )
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

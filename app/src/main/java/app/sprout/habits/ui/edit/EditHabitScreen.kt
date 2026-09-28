@@ -24,10 +24,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -39,11 +37,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -51,7 +47,6 @@ import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -68,12 +63,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.HeaderIconButton
 import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.ui.components.ColorSwatchRow
 import app.sprout.habits.ui.components.Swatch
 import app.sprout.habits.data.HabitIcon
-import app.sprout.habits.data.DurationUnit
 import app.sprout.habits.data.TrackType
 import app.sprout.habits.notify.Notifications
 import app.sprout.habits.notify.rememberNotificationPermission
@@ -146,21 +143,17 @@ private fun EditHabitContent(
 
     Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().imePadding().focusRequester(focusSink).focusable()) {
         Row(
-            Modifier.fillMaxWidth().height(64.dp).padding(start = 8.dp, end = 16.dp, top = 8.dp),
+            Modifier.fillMaxWidth().height(64.dp).padding(start = 16.dp, end = 16.dp, top = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onClose) {
-                Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.action_close), modifier = Modifier.size(22.dp))
-            }
+            HeaderIconButton(R.drawable.ic_close, stringResource(R.string.action_close), onClick = onClose)
             Text(
                 stringResource(if (form.isNew) R.string.new_habit else R.string.edit_habit),
                 style = type.titleLarge,
                 color = colors.onBackground,
-                modifier = Modifier.weight(1f).padding(start = 8.dp),
+                modifier = Modifier.weight(1f).padding(start = 14.dp),
             )
-            Button(onClick = onSave, enabled = form.canSave, modifier = Modifier.height(40.dp)) {
-                Text(stringResource(R.string.action_save), style = type.labelLarge)
-            }
+            HeaderIconButton(R.drawable.ic_check, stringResource(R.string.action_save), primary = true, enabled = form.canSave, onClick = onSave)
         }
 
         Column(
@@ -173,7 +166,9 @@ private fun EditHabitContent(
             verticalArrangement = Arrangement.spacedBy(22.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(56.dp).background(hc.soft, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
+                // The text field keeps 8 dp above its outline for the floating label; match it so the
+                // tile lines up with the outline, not with the label space.
+                Box(Modifier.padding(top = 8.dp).size(56.dp).background(hc.soft, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
                     Icon(painterResource(form.icon.drawable), contentDescription = null, tint = hc.ink, modifier = Modifier.size(28.dp))
                 }
                 OutlinedTextField(
@@ -233,7 +228,7 @@ private fun EditHabitContent(
             }
 
             Section(stringResource(R.string.how_track)) {
-                val options = listOf(TrackType.CHECK to stringResource(R.string.track_check), TrackType.AMOUNT to stringResource(R.string.track_amount), TrackType.DURATION to stringResource(R.string.track_duration))
+                val options = listOf(TrackType.CHECK to stringResource(R.string.track_check), TrackType.AMOUNT to stringResource(R.string.track_amount))
                 // Each segment is a fixed share of the row, so labels stop scaling at 1.3x.
                 CappedFontScale {
                 SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
@@ -247,8 +242,8 @@ private fun EditHabitContent(
                     }
                 }
                 }
-                when (form.trackType) {
-                    TrackType.AMOUNT -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (form.trackType == TrackType.AMOUNT) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         NumberField(stringResource(R.string.target), form.target, Modifier.weight(1f)) { v -> onEdit { it.copy(target = v) } }
                         OutlinedTextField(
                             value = form.unit,
@@ -257,29 +252,17 @@ private fun EditHabitContent(
                             placeholder = { Text(stringResource(R.string.unit_placeholder)) },
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1.3f),
                         )
+                        NumberField(stringResource(R.string.step), form.step, Modifier.weight(0.9f)) { v -> onEdit { it.copy(step = v) } }
                     }
-                    TrackType.DURATION -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
-                        NumberField(stringResource(R.string.target), form.target, Modifier.weight(1f)) { v -> onEdit { it.copy(target = v) } }
-                        val units = listOf(DurationUnit.MINUTES to stringResource(R.string.minutes), DurationUnit.HOURS to stringResource(R.string.hours))
-                        CappedFontScale {
-                        SingleChoiceSegmentedButtonRow(Modifier.weight(1.3f)) {
-                            units.forEachIndexed { index, (value, label) ->
-                                SegmentedButton(
-                                    selected = form.durationUnit == value,
-                                    onClick = { edit { it.withDurationUnit(value) } },
-                                    shape = SegmentedButtonDefaults.itemShape(index, units.size),
-                                    icon = {},
-                                    modifier = Modifier.height(56.dp),
-                                ) { Text(label, style = type.labelLarge, maxLines = 1) }
-                            }
-                        }
-                        }
-                    }
-                    TrackType.CHECK -> Unit
                 }
-                Text(stringResource(R.string.partial_hint), style = type.labelMedium, fontWeight = FontWeight.Normal, color = colors.onSurfaceVariant)
+                Text(
+                    stringResource(if (form.trackType == TrackType.AMOUNT) R.string.step_hint else R.string.partial_hint),
+                    style = type.labelMedium,
+                    fontWeight = FontWeight.Normal,
+                    color = colors.onSurfaceVariant,
+                )
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

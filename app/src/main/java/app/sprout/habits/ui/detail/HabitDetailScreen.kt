@@ -22,13 +22,10 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,10 +33,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalScrollCaptureInProgress
@@ -54,7 +49,10 @@ import app.sprout.habits.ui.today.DayLogHost
 import app.sprout.habits.ui.today.UndoSnackbarHost
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.HeaderIconButton
 import app.sprout.habits.ui.components.MarkKind
 import app.sprout.habits.ui.manage.DeleteHabitDialog
 import app.sprout.habits.ui.theme.HabitColors
@@ -74,7 +72,6 @@ fun HabitDetailScreen(
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
     val hc = habitColors(ui.habit.colorHue.toFloat())
-    var menuOpen by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
     DayLogHost(viewModel.logger, snackbar)
@@ -87,28 +84,18 @@ fun HabitDetailScreen(
         ) {
             item(key = "bar") {
                 Row(Modifier.fillMaxWidth().height(64.dp).padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onBack, modifier = Modifier.padding(start = 0.dp)) {
-                        Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.action_back), modifier = Modifier.size(22.dp))
-                    }
+                    HeaderIconButton(R.drawable.ic_arrow_back, stringResource(R.string.action_back), onClick = onBack)
                     Spacer(Modifier.weight(1f))
-                    IconButton(onClick = onEdit) {
-                        Icon(painterResource(R.drawable.ic_habit_pen), contentDescription = stringResource(R.string.edit_habit), modifier = Modifier.size(22.dp))
-                    }
-                    Box {
-                        IconButton(onClick = { menuOpen = true }) {
-                            Icon(painterResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.action_more_options), modifier = Modifier.size(22.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        HeaderIconButton(R.drawable.ic_habit_pen, stringResource(R.string.edit_habit), onClick = onEdit)
+                        HeaderIconButton(
+                            if (ui.habit.archived) R.drawable.ic_unarchive else R.drawable.ic_archive,
+                            stringResource(if (ui.habit.archived) R.string.restore else R.string.archive),
+                        ) {
+                            viewModel.setArchived(!ui.habit.archived)
+                            if (!ui.habit.archived) onBack()
                         }
-                        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(if (ui.habit.archived) R.string.restore else R.string.archive)) },
-                                onClick = {
-                                    menuOpen = false
-                                    viewModel.setArchived(!ui.habit.archived)
-                                    if (!ui.habit.archived) onBack()
-                                },
-                            )
-                            DropdownMenuItem(text = { Text(stringResource(R.string.action_delete), color = colors.error) }, onClick = { menuOpen = false; deleting = true })
-                        }
+                        HeaderIconButton(R.drawable.ic_delete, stringResource(R.string.action_delete), danger = true) { deleting = true }
                     }
                 }
             }

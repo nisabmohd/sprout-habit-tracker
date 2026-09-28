@@ -1,37 +1,21 @@
 package app.sprout.habits.domain
 
-import app.sprout.habits.data.DurationUnit
 import app.sprout.habits.data.Habit
 import app.sprout.habits.data.TrackType
 
 /*
- * How a habit's amounts read. Durations are stored in minutes and shown in the unit the user
- * picked for that habit, so "90" in the database reads "1.5 h" for an hours habit.
+ * How a habit's amounts read. AMOUNT habits store and show amounts in their own unit, so a
+ * sleep habit with unit "h" stores 7.5 and reads "7.5 h".
  */
 
-private fun Habit.inHours() = trackType == TrackType.DURATION && durationUnit == DurationUnit.HOURS
+/** The habit's own unit for AMOUNT, or "" for CHECK. */
+fun Habit.displayUnit(): String = if (trackType == TrackType.AMOUNT) unit else ""
 
-/** "min", "h", the habit's own unit for AMOUNT, or "" for CHECK. */
-fun Habit.displayUnit(): String = when (trackType) {
-    TrackType.DURATION -> if (durationUnit == DurationUnit.HOURS) "h" else "min"
-    TrackType.AMOUNT -> unit
-    TrackType.CHECK -> ""
-}
-
-/** Multiply a shown value by this to get the stored one. */
-fun Habit.storedPerShown(): Double = if (inHours()) 60.0 else 1.0
-
-fun Habit.toShown(stored: Double): Double = stored / storedPerShown()
-
-/** The amount sheet's step: 5 min, a quarter hour, or 1. */
-fun Habit.step(): Double = when {
-    inHours() -> 0.25
-    trackType == TrackType.DURATION -> 5.0
-    else -> 1.0
-}
+/** The amount sheet's step: the habit's step for AMOUNT (1 if unset), else 1. */
+fun Habit.step(): Double = if (trackType == TrackType.AMOUNT && step > 0) step else 1.0
 
 /** "20 pages", "45 min", "1.5 h", or just "20" when there's no unit. */
-fun Habit.measure(stored: Double): String = "${formatNumber(toShown(stored))} ${displayUnit()}".trim()
+fun Habit.measure(value: Double): String = "${formatNumber(value)} ${displayUnit()}".trim()
 
 /** "15", "1.5", "1.25": up to two decimals, without trailing zeros. */
 fun formatNumber(value: Double): String {

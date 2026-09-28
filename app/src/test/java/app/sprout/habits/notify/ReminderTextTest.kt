@@ -17,8 +17,8 @@ class ReminderTextTest {
     @Test fun nothingLoggedStatesTheGoal() =
         assertEquals("Read" to "Goal today: 20 pages.", ReminderNotifier.reminderText(read, 0.0, TestStrings))
 
-    @Test fun durationUsesMinutes() {
-        val workout = Habit(name = "Workout", icon = "dumbbell", colorHue = 12, trackType = TrackType.DURATION, target = 45.0)
+    @Test fun minutesHabitReadsInMinutes() {
+        val workout = Habit(name = "Workout", icon = "dumbbell", colorHue = 12, trackType = TrackType.AMOUNT, target = 45.0, unit = "min", step = 5.0)
         assertEquals("Workout · 15 min to go" to "You're at 30 of 45 min today.", ReminderNotifier.reminderText(workout, 30.0, TestStrings))
     }
 

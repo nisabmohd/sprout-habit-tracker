@@ -58,6 +58,9 @@
     <string name="amount_of_goal">%1$s of %2$s</string>
     <string name="not_logged_yet">Not logged yet</string>
     <string name="edit_note">Edit note</string>
+    <string name="action_share">Share</string>
+    <string name="delete_note">Delete note</string>
+    <string name="note_deleted">Note deleted</string>
     <string name="new_note">New note</string>
     <string name="note_no_habits">Add a habit first, then write a note about it.</string>
     <string name="choose_habit">Choose habit</string>
@@ -210,14 +213,13 @@
     <string name="color">Color</string>
     <string name="how_track">How do you track it?</string>
     <string name="track_check">Check off</string>
-    <string name="track_amount">Amount</string>
-    <string name="track_duration">Duration</string>
+    <string name="track_amount">Measure</string>
     <string name="target">Target</string>
     <string name="unit">Unit</string>
     <string name="unit_placeholder">pages</string>
-    <string name="minutes">Minutes</string>
-    <string name="hours">Hours</string>
     <string name="partial_hint">You can always log part of it with a long press.</string>
+    <string name="step">Step</string>
+    <string name="step_hint">Long-press a habit to log part of it. − / + and the slider move by the step: 1 page, 500 steps, 0.25 h.</string>
     <string name="days">Days</string>
     <string name="reminder">Reminder</string>
     <string name="reminder_hint">On the days above · tap to change</string>
@@ -398,4 +400,28 @@
         <item quantity="one">%1$d\u00A0left</item>
         <item quantity="other">%1$d\u00A0left</item>
     </plurals>
+
+    <!-- Sample data a fresh install starts with (data/SampleData.kt) -->
+    <string name="sample_wake">Wake up at 7</string>
+    <string name="sample_read">Read</string>
+    <string name="sample_water">Drink water</string>
+    <string name="sample_calm">Stay calm</string>
+    <string name="sample_workout">Workout</string>
+    <string name="sample_vitamins">Vitamins</string>
+    <string name="sample_walk">Walk outside</string>
+    <string name="sample_journal">Evening journal</string>
+    <string name="sample_unit_pages">pages</string>
+    <string name="sample_unit_glasses">glasses</string>
+    <string name="sample_note_calm_today">Rough morning, but I noticed it sooner than usual.</string>
+    <string name="sample_note_read">Only 8 pages, fell asleep. Start before 10 PM.</string>
+    <string name="sample_note_workout">Legs day. Felt strong, added 5 kg on squats.</string>
+    <string name="sample_note_journal">Wrote a full page about the week. Calmer than I expected.</string>
+    <string name="sample_note_calm">Snapped at a teammate when the deploy failed. I was tired and hadn\'t eaten.</string>
+    <string name="sample_note_walk">Long walk by the lake after work. Phone stayed in my pocket.</string>
+    <string name="sample_note_water">Busy day, forgot the bottle at home.</string>
+    <string name="sample_card_title">These are sample habits</string>
+    <string name="sample_card_body">Try swiping, holding and adding notes. Remove them when you\'re ready to add your own.</string>
+    <string name="sample_remove">Remove sample data</string>
+    <string name="sample_removed">Sample data removed</string>
+    <string name="sample_remove_subtitle">Deletes the sample habits, their history and notes</string>
 </resources>

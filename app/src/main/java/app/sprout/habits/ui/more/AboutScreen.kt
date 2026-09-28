@@ -3,10 +3,6 @@ package app.sprout.habits.ui.more
 import androidx.compose.foundation.layout.Spacer
 import app.sprout.habits.ui.update.CheckForUpdates
 import app.sprout.habits.data.update.UpdateManager
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +19,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.sprout.habits.BuildConfig
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.HeaderIconButton
 import app.sprout.habits.ui.openUrl
 import app.sprout.habits.ui.theme.habitColors
 
@@ -118,10 +114,8 @@ private fun LinkRow(title: String, subtitle: String, onClick: () -> Unit) =
 
 @Composable
 fun TopBar(title: String, onBack: () -> Unit) {
-    Row(Modifier.fillMaxWidth().height(64.dp).padding(start = 8.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onBack) {
-            Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.action_back), modifier = Modifier.size(22.dp))
-        }
-        Text(title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(start = 8.dp))
+    Row(Modifier.fillMaxWidth().height(64.dp).padding(start = 16.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        HeaderIconButton(R.drawable.ic_arrow_back, stringResource(R.string.action_back), onClick = onBack)
+        Text(title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(start = 14.dp))
     }
 }

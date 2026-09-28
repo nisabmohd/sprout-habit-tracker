@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import app.sprout.habits.ui.theme.BodyFont
@@ -43,6 +44,8 @@ data class Settings(
     val lastUpdateCheckAt: Long? = null,
     /** The release the user answered "Later" to; its dialog doesn't come back on its own. */
     val dismissedUpdate: String? = null,
+    /** Ids of the sample habits a fresh install starts with; empty once removed or never added. */
+    val sampleHabitIds: Set<Long> = emptySet(),
 )
 
 private val Context.dataStore by preferencesDataStore(name = "settings")
@@ -68,6 +71,9 @@ class SettingsRepository(context: Context) {
         it[LAST_UPDATE_CHECK] = at
     }
     suspend fun dismissUpdate(version: String) = store.edit { it[DISMISSED_UPDATE] = version }
+    suspend fun setSampleHabitIds(ids: Set<Long>) = store.edit {
+        if (ids.isEmpty()) it.remove(SAMPLE_HABITS) else it[SAMPLE_HABITS] = ids.mapTo(HashSet()) { id -> id.toString() }
+    }
     suspend fun markFirstOpen(now: Long = System.currentTimeMillis()) = store.edit { if (it[FIRST_OPEN_AT] == null) it[FIRST_OPEN_AT] = now }
     suspend fun addCheckIn() = store.edit { it[CHECK_INS] = (it[CHECK_INS] ?: 0) + 1 }
     suspend fun supportPromptShown(dismissed: Boolean, now: Long = System.currentTimeMillis()) = store.edit {
@@ -109,6 +115,7 @@ class SettingsRepository(context: Context) {
             availableUpdate = this[AVAILABLE_UPDATE],
             lastUpdateCheckAt = this[LAST_UPDATE_CHECK],
             dismissedUpdate = this[DISMISSED_UPDATE],
+            sampleHabitIds = this[SAMPLE_HABITS].orEmpty().mapNotNullTo(HashSet()) { it.toLongOrNull() },
         )
     }
 
@@ -130,6 +137,7 @@ class SettingsRepository(context: Context) {
         val AVAILABLE_UPDATE = stringPreferencesKey("availableUpdateVersion")
         val LAST_UPDATE_CHECK = longPreferencesKey("lastUpdateCheckAt")
         val DISMISSED_UPDATE = stringPreferencesKey("dismissedUpdateVersion")
+        val SAMPLE_HABITS = stringSetPreferencesKey("sampleHabitIds")
 
         inline fun <reified E : Enum<E>> enumOrDefault(name: String?, default: E): E =
             name?.let { n -> enumValues<E>().firstOrNull { it.name == n } } ?: default

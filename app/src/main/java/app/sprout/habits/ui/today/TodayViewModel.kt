@@ -19,7 +19,6 @@ import app.sprout.habits.domain.dayCredit
 import app.sprout.habits.domain.firstDay
 import app.sprout.habits.domain.isScheduled
 import app.sprout.habits.domain.measure
-import app.sprout.habits.domain.toShown
 import app.sprout.habits.domain.outcomeOf
 import app.sprout.habits.domain.score
 import app.sprout.habits.domain.weekOf
@@ -243,11 +242,11 @@ class TodayViewModel(
 
         /** "15 / 20 pages", "30 / 45 min", "1.5 / 2 h". */
         fun amountOf(habit: Habit, amount: Double, strings: Strings): String =
-            strings(R.string.amount_slash_goal, formatNumber(habit.toShown(amount)), goalOf(habit, strings))
+            strings(R.string.amount_slash_goal, formatNumber(amount), goalOf(habit, strings))
 
         /** "20 pages", "45 min", or the reminder time for a check habit. */
         fun goalOf(habit: Habit, strings: Strings): String = when (habit.trackType) {
-            TrackType.AMOUNT, TrackType.DURATION -> habit.measure(habit.target)
+            TrackType.AMOUNT -> habit.measure(habit.target)
             TrackType.CHECK -> habit.reminderMinutes?.let { strings(R.string.reminder_at, formatTime(it)) } ?: strings(R.string.once_a_day)
         }
 

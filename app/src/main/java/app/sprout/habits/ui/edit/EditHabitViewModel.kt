@@ -3,9 +3,7 @@ package app.sprout.habits.ui.edit
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.sprout.habits.data.DurationUnit
 import app.sprout.habits.data.Habit
-import app.sprout.habits.domain.toShown
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.data.SettingsRepository
@@ -33,8 +31,8 @@ data class HabitForm(
     /** Text of the target field, kept as typed. */
     val target: String = "",
     val unit: String = "",
-    /** For Duration: whether the target (and logging) is in minutes or hours. */
-    val durationUnit: DurationUnit = DurationUnit.MINUTES,
+    /** Text of the step field, kept as typed: how much − / + and the slider move when logging. */
+    val step: String = "1",
     val daysMask: Int = Habit.EVERY_DAY,
     val reminderOn: Boolean = false,
     val reminderMinutes: Int = 9 * 60,
@@ -44,23 +42,12 @@ data class HabitForm(
 ) {
     val targetValue: Double? get() = target.replace(',', '.').toDoubleOrNull()
 
-    /**
-     * Switching minutes and hours converts the target when it reads as a whole number of quarter
-     * hours (90 min becomes 1.5 h), and to minutes when it could be hours in a day (2 h becomes
-     * 120 min). Otherwise the number stays as typed: typing 2 and then tapping Hours means
-     * 2 hours, not 0.03, and typing 45 and then tapping Minutes means 45 minutes.
-     */
-    fun withDurationUnit(unit: DurationUnit): HabitForm {
-        if (unit == durationUnit) return this
-        val v = targetValue ?: return copy(durationUnit = unit)
-        val converted = if (unit == DurationUnit.HOURS) v / 60 else v * 60
-        val keep = if (unit == DurationUnit.HOURS) (converted * 4) % 1.0 != 0.0 else v > 24
-        return copy(durationUnit = unit, target = if (keep) target else app.sprout.habits.domain.formatNumber(converted))
-    }
+    /** The typed step, or 1 when the field is empty. */
+    val stepValue: Double? get() = if (step.isBlank()) 1.0 else step.replace(',', '.').toDoubleOrNull()
 
     val canSave: Boolean
         get() = name.isNotBlank() && daysMask != 0 &&
-            (trackType == TrackType.CHECK || (targetValue ?: 0.0) > 0.0)
+            (trackType == TrackType.CHECK || ((targetValue ?: 0.0) > 0.0 && (stepValue ?: 0.0) > 0.0))
 }
 
 class EditHabitViewModel(
@@ -94,9 +81,9 @@ class EditHabitViewModel(
                     icon = HabitIcon.fromKey(habit.icon),
                     hue = habit.colorHue,
                     trackType = habit.trackType,
-                    target = if (habit.trackType == TrackType.CHECK) "" else formatTarget(habit.toShown(habit.target)),
+                    target = if (habit.trackType == TrackType.CHECK) "" else formatTarget(habit.target),
                     unit = habit.unit,
-                    durationUnit = habit.durationUnit,
+                    step = formatTarget(habit.step),
                     daysMask = habit.daysMask,
                     reminderOn = habit.reminderMinutes != null,
                     reminderMinutes = habit.reminderMinutes ?: s.defaultReminderMinutes,
@@ -121,13 +108,9 @@ class EditHabitViewModel(
             icon = f.icon.key,
             colorHue = f.hue,
             trackType = f.trackType,
-            target = when {
-                f.trackType == TrackType.CHECK -> 1.0
-                f.trackType == TrackType.DURATION && f.durationUnit == DurationUnit.HOURS -> f.targetValue!! * 60
-                else -> f.targetValue!!
-            },
+            target = if (f.trackType == TrackType.CHECK) 1.0 else f.targetValue!!,
             unit = if (f.trackType == TrackType.AMOUNT) f.unit.trim() else "",
-            durationUnit = f.durationUnit,
+            step = if (f.trackType == TrackType.AMOUNT) f.stepValue!! else 1.0,
             daysMask = f.daysMask,
             reminderMinutes = if (f.reminderOn) f.reminderMinutes else null,
             askForNote = f.askForNote,

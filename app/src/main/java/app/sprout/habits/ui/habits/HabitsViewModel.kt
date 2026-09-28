@@ -206,7 +206,7 @@ class HabitsViewModel(
 
     companion object {
         fun goalLabel(habit: Habit, strings: Strings): String = when (habit.trackType) {
-            TrackType.AMOUNT, TrackType.DURATION -> habit.measure(habit.target)
+            TrackType.AMOUNT -> habit.measure(habit.target)
             TrackType.CHECK -> daysLabel(habit.daysMask, strings)
         }
 

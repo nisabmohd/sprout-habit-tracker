@@ -16,10 +16,7 @@ import app.sprout.habits.data.TrackType
 import app.sprout.habits.domain.displayUnit
 import app.sprout.habits.domain.measure
 import app.sprout.habits.domain.step
-import app.sprout.habits.domain.storedPerShown
-import app.sprout.habits.domain.toShown
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,8 +38,6 @@ data class LogSheetUi(
     val unit: String,
     /** Stepper step in the shown unit: 1, 5 min or 0.25 h. */
     val step: Double,
-    /** Shown value × this = stored value (60 for hours habits). */
-    val storedPerShown: Double,
     val isToday: Boolean,
     /** "Today", or the date when logging a past day ("Friday, 25 Sep"). */
     val dayLabel: String,
@@ -143,10 +138,9 @@ class DayLogger(
                 icon = HabitIcon.fromKey(habit.icon).drawable,
                 hue = habit.colorHue.toFloat(),
                 trackType = habit.trackType,
-                target = habit.toShown(habit.target),
+                target = habit.target,
                 unit = habit.displayUnit(),
                 step = habit.step(),
-                storedPerShown = habit.storedPerShown(),
                 isToday = isToday,
                 dayLabel = dayLabel,
                 subtitle = when {
@@ -155,7 +149,7 @@ class DayLogger(
                     else -> strings(R.string.log_goal_on_day, dayLabel, goal)
                 },
                 status = entry?.status ?: if (habit.trackType == TrackType.CHECK) EntryStatus.DONE else EntryStatus.PARTIAL,
-                amount = habit.toShown(entry?.amount ?: 0.0),
+                amount = entry?.amount ?: 0.0,
                 noteId = note?.id,
                 noteText = note?.text.orEmpty(),
                 hasEntry = entry != null,
@@ -179,7 +173,7 @@ class DayLogger(
                 EntryStatus.SKIP -> 0.0
             }
             val previous = repository.getEntry(sheet.habitId, sheet.day)
-            val next = Entry(sheet.habitId, sheet.day, finalStatus, finalAmount * sheet.storedPerShown, loggedAt = now())
+            val next = Entry(sheet.habitId, sheet.day, finalStatus, finalAmount, loggedAt = now())
             if (!next.sameOutcomeAs(previous)) {
                 repository.setEntry(next)
                 countCheckIn(next)
