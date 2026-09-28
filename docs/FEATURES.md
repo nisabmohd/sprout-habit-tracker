@@ -60,6 +60,12 @@ The More tab covers backup, the app language (English, Hindi, Spanish, German, F
 
 Code: `ui/more/`, `data/SettingsRepository.kt`, `ui/theme/`, `AppLanguage.kt`; text in `res/values*/strings.xml`.
 
+## Updates
+
+The GitHub build checks GitHub Releases for a newer version: from About → Check for updates, and on its own at most once a day. A newer version shows the Update available dialog with up to five What's new lines from the release notes; Update downloads the APK with progress, checks it against the release's SHA256SUMS.txt and opens Android's installer (Android asks once to allow installs from Sprout). Later hides that version until the next one. More → About Sprout shows an "Update available" pill. The update dialog and the support prompt never show on the same launch. The F-Droid and Play builds have no checker; their stores update them.
+
+Code: `data/update/UpdateManager.kt`, `ui/update/UpdateUi.kt`, `domain/Versions.kt`; the permission and FileProvider are in `src/github/AndroidManifest.xml`.
+
 ## Support
 
 About has a Sponsor link and, in the `play` build, a Rate on Play Store link. After a week of use and 30 check-ins, Sprout asks once whether you'd like to support it; it asks again after 60 days at most, and stops after two "Maybe later"s.

@@ -32,12 +32,21 @@ android {
             dimension = "distribution"
             // Shows "Rate on Play Store"; the foss build never links to Google Play.
             buildConfigField("boolean", "PLAY_STORE", "true")
+            buildConfigField("boolean", "GITHUB_UPDATES", "false")
         }
-        // No Google or Play Services code at all (F-Droid).
+        // No Google or Play Services code at all, and no network (F-Droid updates it).
         create("foss") {
             dimension = "distribution"
             versionNameSuffix = "-foss"
             buildConfigField("boolean", "PLAY_STORE", "false")
+            buildConfigField("boolean", "GITHUB_UPDATES", "false")
+        }
+        // The APK on GitHub Releases: foss plus a check for new releases that downloads and installs them.
+        create("github") {
+            dimension = "distribution"
+            versionNameSuffix = "-github"
+            buildConfigField("boolean", "PLAY_STORE", "false")
+            buildConfigField("boolean", "GITHUB_UPDATES", "true")
         }
     }
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+New:
+
+- Check for updates (GitHub build): About has a "Check for updates" button, Sprout looks once a day on its own, and "Update" downloads the new version and opens Android's installer. More → About Sprout shows "Update available" when there is one. The F-Droid and Play builds are updated by their stores.
+
 ## 1.0.0
 
 New:

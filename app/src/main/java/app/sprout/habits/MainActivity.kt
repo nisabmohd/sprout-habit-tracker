@@ -1,5 +1,6 @@
 package app.sprout.habits
 
+import app.sprout.habits.ui.update.UpdatePrompt
 import app.sprout.habits.notify.Notifications
 import android.content.Context
 import android.content.Intent
@@ -67,6 +68,7 @@ class MainActivity : ComponentActivity() {
                 } else {
                     val habitToOpen by openHabit.collectAsStateWithLifecycle()
                     SproutNavHost(container, current, habitToOpen = habitToOpen, onHabitOpened = { openHabit.value = null })
+                    UpdatePrompt(container.updates)
                 }
             }
         }

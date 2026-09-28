@@ -193,7 +193,7 @@ fun SproutNavHost(
                 }
             }
             composable<AboutRoute> {
-                AboutScreen(onBack = { navController.popBackStack() }, onOpenLicences = { navController.navigate(LicencesRoute) })
+                AboutScreen(container.updates, onBack = { navController.popBackStack() }, onOpenLicences = { navController.navigate(LicencesRoute) })
             }
             composable<LicencesRoute> { LicencesScreen(onBack = { navController.popBackStack() }) }
         }

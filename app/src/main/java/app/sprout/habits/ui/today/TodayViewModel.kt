@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.today
 
+import app.sprout.habits.support.LaunchPrompts
 import app.sprout.habits.ui.datePattern
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
@@ -119,7 +120,7 @@ class TodayViewModel(
         if (promptCheckedThisSession || logger.skipped) return
         promptCheckedThisSession = true
         viewModelScope.launch {
-            if (SupportPrompt.shouldShow(settings.settings.first(), System.currentTimeMillis())) _supportPrompt.value = true
+            if (SupportPrompt.shouldShow(settings.settings.first(), System.currentTimeMillis()) && LaunchPrompts.claim()) _supportPrompt.value = true
         }
     }
 

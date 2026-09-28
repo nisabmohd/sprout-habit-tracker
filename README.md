@@ -35,10 +35,11 @@ You can also:
 
 ## Download
 
-Signed APKs are attached to each [GitHub release](https://github.com/nisabmohd/sprout-habit-tracker/releases). There are two builds:
+Download `sprout-vX.Y.Z-github.apk` from the latest [GitHub release](https://github.com/nisabmohd/sprout-habit-tracker/releases). There are three builds:
 
-- `foss` has no Google or Play Services code and backs up to files only. This is the one for F-Droid.
-- `play` will add Google Drive backup (not built yet, see [`TODO.md`](TODO.md)).
+- `github` is the one on GitHub Releases. It has no Google code and checks GitHub for new versions: About → Check for updates, or once a day on its own, then downloads and installs the update for you.
+- `foss` is the same app without the update check and without any network access. This is the one for F-Droid, which updates it.
+- `play` is for Google Play and will add Google Drive backup (see [`TODO.md`](TODO.md)).
 
 Sprout runs on Android 8.0 and later.
 

@@ -1,6 +1,6 @@
 # Releasing
 
-Releases are built by GitHub Actions (`.github/workflows/release.yml`) when a tag starting with `v` is pushed. The workflow runs the unit tests, builds signed `foss` and `play` APKs, and attaches them to a GitHub release with their SHA-256 checksums.
+Releases are built by GitHub Actions (`.github/workflows/release.yml`) when a tag starting with `v` is pushed. The workflow runs the unit tests, builds signed `github` and `play` APKs, and attaches them to a GitHub release with their SHA-256 checksums.
 
 ## One-time setup
 
@@ -32,7 +32,9 @@ Releases are built by GitHub Actions (`.github/workflows/release.yml`) when a ta
    git push origin v1.0.0
    ```
 
-3. The release appears on GitHub with `sprout-v1.0.0-foss.apk`, `sprout-v1.0.0-play.apk` and `SHA256SUMS.txt`.
+3. The release appears on GitHub with `sprout-v1.0.0-github.apk`, `sprout-v1.0.0-play.apk` and `SHA256SUMS.txt`. Its notes are that version's section of `CHANGELOG.md`, so rename `## Unreleased` to `## 1.0.0` before tagging.
+
+The app's update check reads the latest release: its tag is the version, its `- ` lines are the What's new list (first five), it downloads the asset ending in `-github.apk`, and it checks it against `SHA256SUMS.txt`. Uploading a release by hand? Attach the `github` APK (`./gradlew :app:assembleGithubRelease`) and `SHA256SUMS.txt` with the same names, or installs from GitHub stop getting update checks.
 
 ## Signing locally
 

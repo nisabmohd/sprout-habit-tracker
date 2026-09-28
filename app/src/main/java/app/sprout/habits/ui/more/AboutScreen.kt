@@ -1,5 +1,8 @@
 package app.sprout.habits.ui.more
 
+import androidx.compose.foundation.layout.Spacer
+import app.sprout.habits.ui.update.CheckForUpdates
+import app.sprout.habits.data.update.UpdateManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -37,7 +40,7 @@ import app.sprout.habits.ui.openUrl
 import app.sprout.habits.ui.theme.habitColors
 
 @Composable
-fun AboutScreen(onBack: () -> Unit, onOpenLicences: () -> Unit) {
+fun AboutScreen(updates: UpdateManager, onBack: () -> Unit, onOpenLicences: () -> Unit) {
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
@@ -54,6 +57,8 @@ fun AboutScreen(onBack: () -> Unit, onOpenLicences: () -> Unit) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(R.string.app_name), style = type.headlineMedium, color = colors.onBackground)
                 Text(stringResource(R.string.version_build, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE), style = type.bodyMedium, color = colors.onSurfaceVariant)
+                Spacer(Modifier.height(10.dp))
+                CheckForUpdates(updates)
             }
             Column(
                 Modifier.fillMaxWidth().background(colors.primaryContainer, RoundedCornerShape(24.dp)).padding(18.dp),

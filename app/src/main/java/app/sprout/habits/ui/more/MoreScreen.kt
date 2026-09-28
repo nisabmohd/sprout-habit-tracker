@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.more
 
+import app.sprout.habits.ui.update.UpdateBadge
+import app.sprout.habits.domain.isNewerVersion
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.res.stringResource
@@ -189,7 +191,14 @@ fun MoreScreen(
             item(key = "about") {
                 Box(Modifier.padding(top = 12.dp)) {
                     SettingsCard {
-                        SettingsRow(stringResource(R.string.about_sprout), stringResource(R.string.version_open_source, BuildConfig.VERSION_NAME), icon = R.drawable.ic_seedling, onClick = onOpenAbout) {
+                        val update = settings.availableUpdate?.takeIf { isNewerVersion(it, BuildConfig.VERSION_NAME) }
+                        SettingsRow(
+                            stringResource(R.string.about_sprout),
+                            stringResource(R.string.version_open_source, BuildConfig.VERSION_NAME),
+                            icon = R.drawable.ic_seedling,
+                            onClick = onOpenAbout,
+                            badge = if (update != null) { { UpdateBadge() } } else null,
+                        ) {
                             Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null, modifier = Modifier.size(20.dp))
                         }
                     }

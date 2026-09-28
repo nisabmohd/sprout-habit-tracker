@@ -4,6 +4,7 @@ import android.content.Context
 import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.data.SettingsRepository
 import app.sprout.habits.data.backup.BackupManager
+import app.sprout.habits.data.update.UpdateManager
 import app.sprout.habits.notify.ReminderNotifier
 import app.sprout.habits.notify.ReminderScheduler
 import app.sprout.habits.widget.WidgetUpdater
@@ -22,6 +23,7 @@ class AppContainer(private val context: Context) {
     val widgets by lazy { WidgetUpdater(context, repository, settings) }
     val backup by lazy { BackupManager(repository, settings) }
     val strings: Strings = ResourceStrings(context)
+    val updates by lazy { UpdateManager(context, settings) }
 
     /** Lives as long as the process, for work that isn't tied to a screen. */
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

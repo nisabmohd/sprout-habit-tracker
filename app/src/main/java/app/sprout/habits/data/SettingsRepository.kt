@@ -37,6 +37,12 @@ data class Settings(
     val checkInCount: Int = 0,
     val supportPromptShownAt: Long? = null,
     val supportPromptDismissCount: Int = 0,
+    /** A newer release found on GitHub (github build), for the "Update available" pill. */
+    val availableUpdate: String? = null,
+    /** Epoch millis of the last automatic update check. */
+    val lastUpdateCheckAt: Long? = null,
+    /** The release the user answered "Later" to; its dialog doesn't come back on its own. */
+    val dismissedUpdate: String? = null,
 )
 
 private val Context.dataStore by preferencesDataStore(name = "settings")
@@ -56,6 +62,12 @@ class SettingsRepository(context: Context) {
     suspend fun setBackupEnabled(enabled: Boolean) = store.edit { it[BACKUP_ENABLED] = enabled }
     suspend fun setLastBackupAt(epochMillis: Long) = store.edit { it[LAST_BACKUP_AT] = epochMillis }
     suspend fun setOnboarded() = store.edit { it[ONBOARDED] = true }
+    /** Remembers the newest release found (or null when up to date) and when the check ran. */
+    suspend fun setUpdateCheck(available: String?, at: Long) = store.edit {
+        if (available != null) it[AVAILABLE_UPDATE] = available else it.remove(AVAILABLE_UPDATE)
+        it[LAST_UPDATE_CHECK] = at
+    }
+    suspend fun dismissUpdate(version: String) = store.edit { it[DISMISSED_UPDATE] = version }
     suspend fun markFirstOpen(now: Long = System.currentTimeMillis()) = store.edit { if (it[FIRST_OPEN_AT] == null) it[FIRST_OPEN_AT] = now }
     suspend fun addCheckIn() = store.edit { it[CHECK_INS] = (it[CHECK_INS] ?: 0) + 1 }
     suspend fun supportPromptShown(dismissed: Boolean, now: Long = System.currentTimeMillis()) = store.edit {
@@ -94,6 +106,9 @@ class SettingsRepository(context: Context) {
             checkInCount = this[CHECK_INS] ?: 0,
             supportPromptShownAt = this[PROMPT_SHOWN_AT],
             supportPromptDismissCount = this[PROMPT_DISMISSED] ?: 0,
+            availableUpdate = this[AVAILABLE_UPDATE],
+            lastUpdateCheckAt = this[LAST_UPDATE_CHECK],
+            dismissedUpdate = this[DISMISSED_UPDATE],
         )
     }
 
@@ -112,6 +127,9 @@ class SettingsRepository(context: Context) {
         val CHECK_INS = intPreferencesKey("checkInCount")
         val PROMPT_SHOWN_AT = longPreferencesKey("supportPromptShownAt")
         val PROMPT_DISMISSED = intPreferencesKey("supportPromptDismissCount")
+        val AVAILABLE_UPDATE = stringPreferencesKey("availableUpdateVersion")
+        val LAST_UPDATE_CHECK = longPreferencesKey("lastUpdateCheckAt")
+        val DISMISSED_UPDATE = stringPreferencesKey("dismissedUpdateVersion")
 
         inline fun <reified E : Enum<E>> enumOrDefault(name: String?, default: E): E =
             name?.let { n -> enumValues<E>().firstOrNull { it.name == n } } ?: default

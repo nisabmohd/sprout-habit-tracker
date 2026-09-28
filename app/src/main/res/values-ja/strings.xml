@@ -318,6 +318,23 @@
     <string name="help_translate_desc">言語を追加・改善する</string>
     <string name="nav_habits">習慣</string>
     <string name="nav_insights">統計</string>
+    <string name="check_for_updates">アップデートを確認</string>
+    <string name="checking_updates">確認中…</string>
+    <string name="up_to_date">最新バージョンです</string>
+    <string name="update_check_failed">確認できませんでした。再試行</string>
+    <string name="updates_from_fdroid">アップデートは F-Droid から届きます</string>
+    <string name="updates_from_play">アップデートは Google Play から届きます</string>
+    <string name="update_available">アップデートがあります</string>
+    <string name="update_version_line">バージョン %1$s・現在は %2$s</string>
+    <string name="whats_new">新機能</string>
+    <string name="update">アップデート</string>
+    <string name="later">あとで</string>
+    <string name="downloading">ダウンロード中…</string>
+    <string name="downloading_percent">ダウンロード中… %1$d%%</string>
+    <string name="install">インストール</string>
+    <string name="allow_installs_hint">Sprout にアプリのインストールを許可してから、インストールをタップしてください。</string>
+    <string name="update_failed">ダウンロードが完了しませんでした。リリースページから入手できます。</string>
+    <string name="open_release_page">リリースページを開く</string>
     <plurals name="count_done">
         <item quantity="other">完了 %1$d</item>
     </plurals>
