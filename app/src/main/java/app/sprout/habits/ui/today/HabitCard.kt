@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -74,12 +75,12 @@ fun HabitCard(
             .clip(HabitCardShape)
             .background(if (skipped) colors.surfaceContainerHigh else colors.surfaceContainerLowest)
             .combinedClickable(
-                onLongClickLabel = "Log amount",
+                onLongClickLabel = stringResource(R.string.log_amount),
                 onLongClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     onLongPress()
                 },
-                onClickLabel = "Open ${habit.name}",
+                onClickLabel = stringResource(R.string.open_habit, habit.name),
                 onClick = onClick,
             ),
     ) {
@@ -136,7 +137,7 @@ private fun IconTile(habit: HabitRowUi, hc: HabitColors) {
 @Composable
 private fun TrailingControl(habit: HabitRowUi, hc: HabitColors, onToggle: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val label = if (habit.outcome == DayOutcome.DONE) "Mark ${habit.name} not done" else "Mark ${habit.name} done"
+    val label = stringResource(if (habit.outcome == DayOutcome.DONE) R.string.mark_not_done else R.string.mark_done, habit.name)
     when (habit.outcome) {
         DayOutcome.SKIP -> Box(
             Modifier
@@ -145,7 +146,7 @@ private fun TrailingControl(habit: HabitRowUi, hc: HabitColors, onToggle: () -> 
                 .padding(horizontal = 12.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text("Skipped", style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant)
+            Text(stringResource(R.string.outcome_skipped), style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant)
         }
 
         DayOutcome.DONE -> CircleButton(label, onToggle) {
@@ -158,7 +159,7 @@ private fun TrailingControl(habit: HabitRowUi, hc: HabitColors, onToggle: () -> 
             Box(Modifier.size(44.dp), contentAlignment = Alignment.Center) {
                 ProgressRing(habit.progress, hc.solid, hc.mid, 4.dp, Modifier.fillMaxSize())
                 Text(
-                    "${(habit.progress * 100).roundToInt()}%",
+                    stringResource(R.string.percent, (habit.progress * 100).roundToInt()),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = hc.ink,

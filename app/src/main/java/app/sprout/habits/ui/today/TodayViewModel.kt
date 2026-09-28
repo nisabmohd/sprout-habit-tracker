@@ -3,6 +3,8 @@ package app.sprout.habits.ui.today
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.sprout.habits.R
+import app.sprout.habits.Strings
 import app.sprout.habits.data.Entry
 import app.sprout.habits.data.Habit
 import app.sprout.habits.data.HabitIcon
@@ -21,6 +23,7 @@ import app.sprout.habits.domain.score
 import app.sprout.habits.domain.weekOf
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -80,6 +83,7 @@ data class TodayUiState(
 class TodayViewModel(
     private val repository: HabitRepository,
     private val settings: SettingsRepository,
+    private val strings: Strings,
 ) : ViewModel() {
     private val today = MutableStateFlow(LocalDate.now())
     private val selected = MutableStateFlow(today.value)
@@ -106,7 +110,7 @@ class TodayViewModel(
     val supportPrompt: StateFlow<Boolean> = _supportPrompt
 
     /** Quick actions, the log sheet and Undo; shared with Habits and the habit detail. */
-    val logger = DayLogger(repository, settings, viewModelScope)
+    val logger = DayLogger(repository, settings, viewModelScope, strings)
     private var promptCheckedThisSession = false
 
     /** Called when Today resumes; shows the support prompt at most once per app session. */
@@ -133,7 +137,7 @@ class TodayViewModel(
     /** The circle on the card: DONE becomes not logged; anything else becomes DONE. */
     fun toggleDone(habitId: Long) {
         val done = state.value.habits.firstOrNull { it.id == habitId }?.outcome == DayOutcome.DONE
-        if (done) logger.reset(habitId, selected.value, "marked not done") else markDone(habitId)
+        if (done) logger.reset(habitId, selected.value, R.string.log_marked_not_done) else markDone(habitId)
     }
 
     fun openLogSheet(habitId: Long) = logger.open(habitId, selected.value)
@@ -194,7 +198,7 @@ class TodayViewModel(
                 hue = habit.colorHue.toFloat(),
                 outcome = outcome,
                 progress = credit.toFloat(),
-                subtitle = subtitle(habit, entry, outcome).let { if (hasNote) "$it · note added" else it },
+                subtitle = subtitle(habit, entry, outcome).let { if (hasNote) strings(R.string.note_added, it) else it },
                 hasNote = hasNote,
             )
         }
@@ -216,35 +220,36 @@ class TodayViewModel(
     private fun createdAfter(habit: Habit, date: LocalDate): Boolean = habit.firstDay() > date.toEpochDay()
 
     private fun subtitle(habit: Habit, entry: Entry?, outcome: DayOutcome): String = when (outcome) {
-        DayOutcome.DONE -> if (habit.trackType == TrackType.CHECK) doneAt(entry) else amountOf(habit, entry?.amount ?: habit.target)
-        DayOutcome.PARTIAL -> amountOf(habit, entry?.amount ?: 0.0)
-        DayOutcome.SKIP -> "Skipped"
-        DayOutcome.OPEN -> goalOf(habit)
+        DayOutcome.DONE -> if (habit.trackType == TrackType.CHECK) doneAt(entry) else amountOf(habit, entry?.amount ?: habit.target, strings)
+        DayOutcome.PARTIAL -> amountOf(habit, entry?.amount ?: 0.0, strings)
+        DayOutcome.SKIP -> strings(R.string.outcome_skipped)
+        DayOutcome.OPEN -> goalOf(habit, strings)
     }
 
     /** "Done at 6:52 AM" when it was logged on that same day; plain "Done" otherwise. */
     private fun doneAt(entry: Entry?): String {
         val at = entry?.loggedAt?.let { java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()) }
-        return if (at != null && at.toLocalDate().toEpochDay() == entry.date) "Done at ${at.toLocalTime().format(TIME)}" else "Done"
+        return if (at != null && at.toLocalDate().toEpochDay() == entry.date) strings(R.string.done_at, at.toLocalTime().format(TIME)) else strings(R.string.outcome_done)
     }
 
     companion object {
-        private val TIME = DateTimeFormatter.ofPattern("h:mm a")
-        private val DATE_FORMAT = DateTimeFormatter.ofPattern("EEEE, d MMMM")
+        // Built on each use so a change of language shows up.
+        private val TIME get() = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+        private val DATE_FORMAT get() = DateTimeFormatter.ofPattern("EEEE, d MMMM")
 
         fun formatNumber(value: Double): String = app.sprout.habits.domain.formatNumber(value)
 
         /** "15 / 20 pages", "30 / 45 min", "1.5 / 2 h". */
-        fun amountOf(habit: Habit, amount: Double): String =
-            "${formatNumber(habit.toShown(amount))} / ${goalOf(habit)}"
+        fun amountOf(habit: Habit, amount: Double, strings: Strings): String =
+            strings(R.string.amount_slash_goal, formatNumber(habit.toShown(amount)), goalOf(habit, strings))
 
         /** "20 pages", "45 min", or the reminder time for a check habit. */
-        fun goalOf(habit: Habit): String = when (habit.trackType) {
+        fun goalOf(habit: Habit, strings: Strings): String = when (habit.trackType) {
             TrackType.AMOUNT, TrackType.DURATION -> habit.measure(habit.target)
-            TrackType.CHECK -> habit.reminderMinutes?.let { "Reminder at ${formatTime(it)}" } ?: "Once a day"
+            TrackType.CHECK -> habit.reminderMinutes?.let { strings(R.string.reminder_at, formatTime(it)) } ?: strings(R.string.once_a_day)
         }
 
         fun formatTime(minutes: Int): String =
-            java.time.LocalTime.of(minutes / 60, minutes % 60).format(DateTimeFormatter.ofPattern("h:mm a"))
+            java.time.LocalTime.of(minutes / 60, minutes % 60).format(TIME)
     }
 }

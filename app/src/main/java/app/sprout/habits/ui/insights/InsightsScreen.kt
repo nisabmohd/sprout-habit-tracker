@@ -37,7 +37,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -61,6 +64,7 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek)
     var filtering by remember { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
+    val res = LocalContext.current.resources
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
@@ -70,11 +74,11 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek)
             Row(Modifier.fillMaxWidth().padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(ui.rangeLabel, style = type.titleSmall, color = colors.onSurfaceVariant)
-                    Text("Insights", style = type.headlineMedium, color = colors.onBackground)
+                    Text(stringResource(R.string.insights_title), style = type.headlineMedium, color = colors.onBackground)
                 }
-                HeaderIconButton(R.drawable.ic_calendar, "Change date range") { pickingRange = true }
+                HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.change_date_range)) { pickingRange = true }
                 Spacer(Modifier.width(8.dp))
-                HeaderIconButton(R.drawable.ic_filter, "Filter by habit", active = ui.filter.isNotEmpty()) { filtering = true }
+                HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty()) { filtering = true }
             }
         }
         item(key = "score") { ScoreCard(ui) }
@@ -87,7 +91,7 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek)
             from = ui.from,
             to = ui.to,
             weekStart = weekStart,
-            shortcutLabel = "This week",
+            shortcutLabel = stringResource(R.string.this_week),
             onApply = { a, b -> viewModel.setRange(a, b); pickingRange = false },
             onShortcut = { viewModel.setRange(null, null); pickingRange = false },
             onDismiss = { pickingRange = false },
@@ -97,7 +101,7 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek)
         HabitFilterSheet(
             options = ui.options,
             selected = ui.filter,
-            applyLabel = { n -> if (n == 0) "Show all habits" else if (n == 1) "Show 1 habit" else "Show $n habits" },
+            applyLabel = { n -> if (n == 0) res.getString(R.string.show_all_habits) else res.getQuantityString(R.plurals.show_habits, n, n) },
             onApply = { ids -> viewModel.setFilter(ids); filtering = false },
             onDismiss = { filtering = false },
         )
@@ -119,13 +123,13 @@ private fun ScoreCard(ui: InsightsUi) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(104.dp), contentAlignment = Alignment.Center) {
                 ProgressRing(ui.scorePercent / 100f, colors.primary, colors.surfaceContainerHigh, 10.dp, Modifier.fillMaxSize())
-                Text("${ui.scorePercent}%", style = type.headlineMedium, color = colors.onSurface)
+                Text(stringResource(R.string.percent, ui.scorePercent), style = type.headlineMedium, color = colors.onSurface)
             }
             Column(Modifier.padding(start = 20.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("Average score", style = type.titleSmall, color = colors.onSurfaceVariant)
-                val habits = if (ui.habitCount == 1) "1 habit" else "${ui.habitCount} habits"
-                Text("${ui.doneCount} check-ins done, ${ui.partialCount} partial across $habits.", style = type.bodyLarge, color = colors.onSurface)
-                ui.bestDay?.let { Text("Best day: $it", style = type.titleSmall, color = colors.primary) }
+                Text(stringResource(R.string.insights_average), style = type.titleSmall, color = colors.onSurfaceVariant)
+                val habits = pluralStringResource(R.plurals.habit_count, ui.habitCount, ui.habitCount)
+                Text(stringResource(R.string.insights_summary, ui.doneCount, ui.partialCount, habits), style = type.bodyLarge, color = colors.onSurface)
+                ui.bestDay?.let { Text(stringResource(R.string.insights_best_day, it), style = type.titleSmall, color = colors.primary) }
             }
         }
     }
@@ -135,14 +139,15 @@ private fun ScoreCard(ui: InsightsUi) {
 private fun DayBars(ui: InsightsUi) {
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
+    val res = LocalContext.current.resources
     val done = colors.primary
     val partial = colors.primaryContainer
     Card {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(if (ui.averaged) "Habits per day (average)" else "Habits per day", style = type.titleMedium, color = colors.onSurface, modifier = Modifier.weight(1f))
-                LegendDot("Done", done)
-                LegendDot("Partial", partial)
+                Text(stringResource(if (ui.averaged) R.string.insights_per_day_avg else R.string.insights_per_day), style = type.titleMedium, color = colors.onSurface, modifier = Modifier.weight(1f))
+                LegendDot(stringResource(R.string.outcome_done), done)
+                LegendDot(stringResource(R.string.outcome_partial), partial)
             }
             val max = ui.bars.maxOf { it.done + it.partial }.coerceAtLeast(1f)
             Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -151,7 +156,7 @@ private fun DayBars(ui: InsightsUi) {
                     val value = if (ui.averaged) "%.1f".format(total) else total.roundToInt().toString()
                     Column(
                         Modifier.width(30.dp).semantics(mergeDescendants = true) {
-                            contentDescription = "${bar.label}: ${bar.done.fmt()} done, ${bar.partial.fmt()} partial"
+                            contentDescription = res.getString(R.string.insights_bar_description, bar.label, bar.done.fmt(), bar.partial.fmt())
                         },
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -198,7 +203,7 @@ private fun ByHabit(rates: List<HabitRateUi>) {
     val track = colors.surfaceContainerHigh
     Card {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("By habit", style = type.titleMedium, color = colors.onSurface)
+            Text(stringResource(R.string.insights_by_habit), style = type.titleMedium, color = colors.onSurface)
             rates.forEach { r ->
                 val solid = habitColors(r.hue).solid
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.semantics(mergeDescendants = true) {}) {
@@ -210,7 +215,7 @@ private fun ByHabit(rates: List<HabitRateUi>) {
                         if (w > 0f) drawRoundRect(solid, size = Size(w, size.height), cornerRadius = radius)
                     }
                     Text(
-                        "${r.percent}%",
+                        stringResource(R.string.percent, r.percent),
                         style = type.titleSmall,
                         color = colors.onSurface,
                         textAlign = TextAlign.End,

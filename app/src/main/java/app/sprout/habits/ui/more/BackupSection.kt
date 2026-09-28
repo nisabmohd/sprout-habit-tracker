@@ -13,6 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import app.sprout.habits.R
 import app.sprout.habits.data.backup.BackupException
 import app.sprout.habits.data.backup.BackupFile
@@ -38,15 +40,15 @@ fun BackupRows(backup: BackupManager, onMessage: (String) -> Unit) {
                     context.contentResolver.openOutputStream(uri, "wt")!!.use { block(it) }
                 }
             }
-            onMessage(if (result.isSuccess) done else "Couldn't save the file.")
+            onMessage(if (result.isSuccess) done else context.getString(R.string.save_failed))
         }
     }
 
     val exportJson = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
-        write(uri, { backup.exportJson(it) }, "Backup saved")
+        write(uri, { backup.exportJson(it) }, context.getString(R.string.backup_saved))
     }
     val exportCsv = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
-        write(uri, { backup.exportCsv(it) }, "CSV saved")
+        write(uri, { backup.exportCsv(it) }, context.getString(R.string.csv_saved))
     }
     val import = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri ?: return@rememberLauncherForActivityResult
@@ -56,18 +58,18 @@ fun BackupRows(backup: BackupManager, onMessage: (String) -> Unit) {
                     context.contentResolver.openInputStream(uri)!!.use { BackupManager.parse(it) }
                 }
             } catch (e: BackupException) {
-                onMessage(e.message ?: "Couldn't read the file.")
+                onMessage(context.backupError(e))
             } catch (e: java.io.IOException) {
-                onMessage("Couldn't read the file.")
+                onMessage(context.getString(R.string.read_failed))
             }
         }
     }
 
-    SettingsRow("Export to file", "JSON or CSV, works without an account", icon = R.drawable.ic_download, onClick = { choosingFormat = true })
+    SettingsRow(stringResource(R.string.export_to_file), stringResource(R.string.export_desc), icon = R.drawable.ic_download, onClick = { choosingFormat = true })
     CardDivider()
     SettingsRow(
-        "Import from file",
-        "Replace current data with a backup",
+        stringResource(R.string.import_from_file),
+        stringResource(R.string.import_desc),
         icon = R.drawable.ic_upload,
         onClick = { import.launch(arrayOf("application/json", "application/octet-stream", "text/plain")) },
     )
@@ -75,13 +77,13 @@ fun BackupRows(backup: BackupManager, onMessage: (String) -> Unit) {
     if (choosingFormat) {
         AlertDialog(
             onDismissRequest = { choosingFormat = false },
-            title = { Text("Export to file") },
-            text = { Text("A JSON backup can be imported again. CSV opens in any spreadsheet.") },
+            title = { Text(stringResource(R.string.export_to_file)) },
+            text = { Text(stringResource(R.string.export_dialog_text)) },
             confirmButton = {
-                TextButton(onClick = { choosingFormat = false; exportJson.launch("sprout-backup-${LocalDate.now()}.json") }) { Text("JSON backup") }
+                TextButton(onClick = { choosingFormat = false; exportJson.launch("sprout-backup-${LocalDate.now()}.json") }) { Text(stringResource(R.string.json_backup)) }
             },
             dismissButton = {
-                TextButton(onClick = { choosingFormat = false; exportCsv.launch("sprout-${LocalDate.now()}.csv") }) { Text("CSV") }
+                TextButton(onClick = { choosingFormat = false; exportCsv.launch("sprout-${LocalDate.now()}.csv") }) { Text(stringResource(R.string.csv)) }
             },
         )
     }
@@ -89,12 +91,15 @@ fun BackupRows(backup: BackupManager, onMessage: (String) -> Unit) {
     pending?.let { file ->
         AlertDialog(
             onDismissRequest = { pending = null },
-            title = { Text("Replace your data?") },
+            title = { Text(stringResource(R.string.replace_data_title)) },
             text = {
                 Text(
-                    "This backup has ${count(file.habits.size, "habit")}, ${count(file.entries.size, "logged day")} and " +
-                        "${count(file.notes.size, "note")}. " +
-                        "Importing it replaces everything in Sprout.",
+                    stringResource(
+                        R.string.replace_data_text,
+                        pluralStringResource(R.plurals.habit_count, file.habits.size, file.habits.size),
+                        pluralStringResource(R.plurals.logged_day_count, file.entries.size, file.entries.size),
+                        pluralStringResource(R.plurals.note_count, file.notes.size, file.notes.size),
+                    ),
                 )
             },
             confirmButton = {
@@ -103,18 +108,23 @@ fun BackupRows(backup: BackupManager, onMessage: (String) -> Unit) {
                     scope.launch {
                         try {
                             backup.restore(file)
-                            onMessage("Backup restored")
+                            onMessage(context.getString(R.string.backup_restored))
                         } catch (e: BackupException) {
-                            onMessage(e.message ?: "Couldn't restore the backup.")
+                            onMessage(context.backupError(e))
                         } catch (e: android.database.sqlite.SQLiteException) {
-                            onMessage("Couldn't restore the backup.")
+                            onMessage(context.getString(R.string.restore_failed))
                         }
                     }
-                }) { Text("Replace") }
+                }) { Text(stringResource(R.string.replace)) }
             },
-            dismissButton = { TextButton(onClick = { pending = null }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { pending = null }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 }
 
-private fun count(n: Int, noun: String) = if (n == 1) "1 $noun" else "$n ${noun}s"
+private fun android.content.Context.backupError(e: BackupException): String = when (e.reason) {
+    BackupException.Reason.DAMAGED -> getString(R.string.backup_error_damaged)
+    BackupException.Reason.NOT_SPROUT -> getString(R.string.backup_error_not_sprout)
+    BackupException.Reason.NEWER -> getString(R.string.backup_error_newer)
+    BackupException.Reason.BAD_DATE -> getString(R.string.backup_error_date, e.detail)
+}

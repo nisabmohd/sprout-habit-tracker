@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
@@ -86,15 +87,19 @@ fun SwipeableHabitCard(
     )
     stateRef[0] = state
     val done = habit.outcome == DayOutcome.DONE
+    val markDone = stringResource(R.string.action_mark_done)
+    val skip = stringResource(R.string.outcome_skip)
+    val undo = stringResource(R.string.action_undo)
+    val logAmount = stringResource(R.string.log_amount)
     val skipped = habit.outcome == DayOutcome.SKIP
     SwipeToDismissBox(
         state = state,
         modifier = modifier.onSizeChanged { width = it.width }.semantics {
             customActions = buildList {
-                if (!done) add(CustomAccessibilityAction("Mark done") { onDone(); true })
-                if (!skipped) add(CustomAccessibilityAction("Skip") { onSkip(); true })
-                if (done || skipped) add(CustomAccessibilityAction("Undo") { onUndo(); true })
-                add(CustomAccessibilityAction("Log amount") { onLongPress(); true })
+                if (!done) add(CustomAccessibilityAction(markDone) { onDone(); true })
+                if (!skipped) add(CustomAccessibilityAction(skip) { onSkip(); true })
+                if (done || skipped) add(CustomAccessibilityAction(undo) { onUndo(); true })
+                add(CustomAccessibilityAction(logAmount) { onLongPress(); true })
             }
         },
         backgroundContent = { SwipeBackground(habit, state.dismissDirection) },
@@ -119,7 +124,7 @@ private fun SwipeBackground(habit: HabitRowUi, direction: SwipeToDismissBoxValue
             horizontalArrangement = Arrangement.spacedBy(6.dp, if (start) Alignment.Start else Alignment.End),
         ) {
             Icon(painterResource(R.drawable.ic_undo), contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
-            Text("Undo", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = colors.onSurfaceVariant)
+            Text(stringResource(R.string.action_undo), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = colors.onSurfaceVariant)
         }
         return
     }
@@ -130,7 +135,7 @@ private fun SwipeBackground(habit: HabitRowUi, direction: SwipeToDismissBoxValue
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = hc.on, modifier = Modifier.size(20.dp))
-            Text("Done", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = hc.on)
+            Text(stringResource(R.string.outcome_done), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = hc.on)
         }
 
         SwipeToDismissBoxValue.EndToStart -> Row(
@@ -138,7 +143,7 @@ private fun SwipeBackground(habit: HabitRowUi, direction: SwipeToDismissBoxValue
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
         ) {
-            Text("Skip", style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant)
+            Text(stringResource(R.string.outcome_skip), style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant)
             Icon(painterResource(R.drawable.ic_skip), contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(20.dp))
         }
 

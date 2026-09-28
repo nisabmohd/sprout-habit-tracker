@@ -88,7 +88,16 @@ data class SettingsDto(
     val defaultReminderMinutes: Int,
 )
 
-class BackupException(message: String, cause: Throwable? = null) : Exception(message, cause)
+class BackupException(
+    val reason: Reason,
+    message: String,
+    cause: Throwable? = null,
+    /** The value that couldn't be read, for [Reason.BAD_DATE]. */
+    val detail: String = "",
+) : Exception(message, cause) {
+    /** Why the file was rejected; the UI shows its own translated text for each. */
+    enum class Reason { DAMAGED, NOT_SPROUT, NEWER, BAD_DATE }
+}
 
 /** Converts between the database and a [BackupFile], and reads and writes JSON and CSV. */
 class BackupManager(
@@ -140,7 +149,7 @@ class BackupManager(
             )
         }
         val ids = habits.mapTo(HashSet()) { it.id }
-        if (ids.size != habits.size) throw BackupException("This backup is damaged and can't be imported.")
+        if (ids.size != habits.size) throw BackupException(BackupException.Reason.DAMAGED, "This backup is damaged and can't be imported.")
         val entries = backup.entries
             .filter { it.habitId in ids }
             .map { Entry(it.habitId, parseDate(it.date), enumOr(it.status, EntryStatus.DONE), it.amount, it.loggedAt) }
@@ -187,13 +196,13 @@ class BackupManager(
             val backup = try {
                 json.decodeFromStream(BackupFile.serializer(), input)
             } catch (e: SerializationException) {
-                throw BackupException("This isn't a Sprout backup file.", e)
+                throw BackupException(BackupException.Reason.NOT_SPROUT, "This isn't a Sprout backup file.", e)
             } catch (e: IllegalArgumentException) {
-                throw BackupException("This isn't a Sprout backup file.", e)
+                throw BackupException(BackupException.Reason.NOT_SPROUT, "This isn't a Sprout backup file.", e)
             }
-            if (backup.app != BackupFile.APP_ID) throw BackupException("This isn't a Sprout backup file.")
+            if (backup.app != BackupFile.APP_ID) throw BackupException(BackupException.Reason.NOT_SPROUT, "This isn't a Sprout backup file.")
             if (backup.version > BackupFile.FORMAT_VERSION) {
-                throw BackupException("This backup was made by a newer version of Sprout. Update the app, then try again.")
+                throw BackupException(BackupException.Reason.NEWER, "This backup was made by a newer version of Sprout. Update the app, then try again.")
             }
             return backup
         }
@@ -226,7 +235,7 @@ class BackupManager(
         private fun parseDate(s: String): Long = try {
             LocalDate.parse(s).toEpochDay()
         } catch (e: java.time.format.DateTimeParseException) {
-            throw BackupException("The backup has a date that can't be read: $s", e)
+            throw BackupException(BackupException.Reason.BAD_DATE, "The backup has a date that can't be read: $s", e, detail = s)
         }
 
         private inline fun <reified E : Enum<E>> enumOr(name: String, default: E): E =

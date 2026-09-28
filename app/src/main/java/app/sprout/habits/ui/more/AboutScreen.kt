@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.sprout.habits.BuildConfig
@@ -41,7 +42,7 @@ fun AboutScreen(onBack: () -> Unit, onOpenLicences: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
     Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().navigationBarsPadding()) {
-        TopBar("About", onBack)
+        TopBar(stringResource(R.string.about), onBack)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -51,8 +52,8 @@ fun AboutScreen(onBack: () -> Unit, onOpenLicences: () -> Unit) {
                 Icon(painterResource(R.drawable.ic_seedling), contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(40.dp))
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Sprout", style = type.headlineMedium, color = colors.onBackground)
-                Text("Version ${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})", style = type.bodyMedium, color = colors.onSurfaceVariant)
+                Text(stringResource(R.string.app_name), style = type.headlineMedium, color = colors.onBackground)
+                Text(stringResource(R.string.version_build, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE), style = type.bodyMedium, color = colors.onSurfaceVariant)
             }
             Column(
                 Modifier.fillMaxWidth().background(colors.primaryContainer, RoundedCornerShape(24.dp)).padding(18.dp),
@@ -60,10 +61,10 @@ fun AboutScreen(onBack: () -> Unit, onOpenLicences: () -> Unit) {
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(painterResource(R.drawable.ic_code), contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(22.dp))
-                    Text("Free and open source", style = type.titleMedium, color = colors.onPrimaryContainer, modifier = Modifier.padding(start = 12.dp))
+                    Text(stringResource(R.string.free_open_source), style = type.titleMedium, color = colors.onPrimaryContainer, modifier = Modifier.padding(start = 12.dp))
                 }
                 Text(
-                    "Licensed under the GNU GPL v3. Sprout has no ads and doesn't track you. Your habits and notes stay on this device unless you export them.",
+                    stringResource(R.string.about_licence_text),
                     style = type.bodyMedium,
                     color = colors.onPrimaryContainer,
                 )
@@ -72,20 +73,20 @@ fun AboutScreen(onBack: () -> Unit, onOpenLicences: () -> Unit) {
             SettingsCard {
                 val repo = BuildConfig.REPO_URL
                 if (BuildConfig.PLAY_STORE) {
-                    LinkRow("Rate on Play Store", "Takes 10 seconds, helps a lot") { openUrl(context, BuildConfig.PLAY_STORE_URL) }
+                    LinkRow(stringResource(R.string.rate_on_play), stringResource(R.string.rate_desc)) { openUrl(context, BuildConfig.PLAY_STORE_URL) }
                     CardDivider()
                 }
-                LinkRow("Source code", repo.removePrefix("https://")) { openUrl(context, repo) }
+                LinkRow(stringResource(R.string.source_code), repo.removePrefix("https://")) { openUrl(context, repo) }
                 CardDivider()
-                LinkRow("Report a bug or request a feature", "GitHub Issues") { openUrl(context, "$repo/issues") }
+                LinkRow(stringResource(R.string.report_bug), stringResource(R.string.github_issues)) { openUrl(context, "$repo/issues") }
                 CardDivider()
-                LinkRow("Contribute", "Code, design and translations welcome") { openUrl(context, "$repo/blob/main/CONTRIBUTING.md") }
+                LinkRow(stringResource(R.string.contribute), stringResource(R.string.contribute_desc)) { openUrl(context, "$repo/blob/main/CONTRIBUTING.md") }
                 CardDivider()
-                SettingsRow("Open-source licences", "Libraries and fonts this app uses", onClick = onOpenLicences) {
+                SettingsRow(stringResource(R.string.licences), stringResource(R.string.licences_desc), onClick = onOpenLicences) {
                     Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null, modifier = Modifier.size(20.dp))
                 }
             }
-            Text("Made by the Sprout contributors", style = type.bodyMedium, color = colors.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(bottom = 24.dp))
+            Text(stringResource(R.string.made_by), style = type.bodyMedium, color = colors.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(bottom = 24.dp))
         }
     }
 }
@@ -94,9 +95,9 @@ fun AboutScreen(onBack: () -> Unit, onOpenLicences: () -> Unit) {
 @Composable
 private fun SupportRow(onClick: () -> Unit) {
     val pink = habitColors(330f)
-    SettingsRow("Support Sprout", "Free forever, kept alive by sponsors", onClick = onClick) {
+    SettingsRow(stringResource(R.string.support_sprout), stringResource(R.string.support_desc), onClick = onClick) {
         Text(
-            "Sponsor",
+            stringResource(R.string.sponsor),
             style = MaterialTheme.typography.labelLarge,
             color = pink.ink,
             modifier = Modifier.background(pink.soft, RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 6.dp),
@@ -114,7 +115,7 @@ private fun LinkRow(title: String, subtitle: String, onClick: () -> Unit) =
 fun TopBar(title: String, onBack: () -> Unit) {
     Row(Modifier.fillMaxWidth().height(64.dp).padding(start = 8.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = onBack) {
-            Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = "Back", modifier = Modifier.size(22.dp))
+            Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.action_back), modifier = Modifier.size(22.dp))
         }
         Text(title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(start = 8.dp))
     }

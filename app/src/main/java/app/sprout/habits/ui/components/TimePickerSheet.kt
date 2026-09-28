@@ -16,7 +16,9 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.sprout.habits.R
 
 /** Pick a time of day (minutes after midnight), for reminders. A sheet, like every other picker. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,7 +38,7 @@ fun TimePickerSheet(title: String, initialMinutes: Int, onApply: (Int) -> Unit, 
                 onClick = { onApply(state.hour * 60 + state.minute) },
                 modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(48.dp),
             ) {
-                Text("Set time", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.set_time), style = MaterialTheme.typography.labelLarge)
             }
         }
     }

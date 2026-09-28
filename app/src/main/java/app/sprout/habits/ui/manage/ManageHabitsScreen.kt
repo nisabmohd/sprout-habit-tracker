@@ -41,6 +41,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
@@ -90,9 +91,9 @@ fun ManageHabitsScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onClose) {
-                Icon(painterResource(R.drawable.ic_close), contentDescription = "Close", modifier = Modifier.size(22.dp))
+                Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.action_close), modifier = Modifier.size(22.dp))
             }
-            Text("Manage habits", style = MaterialTheme.typography.titleLarge, color = colors.onBackground, modifier = Modifier.padding(start = 8.dp))
+            Text(stringResource(R.string.manage_habits), style = MaterialTheme.typography.titleLarge, color = colors.onBackground, modifier = Modifier.padding(start = 8.dp))
         }
         LazyColumn(
             state = listState,
@@ -102,7 +103,7 @@ fun ManageHabitsScreen(
         ) {
             item(key = "hint") {
                 Text(
-                    "Hold the handle and drag to reorder.",
+                    stringResource(R.string.reorder_hint),
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
@@ -110,14 +111,16 @@ fun ManageHabitsScreen(
             }
             itemsIndexed(order, key = { _, h -> h.id }) { index, habit ->
                 val dragging = draggingId == habit.id
+                val moveUp = stringResource(R.string.move_up)
+                val moveDown = stringResource(R.string.move_down)
                 HabitRow(
                     habit = habit,
                     modifier = Modifier
                         .then(if (dragging) Modifier.zIndex(1f).graphicsLayer { translationY = dragOffset } else Modifier.animateItem())
                         .semantics {
                             customActions = buildList {
-                                if (index > 0) add(CustomAccessibilityAction("Move up") { move(index, index - 1); commit(); true })
-                                if (index < order.lastIndex) add(CustomAccessibilityAction("Move down") { move(index, index + 1); commit(); true })
+                                if (index > 0) add(CustomAccessibilityAction(moveUp) { move(index, index - 1); commit(); true })
+                                if (index < order.lastIndex) add(CustomAccessibilityAction(moveDown) { move(index, index + 1); commit(); true })
                             }
                         },
                     elevated = dragging,
@@ -157,14 +160,14 @@ fun ManageHabitsScreen(
                         )
                     },
                 ) {
-                    TextButton(onClick = { onEdit(habit.id) }) { Text("Edit") }
-                    TextButton(onClick = { viewModel.setArchived(habit, true) }) { Text("Archive") }
+                    TextButton(onClick = { onEdit(habit.id) }) { Text(stringResource(R.string.edit)) }
+                    TextButton(onClick = { viewModel.setArchived(habit, true) }) { Text(stringResource(R.string.archive)) }
                 }
             }
             if (archived.isNotEmpty()) {
                 item(key = "archived") {
                     Text(
-                        "Archived",
+                        stringResource(R.string.archived),
                         style = MaterialTheme.typography.titleLarge,
                         color = colors.onBackground,
                         modifier = Modifier.padding(start = 4.dp, top = 16.dp, bottom = 4.dp),
@@ -172,8 +175,8 @@ fun ManageHabitsScreen(
                 }
                 items(archived, key = { "a${it.id}" }) { habit ->
                     HabitRow(habit, Modifier.animateItem(), elevated = false, handleModifier = null) {
-                        TextButton(onClick = { viewModel.setArchived(habit, false) }) { Text("Restore") }
-                        TextButton(onClick = { deleting = habit }) { Text("Delete", color = colors.error) }
+                        TextButton(onClick = { viewModel.setArchived(habit, false) }) { Text(stringResource(R.string.restore)) }
+                        TextButton(onClick = { deleting = habit }) { Text(stringResource(R.string.action_delete), color = colors.error) }
                     }
                 }
             }
@@ -220,7 +223,7 @@ private fun HabitRow(
         actions()
         if (handleModifier != null) {
             Box(handleModifier.size(48.dp), contentAlignment = Alignment.Center) {
-                Icon(painterResource(R.drawable.ic_drag), contentDescription = "Drag to reorder", tint = colors.onSurfaceVariant, modifier = Modifier.size(22.dp))
+                Icon(painterResource(R.drawable.ic_drag), contentDescription = stringResource(R.string.drag_to_reorder), tint = colors.onSurfaceVariant, modifier = Modifier.size(22.dp))
             }
         }
     }

@@ -19,9 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import app.sprout.habits.R
+import app.sprout.habits.Strings
 import app.sprout.habits.data.Entry
 import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.data.Habit
@@ -36,6 +39,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 /** One note as the Journal and a habit's detail show it. */
 @Immutable
@@ -55,10 +59,11 @@ data class NoteCardUi(
     val text: String,
 ) {
     companion object {
-        private val TIME = DateTimeFormatter.ofPattern("h:mm a")
+        // Built on each use so a change of language shows up.
+        private val TIME get() = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
 
-        fun of(note: Note, habit: Habit, entry: Entry?, today: LocalDate): NoteCardUi {
-            val (mark, outcome) = dayOutcome(habit, entry, note.date, today.toEpochDay())
+        fun of(note: Note, habit: Habit, entry: Entry?, today: LocalDate, strings: Strings): NoteCardUi {
+            val (mark, outcome) = dayOutcome(habit, entry, note.date, today.toEpochDay(), strings)
             return NoteCardUi(
                 id = note.id,
                 day = note.date,
@@ -73,13 +78,13 @@ data class NoteCardUi(
         }
 
         /** The day's mark and its words. A past day with nothing logged counts as skipped. */
-        fun dayOutcome(habit: Habit, entry: Entry?, day: Long, today: Long): Pair<DayMark, String> = when (entry?.status) {
+        fun dayOutcome(habit: Habit, entry: Entry?, day: Long, today: Long, strings: Strings): Pair<DayMark, String> = when (entry?.status) {
             EntryStatus.DONE -> DayMark(MarkKind.DONE, 1f) to
-                if (habit.trackType == TrackType.CHECK) "Done" else "Done · ${habit.measure(entry.amount)}"
+                if (habit.trackType == TrackType.CHECK) strings(R.string.outcome_done) else strings(R.string.outcome_done_amount, habit.measure(entry.amount))
             EntryStatus.PARTIAL -> DayMark(MarkKind.PARTIAL, (entry.amount / habit.target).toFloat().coerceIn(0f, 1f)) to
-                "${formatNumber(habit.toShown(entry.amount))} of ${habit.measure(habit.target)}"
-            EntryStatus.SKIP -> DayMark(MarkKind.SKIP) to "Skipped"
-            null -> if (day < today) DayMark(MarkKind.SKIP) to "Skipped" else DayMark(MarkKind.OPEN_TODAY) to "Not logged yet"
+                strings(R.string.amount_of_goal, formatNumber(habit.toShown(entry.amount)), habit.measure(habit.target))
+            EntryStatus.SKIP -> DayMark(MarkKind.SKIP) to strings(R.string.outcome_skipped)
+            null -> if (day < today) DayMark(MarkKind.SKIP) to strings(R.string.outcome_skipped) else DayMark(MarkKind.OPEN_TODAY) to strings(R.string.not_logged_yet)
         }
     }
 }
@@ -100,7 +105,7 @@ fun NoteCard(note: NoteCardUi, onOpen: ((Long) -> Unit)?, showHabit: Boolean = t
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
             .background(colors.surfaceContainerLowest)
-            .then(if (onOpen != null) Modifier.clickable(onClickLabel = "Edit note") { onOpen(note.id) } else Modifier)
+            .then(if (onOpen != null) Modifier.clickable(onClickLabel = stringResource(R.string.edit_note)) { onOpen(note.id) } else Modifier)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

@@ -2,6 +2,7 @@ package app.sprout.habits.ui.more
 
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.res.stringResource
 import app.sprout.habits.ui.components.SproutSheet
 import android.os.Build
 import androidx.compose.foundation.background
@@ -74,17 +75,19 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 /** Accent choices when dynamic color is off: the app's green first, then the habit hues. */
 private val ACCENT_HUES = listOf(150f, 192f, 215f, 275f, 330f, 12f, 38f)
 private val ACCENT_NAMES = mapOf(
-    150f to "Green", 192f to "Teal", 215f to "Blue", 275f to "Purple", 330f to "Pink", 12f to "Rust", 38f to "Gold",
+    150f to R.string.color_green, 192f to R.string.color_teal, 215f to R.string.color_blue, 275f to R.string.color_purple,
+    330f to R.string.color_pink, 12f to R.string.color_rust, 38f to R.string.color_gold,
 )
 
-private val TEXT_SCALES = listOf(0.85f to "Small", 1f to "Default", 1.15f to "Large", 1.3f to "Largest")
+private val TEXT_SCALES = listOf(0.85f to R.string.text_small, 1f to R.string.text_default, 1.15f to R.string.text_large, 1.3f to R.string.text_largest)
 
 private val FONT_INFO = mapOf(
-    BodyFont.SYSTEM to ("System default" to "Your phone's font"),
-    BodyFont.FIGTREE to ("Figtree" to "Friendly and clear"),
-    BodyFont.OUTFIT to ("Outfit" to "Rounded, geometric"),
-    BodyFont.LEXEND to ("Lexend" to "Default · built for easy reading"),
-    BodyFont.ATKINSON to ("Atkinson Hyperlegible" to "Designed for low vision"),
+    // Font names stay as they are in every language; null = "System default".
+    BodyFont.SYSTEM to (null to R.string.font_system_desc),
+    BodyFont.FIGTREE to ("Figtree" to R.string.font_figtree_desc),
+    BodyFont.OUTFIT to ("Outfit" to R.string.font_outfit_desc),
+    BodyFont.LEXEND to ("Lexend" to R.string.font_lexend_desc),
+    BodyFont.ATKINSON to ("Atkinson Hyperlegible" to R.string.font_atkinson_desc),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,23 +113,23 @@ fun MoreScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item(key = "title") {
-                Text("More", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp))
+                Text(stringResource(R.string.tab_more), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp))
             }
 
             item(key = "backup") {
-                SectionLabel("Backup & restore")
+                SectionLabel(stringResource(R.string.backup_restore))
                 SettingsCard { BackupRows(backup) { msg -> scope.launch { snackbar.showSnackbar(msg) } } }
             }
 
             item(key = "appearance") {
-                SectionLabel("Appearance")
+                SectionLabel(stringResource(R.string.appearance))
                 SettingsCard {
                     Column(Modifier.padding(horizontal = 20.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text("Theme", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.theme), style = MaterialTheme.typography.titleMedium)
                         // Each segment is a fixed share of the row, so labels stop scaling at 1.3x.
                         CappedFontScale {
                         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                            val modes = listOf(ThemeMode.SYSTEM to "System", ThemeMode.LIGHT to "Light", ThemeMode.DARK to "Dark")
+                            val modes = listOf(ThemeMode.SYSTEM to stringResource(R.string.theme_system), ThemeMode.LIGHT to stringResource(R.string.theme_light), ThemeMode.DARK to stringResource(R.string.theme_dark))
                             modes.forEachIndexed { i, (mode, label) ->
                                 SegmentedButton(
                                     selected = theme.mode == mode,
@@ -144,12 +147,12 @@ fun MoreScreen(
                     }
                     val dynamicSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                     if (dynamicSupported) {
-                        SwitchRow("Dynamic color", "Match your wallpaper", theme.dynamicColor) { on -> save { setDynamicColor(on) } }
+                        SwitchRow(stringResource(R.string.dynamic_color), stringResource(R.string.dynamic_color_desc), theme.dynamicColor) { on -> save { setDynamicColor(on) } }
                     }
                     if (!dynamicSupported || !theme.dynamicColor) {
                         AccentPicker(theme.accentHue) { hue -> save { setAccentHue(hue) } }
                     }
-                    Text("Font", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 20.dp, top = 8.dp, bottom = 4.dp))
+                    Text(stringResource(R.string.font), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 20.dp, top = 8.dp, bottom = 4.dp))
                     BodyFont.entries.forEach { font ->
                         FontRow(font, selected = theme.font == font) { save { setFont(font) } }
                     }
@@ -158,24 +161,31 @@ fun MoreScreen(
             }
 
             item(key = "general") {
-                SectionLabel("General")
+                SectionLabel(stringResource(R.string.general))
                 SettingsCard {
-                    SettingsRow("Week starts on", onClick = { pickingWeekStart = true }) {
+                    SettingsRow(stringResource(R.string.week_starts_on), onClick = { pickingWeekStart = true }) {
                         TrailingValue(settings.weekStart.getDisplayName(TextStyle.FULL, Locale.getDefault()))
                     }
                     CardDivider()
-                    SettingsRow("Default reminder", "Suggested time for new reminders", onClick = { pickingReminder = true }) {
+                    SettingsRow(stringResource(R.string.default_reminder), stringResource(R.string.default_reminder_desc), onClick = { pickingReminder = true }) {
                         TrailingValue(TodayViewModel.formatTime(settings.defaultReminderMinutes))
                     }
                     CardDivider()
-                    SettingsRow("Notifications", onClick = { Notifications.openSettings(context) }) { TrailingValue("System settings") }
+                    SettingsRow(stringResource(R.string.notifications), onClick = { Notifications.openSettings(context) }) { TrailingValue(stringResource(R.string.system_settings)) }
+                    // Android 13+ keeps a language per app in system settings; older versions follow the phone.
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        CardDivider()
+                        SettingsRow(stringResource(R.string.language), stringResource(R.string.language_desc), onClick = { openLanguageSettings(context) }) {
+                            TrailingValue(Locale.getDefault().getDisplayLanguage(Locale.getDefault()).replaceFirstChar { it.titlecase(Locale.getDefault()) })
+                        }
+                    }
                 }
             }
 
             item(key = "about") {
                 Box(Modifier.padding(top = 12.dp)) {
                     SettingsCard {
-                        SettingsRow("About Sprout", "Version ${BuildConfig.VERSION_NAME} · open source", icon = R.drawable.ic_seedling, onClick = onOpenAbout) {
+                        SettingsRow(stringResource(R.string.about_sprout), stringResource(R.string.version_open_source, BuildConfig.VERSION_NAME), icon = R.drawable.ic_seedling, onClick = onOpenAbout) {
                             Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null, modifier = Modifier.size(20.dp))
                         }
                     }
@@ -189,7 +199,7 @@ fun MoreScreen(
         SproutSheet(onDismissRequest = { pickingWeekStart = false }) {
             Column(Modifier.verticalScroll(rememberScrollState()).padding(start = 12.dp, end = 12.dp, bottom = 24.dp).navigationBarsPadding()) {
                 Text(
-                    "Week starts on",
+                    stringResource(R.string.week_starts_on),
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(start = 12.dp, bottom = 8.dp),
@@ -220,7 +230,7 @@ fun MoreScreen(
     }
     if (pickingReminder) {
         TimePickerSheet(
-            title = "Default reminder",
+            title = stringResource(R.string.default_reminder),
             initialMinutes = settings.defaultReminderMinutes,
             onApply = { minutes -> save { setDefaultReminderMinutes(minutes) }; pickingReminder = false },
             onDismiss = { pickingReminder = false },
@@ -231,11 +241,11 @@ fun MoreScreen(
 @Composable
 private fun AccentPicker(selectedHue: Float, onSelect: (Float) -> Unit) {
     Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("Accent", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 8.dp))
+        Text(stringResource(R.string.accent), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 8.dp))
         ColorSwatchRow(
             swatches = ACCENT_HUES.map { hue ->
                 val scheme = seedColorScheme(hue, false)
-                Swatch(scheme.primary, scheme.onPrimary, ACCENT_NAMES.getValue(hue))
+                Swatch(scheme.primary, scheme.onPrimary, stringResource(ACCENT_NAMES.getValue(hue)))
             },
             selected = ACCENT_HUES.indexOf(selectedHue),
             onSelect = { i -> onSelect(ACCENT_HUES[i]) },
@@ -245,7 +255,9 @@ private fun AccentPicker(selectedHue: Float, onSelect: (Float) -> Unit) {
 
 @Composable
 private fun FontRow(font: BodyFont, selected: Boolean, onClick: () -> Unit) {
-    val (name, description) = FONT_INFO.getValue(font)
+    val (fontName, descriptionId) = FONT_INFO.getValue(font)
+    val name = fontName ?: stringResource(R.string.font_system)
+    val description = stringResource(descriptionId)
     Row(
         Modifier
             .fillMaxWidth()
@@ -269,18 +281,25 @@ private fun FontRow(font: BodyFont, selected: Boolean, onClick: () -> Unit) {
 private fun TextSizeRow(scale: Float, onChange: (Float) -> Unit) {
     // Unknown saved value → show "Default"; index 0 (Small) is a real choice.
     val index = TEXT_SCALES.indexOfFirst { it.first == scale }.takeIf { it >= 0 } ?: 1
+    val label = stringResource(TEXT_SCALES[index].second)
     Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Text size", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-            Text(TEXT_SCALES[index].second, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.text_size), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+            Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Slider(
             value = index.toFloat(),
             onValueChange = { onChange(TEXT_SCALES[it.roundToInt()].first) },
             valueRange = 0f..(TEXT_SCALES.size - 1).toFloat(),
             steps = TEXT_SCALES.size - 2,
-            modifier = Modifier.semantics { stateDescription = TEXT_SCALES[index].second },
+            modifier = Modifier.semantics { stateDescription = label },
         )
     }
 }
 
+
+/** The system's per-app language page (Android 13+). */
+private fun openLanguageSettings(context: android.content.Context) {
+    val intent = android.content.Intent(android.provider.Settings.ACTION_APP_LOCALE_SETTINGS, android.net.Uri.parse("package:${context.packageName}"))
+    runCatching { context.startActivity(intent) }
+}

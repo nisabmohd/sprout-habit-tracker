@@ -39,6 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -97,6 +98,7 @@ fun TodayScreen(
             onLongPress = viewModel::openLogSheet,
             onOpen = onOpenHabit,
         )
+        val addNote = stringResource(R.string.add_note)
         // Lift the button above the Undo snackbar while it shows, so the two never overlap.
         val fabLift by animateDpAsState(if (snackbar.currentSnackbarData != null) 72.dp else 0.dp, label = "fabLift")
         // Hidden during a long screenshot, or it would be stamped into every captured frame.
@@ -108,11 +110,11 @@ fun TodayScreen(
                     onAddNote(suggested.id, state.selectedDate.toEpochDay())
                 },
                 icon = { Icon(painterResource(R.drawable.ic_habit_pen), contentDescription = null, modifier = Modifier.size(22.dp)) },
-                text = { Text("Add note", style = MaterialTheme.typography.labelLarge) },
+                text = { Text(stringResource(R.string.add_note), style = MaterialTheme.typography.labelLarge) },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 shape = RoundedCornerShape(18.dp),
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).padding(bottom = fabLift).semantics { contentDescription = "Add note" },
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).padding(bottom = fabLift).semantics { contentDescription = addNote },
             )
         }
         UndoSnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp))
@@ -165,7 +167,7 @@ private fun Header(state: TodayUiState, onAddHabit: () -> Unit) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(state.dateLabel, style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant)
             Text(
-                if (state.isToday) "Today" else state.selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+                if (state.isToday) stringResource(R.string.today) else state.selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
                 style = MaterialTheme.typography.headlineMedium,
                 color = colors.onBackground,
             )
@@ -175,7 +177,7 @@ private fun Header(state: TodayUiState, onAddHabit: () -> Unit) {
             modifier = Modifier.size(48.dp),
             colors = IconButtonDefaults.iconButtonColors(containerColor = colors.surfaceContainerHigh, contentColor = colors.onSurface),
         ) {
-            Icon(painterResource(R.drawable.ic_plus), contentDescription = "New habit", modifier = Modifier.size(22.dp))
+            Icon(painterResource(R.drawable.ic_plus), contentDescription = stringResource(R.string.new_habit), modifier = Modifier.size(22.dp))
         }
     }
 }
@@ -193,10 +195,10 @@ private fun ScoreCard(state: TodayUiState) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(verticalAlignment = Alignment.Bottom) {
-            Text("${state.scorePercent}%", style = type.headlineMedium, color = colors.onSurface)
+            Text(stringResource(R.string.percent, state.scorePercent), style = type.headlineMedium, color = colors.onSurface)
             Spacer(Modifier.width(8.dp))
             Text(
-                if (state.isToday) "of today" else "of the day",
+                stringResource(if (state.isToday) R.string.of_today else R.string.of_the_day),
                 style = type.bodyMedium,
                 color = colors.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 4.dp),
@@ -211,15 +213,17 @@ private fun ScoreCard(state: TodayUiState) {
                 modifier = Modifier.weight(1f).padding(bottom = 4.dp),
             )
         }
-        Segments(state.habits, Modifier.semantics { contentDescription = summary(state) })
+        val summary = summary(state)
+        Segments(state.habits, Modifier.semantics { contentDescription = summary })
     }
 }
 
 /** "1 done · 2 partial · 3 left"; each count stays on one line with its word when text wraps. */
+@Composable
 private fun summary(state: TodayUiState): String = buildList {
-    add("${state.doneCount}\u00A0done")
-    if (state.partialCount > 0) add("${state.partialCount}\u00A0partial")
-    if (state.openCount > 0) add("${state.openCount}\u00A0left")
+    add(stringResource(R.string.count_done, state.doneCount))
+    if (state.partialCount > 0) add(stringResource(R.string.count_partial, state.partialCount))
+    if (state.openCount > 0) add(stringResource(R.string.count_left, state.openCount))
 }.joinToString(" · ")
 
 /** One bar per habit: solid when done, part-filled when partial, faint when skipped. */
@@ -260,7 +264,7 @@ private fun EmptyState() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Text("Nothing scheduled for this day", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-        Text("Tap + to add a habit.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.today_empty), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+        Text(stringResource(R.string.today_empty_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

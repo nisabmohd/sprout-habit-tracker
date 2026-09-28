@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
@@ -77,7 +78,7 @@ fun DateRangeSheet(
     SproutSheet(onDismissRequest = onDismiss) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Date range", style = type.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.date_range), style = type.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
                 TextButton(onClick = onShortcut) { Text(shortcutLabel, style = type.labelLarge) }
             }
             val s = start
@@ -85,9 +86,9 @@ fun DateRangeSheet(
             // Both months spelled out ("21 Sep – 27 Sep 2026") so it reads as a range.
             Text(
                 when {
-                    s == null || e == null -> "Pick a first day"
+                    s == null || e == null -> stringResource(R.string.pick_first_day)
                     s == e -> s.format(DateTimeFormatter.ofPattern("d MMM yyyy"))
-                    else -> "${s.format(dm)} – ${e.format(dm)} ${e.year}"
+                    else -> stringResource(R.string.range_same_year, s.format(dm), e.format(dm), e.year)
                 },
                 style = type.titleSmall,
                 color = colors.onSurfaceVariant,
@@ -110,7 +111,12 @@ fun DateRangeSheet(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(48.dp),
             ) {
                 Text(
-                    if (s == null || e == null) "Show" else if (s == e) "Show ${s.format(dm)}" else if (s.month == e.month) "Show ${s.dayOfMonth} – ${e.format(dm)}" else "Show ${s.format(dm)} – ${e.format(dm)}",
+                    when {
+                        s == null || e == null -> stringResource(R.string.show)
+                        s == e -> stringResource(R.string.show_value, s.format(dm))
+                        s.month == e.month -> stringResource(R.string.show_value, stringResource(R.string.range_short, s.dayOfMonth.toString(), e.format(dm)))
+                        else -> stringResource(R.string.show_value, stringResource(R.string.range_short, s.format(dm), e.format(dm)))
+                    },
                     style = type.labelLarge,
                 )
             }
@@ -136,8 +142,8 @@ fun DatePickerSheet(
     SproutSheet(onDismissRequest = onDismiss) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Date", style = type.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
-                TextButton(onClick = { picked = today; month = YearMonth.from(today) }) { Text("Today", style = type.labelLarge) }
+                Text(stringResource(R.string.date), style = type.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
+                TextButton(onClick = { picked = today; month = YearMonth.from(today) }) { Text(stringResource(R.string.today), style = type.labelLarge) }
             }
             Text(picked.format(DateTimeFormatter.ofPattern("EEEE, d MMM yyyy")), style = type.titleSmall, color = colors.onSurfaceVariant)
             MonthHeader(month, today) { month = it }
@@ -146,7 +152,7 @@ fun DatePickerSheet(
                 onClick = { onApply(picked) },
                 modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(48.dp),
             ) {
-                Text("Use ${picked.format(DateTimeFormatter.ofPattern("d MMM"))}", style = type.labelLarge)
+                Text(stringResource(R.string.use_value, picked.format(DateTimeFormatter.ofPattern("d MMM"))), style = type.labelLarge)
             }
         }
     }
@@ -156,7 +162,7 @@ fun DatePickerSheet(
 private fun MonthHeader(month: YearMonth, today: LocalDate, onMonth: (YearMonth) -> Unit) {
     Row(Modifier.fillMaxWidth().padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { onMonth(month.minusMonths(1)) }) {
-            Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = "Previous month", modifier = Modifier.size(20.dp))
+            Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = stringResource(R.string.previous_month), modifier = Modifier.size(20.dp))
         }
         Text(
             month.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
@@ -166,7 +172,7 @@ private fun MonthHeader(month: YearMonth, today: LocalDate, onMonth: (YearMonth)
             modifier = Modifier.weight(1f),
         )
         IconButton(onClick = { onMonth(month.plusMonths(1)) }, enabled = month < YearMonth.from(today)) {
-            Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = "Next month", modifier = Modifier.size(20.dp))
+            Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = stringResource(R.string.next_month), modifier = Modifier.size(20.dp))
         }
     }
 }

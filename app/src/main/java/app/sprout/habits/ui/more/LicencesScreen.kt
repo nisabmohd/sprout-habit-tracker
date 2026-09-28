@@ -12,7 +12,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.sprout.habits.R
 
 /** Everything bundled into the app, with its licence. Keep in step with the version catalog and res/font. */
 private val LICENCES = listOf(
@@ -29,7 +31,7 @@ private val LICENCES = listOf(
 @Composable
 fun LicencesScreen(onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding().navigationBarsPadding()) {
-        TopBar("Open-source licences", onBack)
+        TopBar(stringResource(R.string.licences), onBack)
         LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(LICENCES, key = { it.first }) { (name, licence) ->
                 SettingsCard { SettingsRow(name, licence) }

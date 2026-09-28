@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.note
 
+import androidx.compose.ui.res.stringResource
+import app.sprout.habits.rememberStrings
 import java.time.LocalDate
 import app.sprout.habits.ui.components.MarkColors
 import app.sprout.habits.ui.components.DayMarkView
@@ -90,10 +92,10 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onClose) {
-                Icon(painterResource(R.drawable.ic_close), contentDescription = "Close", modifier = Modifier.size(22.dp))
+                Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.action_close), modifier = Modifier.size(22.dp))
             }
             Text(
-                if (form.isNew) "New note" else "Edit note",
+                stringResource(if (form.isNew) R.string.new_note else R.string.edit_note),
                 style = type.titleLarge,
                 color = colors.onBackground,
                 modifier = Modifier.weight(1f).padding(start = 8.dp),
@@ -101,15 +103,15 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
             if (!form.isNew) {
                 Box {
                     IconButton(onClick = { menuOpen = true }) {
-                        Icon(painterResource(R.drawable.ic_more_vert), contentDescription = "More options", modifier = Modifier.size(22.dp))
+                        Icon(painterResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.action_more_options), modifier = Modifier.size(22.dp))
                     }
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                        DropdownMenuItem(text = { Text("Delete", color = colors.error) }, onClick = { menuOpen = false; confirmDelete = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_delete), color = colors.error) }, onClick = { menuOpen = false; confirmDelete = true })
                     }
                 }
             }
             Button(onClick = viewModel::save, enabled = form.canSave, modifier = Modifier.height(40.dp)) {
-                Text("Save", style = type.labelLarge)
+                Text(stringResource(R.string.action_save), style = type.labelLarge)
             }
         }
 
@@ -125,21 +127,21 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
             val habit = habits.firstOrNull { it.id == form.habitId }
             if (habit == null) {
                 Text(
-                    "Add a habit first, then write a note about it.",
+                    stringResource(R.string.note_no_habits),
                     style = type.bodyLarge,
                     color = colors.onSurfaceVariant,
                     modifier = Modifier.padding(16.dp),
                 )
             } else {
                 val hc = habitColors(habit.colorHue.toFloat())
-                val (mark, outcome) = NoteCardUi.dayOutcome(habit, entry, form.date.toEpochDay(), LocalDate.now().toEpochDay())
+                val (mark, outcome) = NoteCardUi.dayOutcome(habit, entry, form.date.toEpochDay(), LocalDate.now().toEpochDay(), rememberStrings())
                 Row(
                     Modifier
                         .fillMaxWidth()
                         .height(68.dp)
                         .clip(RoundedCornerShape(22.dp))
                         .background(hc.soft)
-                        .clickable(onClickLabel = "Choose habit") { pickingHabit = true }
+                        .clickable(onClickLabel = stringResource(R.string.choose_habit)) { pickingHabit = true }
                         .padding(start = 12.dp, end = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -149,7 +151,7 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
                     Column(Modifier.weight(1f).padding(start = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(habit.name, style = type.titleMedium, color = hc.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Row(
-                            Modifier.clickable(onClickLabel = "Change date") { pickingDate = true },
+                            Modifier.clickable(onClickLabel = stringResource(R.string.change_date)) { pickingDate = true },
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             DayMarkView(mark, hc, MarkColors(colors.outlineVariant, colors.onSurfaceVariant, colors.outline), Modifier.size(16.dp))
@@ -164,9 +166,10 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
                         }
                     }
                     IconButton(onClick = { pickingHabit = true }) {
-                        Icon(painterResource(R.drawable.ic_chevron_down), contentDescription = "Choose habit", tint = hc.ink, modifier = Modifier.size(22.dp))
+                        Icon(painterResource(R.drawable.ic_chevron_down), contentDescription = stringResource(R.string.choose_habit), tint = hc.ink, modifier = Modifier.size(22.dp))
                     }
                 }
+                val noteLabel = stringResource(R.string.note)
                 val textStyle = type.bodyLarge.copy(fontSize = 18.sp, lineHeight = 1.55.em, color = colors.onSurface)
                 BasicTextField(
                     value = form.text,
@@ -178,10 +181,10 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
                         .fillMaxSize()
                         .padding(start = 16.dp, end = 16.dp, top = 20.dp)
                         .focusRequester(focus)
-                        .semantics { contentDescription = "Note" },
+                        .semantics { contentDescription = noteLabel },
                     decorationBox = { field ->
                         Box {
-                            if (form.text.isEmpty()) Text("How did it go today?", style = textStyle.copy(color = colors.onSurfaceVariant))
+                            if (form.text.isEmpty()) Text(stringResource(R.string.note_placeholder), style = textStyle.copy(color = colors.onSurfaceVariant))
                             field()
                         }
                     },
@@ -213,9 +216,9 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text("Delete this note?") },
-            confirmButton = { TextButton(onClick = { confirmDelete = false; viewModel.delete() }) { Text("Delete", color = colors.error) } },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel") } },
+            title = { Text(stringResource(R.string.delete_note_title)) },
+            confirmButton = { TextButton(onClick = { confirmDelete = false; viewModel.delete() }) { Text(stringResource(R.string.action_delete), color = colors.error) } },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 }
@@ -234,7 +237,7 @@ private fun HabitPickerSheet(
     // Fully open right away so every habit is visible; the list scrolls if there are many.
     SproutSheet(onDismissRequest = onDismiss) {
         Text(
-            "Choose habit",
+            stringResource(R.string.choose_habit),
             style = MaterialTheme.typography.titleLarge,
             color = colors.onSurface,
             modifier = Modifier.padding(start = 24.dp, bottom = 8.dp),

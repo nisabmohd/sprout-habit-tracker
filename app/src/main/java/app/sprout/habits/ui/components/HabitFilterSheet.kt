@@ -34,8 +34,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import app.sprout.habits.R
 import app.sprout.habits.ui.theme.habitColors
 
 @Immutable
@@ -58,8 +60,8 @@ fun HabitFilterSheet(
     var picked by remember { mutableStateOf(selected) }
     SproutSheet(onDismissRequest = onDismiss) {
         Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("Filter by habit", style = MaterialTheme.typography.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
-            TextButton(onClick = { picked = emptySet() }, enabled = picked.isNotEmpty()) { Text("Clear", style = MaterialTheme.typography.labelLarge) }
+            Text(stringResource(R.string.filter_by_habit), style = MaterialTheme.typography.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
+            TextButton(onClick = { picked = emptySet() }, enabled = picked.isNotEmpty()) { Text(stringResource(R.string.clear), style = MaterialTheme.typography.labelLarge) }
         }
         LazyColumn(Modifier.weight(1f, fill = false), contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)) {
             items(options, key = { it.habitId }) { o ->

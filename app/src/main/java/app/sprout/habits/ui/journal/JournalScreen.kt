@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.journal
 
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import app.sprout.habits.ui.components.NoteCard
@@ -61,6 +63,8 @@ fun JournalScreen(
     var pickingRange by remember { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
+    val res = LocalContext.current.resources
+    val addNote = stringResource(R.string.add_note)
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
             Modifier.fillMaxSize(),
@@ -71,14 +75,14 @@ fun JournalScreen(
                 Row(Modifier.fillMaxWidth().padding(start = 4.dp, top = 8.dp, bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         state?.rangeLabel?.let { Text(it, style = type.titleSmall, color = colors.onSurfaceVariant) }
-                        Text("Journal", style = type.headlineMedium, color = colors.onBackground)
+                        Text(stringResource(R.string.journal_title), style = type.headlineMedium, color = colors.onBackground)
                     }
                     // Every filter lives in a sheet: dates here, habits next to it.
                     state?.let { ui ->
-                        HeaderIconButton(R.drawable.ic_calendar, "Filter by date", active = ui.from != null) { pickingRange = true }
+                        HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.filter_by_date), active = ui.from != null) { pickingRange = true }
                         if (ui.options.isNotEmpty()) {
                             Spacer(Modifier.width(8.dp))
-                            HeaderIconButton(R.drawable.ic_filter, "Filter by habit", active = ui.filter.isNotEmpty()) { choosing = true }
+                            HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty()) { choosing = true }
                         }
                     }
                 }
@@ -91,21 +95,21 @@ fun JournalScreen(
                     Column(Modifier.fillMaxWidth().padding(vertical = 48.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
                             when {
-                                dated && filter.isEmpty() -> "No notes in these dates"
-                                filter.size == 1 -> "No notes for this habit yet"
-                                else -> "No notes for these habits yet"
+                                dated && filter.isEmpty() -> stringResource(R.string.journal_empty_dates)
+                                filter.size == 1 -> stringResource(R.string.journal_empty_habit)
+                                else -> stringResource(R.string.journal_empty_habits)
                             },
                             style = type.titleMedium,
                             color = colors.onSurface,
                         )
-                        TextButton(onClick = { viewModel.setFilter(emptySet()); viewModel.setRange(null, null) }) { Text("Show all notes") }
+                        TextButton(onClick = { viewModel.setFilter(emptySet()); viewModel.setRange(null, null) }) { Text(stringResource(R.string.journal_show_all)) }
                     }
                 }
             } else if (list != null && list.isEmpty()) {
                 item(key = "empty") {
                     Column(Modifier.fillMaxWidth().padding(vertical = 48.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("No notes yet", style = type.titleMedium, color = colors.onSurface)
-                        Text("Add a note to remember how a day went.", style = type.bodyMedium, color = colors.onSurfaceVariant)
+                        Text(stringResource(R.string.journal_empty), style = type.titleMedium, color = colors.onSurface)
+                        Text(stringResource(R.string.journal_empty_hint), style = type.bodyMedium, color = colors.onSurfaceVariant)
                     }
                 }
             }
@@ -126,11 +130,11 @@ fun JournalScreen(
             ExtendedFloatingActionButton(
                 onClick = onAddNote,
                 icon = { Icon(painterResource(R.drawable.ic_habit_pen), contentDescription = null, modifier = Modifier.size(22.dp)) },
-                text = { Text("Add note", style = type.labelLarge) },
+                text = { Text(stringResource(R.string.add_note), style = type.labelLarge) },
                 containerColor = colors.primaryContainer,
                 contentColor = colors.onPrimaryContainer,
                 shape = RoundedCornerShape(18.dp),
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).semantics { contentDescription = "Add note" },
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).semantics { contentDescription = addNote },
             )
         }
     }
@@ -140,7 +144,7 @@ fun JournalScreen(
             from = ui.from,
             to = ui.to,
             weekStart = weekStart,
-            shortcutLabel = "All dates",
+            shortcutLabel = stringResource(R.string.all_dates),
             onApply = { a, b -> viewModel.setRange(a, b); pickingRange = false },
             onShortcut = { viewModel.setRange(null, null); pickingRange = false },
             onDismiss = { pickingRange = false },
@@ -150,7 +154,7 @@ fun JournalScreen(
         HabitFilterSheet(
             options = ui.options,
             selected = ui.filter,
-            applyLabel = { n -> if (n == 0) "Show all notes" else if (n == 1) "Show notes for 1 habit" else "Show notes for $n habits" },
+            applyLabel = { n -> if (n == 0) res.getString(R.string.journal_show_all) else res.getQuantityString(R.plurals.journal_show_for_habits, n, n) },
             onApply = { ids -> viewModel.setFilter(ids); choosing = false },
             onDismiss = { choosing = false },
         )

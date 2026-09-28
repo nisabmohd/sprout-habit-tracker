@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import androidx.core.content.ContextCompat
+import app.sprout.habits.R
 
 object Notifications {
     /** One notification per habit reminder. */
@@ -21,11 +22,11 @@ object Notifications {
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannels(
             listOf(
-                NotificationChannel(CHANNEL_REMINDERS, "Habit reminders", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                    description = "A reminder at the time you set for each habit."
+                NotificationChannel(CHANNEL_REMINDERS, context.getString(R.string.channel_reminders), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                    description = context.getString(R.string.channel_reminders_desc)
                 },
-                NotificationChannel(CHANNEL_NOTES, "Note reminders", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                    description = "An evening reminder to add a note when you skip a habit that asks for one."
+                NotificationChannel(CHANNEL_NOTES, context.getString(R.string.channel_notes), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                    description = context.getString(R.string.channel_notes_desc)
                 },
             ),
         )

@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.sprout.habits.R
@@ -43,26 +44,26 @@ fun WelcomeScreen(onStart: () -> Unit) {
             Icon(painterResource(R.drawable.ic_seedling), contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(36.dp))
         }
         Spacer(Modifier.height(24.dp))
-        Text("Sprout", style = type.titleSmall, color = colors.primary)
-        Text("Small habits,\nkept honestly.", style = type.displayLarge, color = colors.onBackground)
+        Text(stringResource(R.string.app_name), style = type.titleSmall, color = colors.primary)
+        Text(stringResource(R.string.welcome_title), style = type.displayLarge, color = colors.onBackground)
         Spacer(Modifier.height(12.dp))
         Text(
-            "Swipe to complete, log part of it, skip when life happens, and write about the days that didn't go to plan.",
+            stringResource(R.string.welcome_body),
             style = type.bodyLarge,
             color = colors.onSurfaceVariant,
         )
         Spacer(Modifier.height(32.dp))
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Feature(HabitIcon.MORNING.drawable, 38f, "Swipe, hold or tap to log")
-            Feature(HabitIcon.WRITE.drawable, 330f, "Journal linked to each habit")
-            Feature(HabitIcon.OUTDOORS.drawable, 150f, "Week at a glance on your home screen")
+            Feature(HabitIcon.MORNING.drawable, 38f, stringResource(R.string.welcome_feature_log))
+            Feature(HabitIcon.WRITE.drawable, 330f, stringResource(R.string.welcome_feature_journal))
+            Feature(HabitIcon.OUTDOORS.drawable, 150f, stringResource(R.string.welcome_feature_widget))
         }
         Spacer(Modifier.weight(1f).height(32.dp))
         Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-            Text("Get started", style = type.titleMedium)
+            Text(stringResource(R.string.welcome_start), style = type.titleMedium)
         }
         Text(
-            "Free and open source. Your data stays on this device.",
+            stringResource(R.string.welcome_footer),
             style = type.bodyMedium,
             color = colors.onSurfaceVariant,
             textAlign = TextAlign.Center,

@@ -8,6 +8,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import app.sprout.habits.MainActivity
 import app.sprout.habits.R
+import app.sprout.habits.ResourceStrings
+import app.sprout.habits.Strings
 import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.data.Habit
 import app.sprout.habits.domain.measure
@@ -29,7 +31,7 @@ class ReminderNotifier(
         if (habit.archived || !Notifications.canPost(context)) return
         val entry = repository.getEntry(habit.id, LocalDate.now().toEpochDay())
         if (entry?.status == EntryStatus.DONE || entry?.status == EntryStatus.SKIP) return
-        val (title, text) = reminderText(habit, entry?.amount ?: 0.0)
+        val (title, text) = reminderText(habit, entry?.amount ?: 0.0, ResourceStrings(context))
         post(habit.id, Notifications.CHANNEL_REMINDERS, title, text, reminderId(habit.id))
     }
 
@@ -41,7 +43,7 @@ class ReminderNotifier(
             if (!habit.askForNote || habit.archived || !isScheduled(habit.daysMask, today)) continue
             if (repository.getEntry(habit.id, day)?.status != EntryStatus.SKIP) continue
             if (repository.getNote(habit.id, day) != null) continue
-            post(habit.id, Notifications.CHANNEL_NOTES, "${habit.name} · how did today go?", "Add a note about today.", noteReminderId(habit.id))
+            post(habit.id, Notifications.CHANNEL_NOTES, context.getString(R.string.nudge_title, habit.name), context.getString(R.string.nudge_text), noteReminderId(habit.id))
         }
     }
 
@@ -73,12 +75,12 @@ class ReminderNotifier(
         fun noteReminderId(habitId: Long) = habitId.toInt() * 2 + 1
 
         /** Title and line for a reminder, given how much is already logged today. */
-        fun reminderText(habit: Habit, amount: Double): Pair<String, String> {
+        fun reminderText(habit: Habit, amount: Double, strings: Strings): Pair<String, String> {
             return when {
-                habit.trackType == TrackType.CHECK -> habit.name to "Time to check it off."
-                amount > 0 -> "${habit.name} · ${habit.measure((habit.target - amount).coerceAtLeast(0.0))} to go" to
-                    "You're at ${formatNumber(habit.toShown(amount))} of ${habit.measure(habit.target)} today."
-                else -> habit.name to "Goal today: ${habit.measure(habit.target)}."
+                habit.trackType == TrackType.CHECK -> habit.name to strings(R.string.reminder_check)
+                amount > 0 -> strings(R.string.reminder_to_go, habit.name, habit.measure((habit.target - amount).coerceAtLeast(0.0))) to
+                    strings(R.string.reminder_progress, formatNumber(habit.toShown(amount)), habit.measure(habit.target))
+                else -> habit.name to strings(R.string.reminder_goal, habit.measure(habit.target))
             }
         }
     }

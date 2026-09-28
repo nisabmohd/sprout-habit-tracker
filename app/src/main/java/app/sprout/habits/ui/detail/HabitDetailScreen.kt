@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.detail
 
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import app.sprout.habits.ui.components.NoteCard
 import androidx.compose.foundation.background
@@ -85,26 +87,26 @@ fun HabitDetailScreen(
             item(key = "bar") {
                 Row(Modifier.fillMaxWidth().height(64.dp).padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onBack, modifier = Modifier.padding(start = 0.dp)) {
-                        Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = "Back", modifier = Modifier.size(22.dp))
+                        Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.action_back), modifier = Modifier.size(22.dp))
                     }
                     Spacer(Modifier.weight(1f))
                     IconButton(onClick = onEdit) {
-                        Icon(painterResource(R.drawable.ic_habit_pen), contentDescription = "Edit habit", modifier = Modifier.size(22.dp))
+                        Icon(painterResource(R.drawable.ic_habit_pen), contentDescription = stringResource(R.string.edit_habit), modifier = Modifier.size(22.dp))
                     }
                     Box {
                         IconButton(onClick = { menuOpen = true }) {
-                            Icon(painterResource(R.drawable.ic_more_vert), contentDescription = "More options", modifier = Modifier.size(22.dp))
+                            Icon(painterResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.action_more_options), modifier = Modifier.size(22.dp))
                         }
                         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                             DropdownMenuItem(
-                                text = { Text(if (ui.habit.archived) "Restore" else "Archive") },
+                                text = { Text(stringResource(if (ui.habit.archived) R.string.restore else R.string.archive)) },
                                 onClick = {
                                     menuOpen = false
                                     viewModel.setArchived(!ui.habit.archived)
                                     if (!ui.habit.archived) onBack()
                                 },
                             )
-                            DropdownMenuItem(text = { Text("Delete", color = colors.error) }, onClick = { menuOpen = false; deleting = true })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.action_delete), color = colors.error) }, onClick = { menuOpen = false; deleting = true })
                         }
                     }
                 }
@@ -123,36 +125,37 @@ fun HabitDetailScreen(
             item(key = "stats") {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     StatTile(days(ui.monthDone), ui.monthDoneLabel, hc, Modifier.weight(1f))
-                    StatTile(days(ui.bestStreak), "best streak", hc, Modifier.weight(1f))
-                    StatTile("${ui.noteCount}", if (ui.noteCount == 1) "note" else "notes", hc, Modifier.weight(1f))
+                    StatTile(days(ui.bestStreak), stringResource(R.string.best_streak), hc, Modifier.weight(1f))
+                    StatTile("${ui.noteCount}", pluralStringResource(R.plurals.notes_count_label, ui.noteCount), hc, Modifier.weight(1f))
                 }
             }
             item(key = "calendar") { MonthCalendar(ui, hc, viewModel::previousMonth, viewModel::nextMonth, viewModel::editDay) }
             item(key = "notes-header") {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("Notes", style = type.titleLarge, color = colors.onBackground, modifier = Modifier.weight(1f))
-                    if (ui.noteCount > 0) TextButton(onClick = onSeeAllNotes) { Text("See all", style = type.labelLarge) }
+                    Text(stringResource(R.string.notes_title), style = type.titleLarge, color = colors.onBackground, modifier = Modifier.weight(1f))
+                    if (ui.noteCount > 0) TextButton(onClick = onSeeAllNotes) { Text(stringResource(R.string.see_all), style = type.labelLarge) }
                 }
             }
             if (ui.notes.isEmpty()) {
                 item(key = "no-notes") {
-                    Text("No notes yet.", style = type.bodyMedium, color = colors.onSurfaceVariant)
+                    Text(stringResource(R.string.no_notes_yet), style = type.bodyMedium, color = colors.onSurfaceVariant)
                 }
             }
             items(ui.notes.take(5), key = { it.card.id }) { note -> NoteCard(note.card, onOpenNote, showHabit = false, dateLabel = note.dateLabel) }
         }
         // Hidden during a long screenshot, or it would be stamped into every captured frame.
         // Lift the button above the Undo snackbar while it shows, so the two never overlap.
+        val addNote = stringResource(R.string.add_note)
         val fabLift by animateDpAsState(if (snackbar.currentSnackbarData != null) 72.dp else 0.dp, label = "fabLift")
         if (onAddNote != null && !LocalScrollCaptureInProgress.current) {
             ExtendedFloatingActionButton(
                 onClick = onAddNote,
                 icon = { Icon(painterResource(R.drawable.ic_habit_pen), contentDescription = null, modifier = Modifier.size(22.dp)) },
-                text = { Text("Add note", style = type.labelLarge) },
+                text = { Text(stringResource(R.string.add_note), style = type.labelLarge) },
                 containerColor = colors.primaryContainer,
                 contentColor = colors.onPrimaryContainer,
                 shape = RoundedCornerShape(18.dp),
-                modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(16.dp).padding(bottom = fabLift).semantics { contentDescription = "Add note" },
+                modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(16.dp).padding(bottom = fabLift).semantics { contentDescription = addNote },
             )
         }
         UndoSnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 8.dp))
@@ -163,7 +166,8 @@ fun HabitDetailScreen(
     }
 }
 
-private fun days(n: Int) = if (n == 1) "1 day" else "$n days"
+@Composable
+private fun days(n: Int) = pluralStringResource(R.plurals.day_count, n, n)
 
 @Composable
 private fun StatTile(value: String, label: String, hc: HabitColors, modifier: Modifier) {
@@ -192,10 +196,10 @@ private fun MonthCalendar(ui: HabitDetailUi, hc: HabitColors, onPrevious: () -> 
         Row(Modifier.fillMaxWidth().padding(start = 6.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(ui.monthLabel, style = type.titleMedium, color = colors.onSurface, modifier = Modifier.weight(1f))
             IconButton(onClick = onPrevious) {
-                Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = "Previous month", modifier = Modifier.size(18.dp))
+                Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = stringResource(R.string.previous_month), modifier = Modifier.size(18.dp))
             }
             IconButton(onClick = onNext, enabled = ui.canGoForward) {
-                Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = "Next month", modifier = Modifier.size(18.dp))
+                Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = stringResource(R.string.next_month), modifier = Modifier.size(18.dp))
             }
         }
         val cells: List<CalendarDayUi?> = List(ui.leadingBlanks) { null } + ui.days
@@ -221,7 +225,7 @@ private fun MonthCalendar(ui: HabitDetailUi, hc: HabitColors, onPrevious: () -> 
                                 .weight(1f)
                                 .aspectRatio(1f)
                                 .clip(CircleShape)
-                                .then(if (editable) Modifier.clickable(onClickLabel = "Edit this day") { onEditDay(day!!.date) } else Modifier),
+                                .then(if (editable) Modifier.clickable(onClickLabel = stringResource(R.string.edit_this_day)) { onEditDay(day!!.date) } else Modifier),
                             contentAlignment = Alignment.Center,
                         ) {
                             day?.let { CalendarDay(it, hc, editable) { onEditDay(it.date) } }
@@ -245,13 +249,15 @@ private fun CalendarDay(day: CalendarDayUi, hc: HabitColors, editable: Boolean, 
         MarkKind.NOT_SCHEDULED -> colors.surfaceContainerLowest to colors.outline
     }
     val description = when (day.mark.kind) {
-        MarkKind.DONE -> "done"
-        MarkKind.PARTIAL -> "partial"
-        MarkKind.SKIP -> "skipped"
-        MarkKind.OPEN_TODAY -> "not logged yet"
-        MarkKind.FUTURE -> "upcoming"
-        MarkKind.NOT_SCHEDULED -> "not scheduled"
+        MarkKind.DONE -> stringResource(R.string.mark_done_lower)
+        MarkKind.PARTIAL -> stringResource(R.string.mark_partial_plain)
+        MarkKind.SKIP -> stringResource(R.string.mark_skipped_lower)
+        MarkKind.OPEN_TODAY -> stringResource(R.string.mark_open_lower)
+        MarkKind.FUTURE -> stringResource(R.string.mark_future_lower)
+        MarkKind.NOT_SCHEDULED -> stringResource(R.string.mark_not_scheduled_lower)
     }
+    val fullDescription = stringResource(R.string.date_description, day.date.format(java.time.format.DateTimeFormatter.ofPattern("EEEE d MMMM")), description)
+    val editLabel = stringResource(R.string.edit_this_day)
     Box(
         Modifier
             .size(38.dp)
@@ -259,8 +265,8 @@ private fun CalendarDay(day: CalendarDayUi, hc: HabitColors, editable: Boolean, 
             .background(bg)
             .then(if (day.isToday) Modifier.border(2.dp, colors.primary, CircleShape) else Modifier)
             .clearAndSetSemantics {
-                contentDescription = "${day.date.format(java.time.format.DateTimeFormatter.ofPattern("EEEE d MMMM"))}: $description"
-                if (editable) onClick("Edit this day") { onEdit(); true }
+                contentDescription = fullDescription
+                if (editable) onClick(editLabel) { onEdit(); true }
             },
         contentAlignment = Alignment.Center,
     ) {

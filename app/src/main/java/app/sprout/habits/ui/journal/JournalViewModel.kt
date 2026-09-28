@@ -3,6 +3,8 @@ package app.sprout.habits.ui.journal
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.sprout.habits.R
+import app.sprout.habits.Strings
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.ui.components.HabitFilterOption
@@ -36,7 +38,7 @@ data class JournalUi(
     val rangeLabel: String?,
 )
 
-class JournalViewModel(repository: HabitRepository) : ViewModel() {
+class JournalViewModel(repository: HabitRepository, private val strings: Strings) : ViewModel() {
     private val filterIds = MutableStateFlow<Set<Long>>(emptySet())
     private val range = MutableStateFlow<Pair<LocalDate, LocalDate>?>(null)
 
@@ -58,11 +60,11 @@ class JournalViewModel(repository: HabitRepository) : ViewModel() {
                 .filter { r == null || it.date in r.first.toEpochDay()..r.second.toEpochDay() }
                 .mapNotNull { note ->
                     val habit = byId[note.habitId] ?: return@mapNotNull null
-                    NoteCardUi.of(note, habit, entryOf[note.habitId to note.date], today)
+                    NoteCardUi.of(note, habit, entryOf[note.habitId to note.date], today, strings)
                 }
             JournalUi(
                 // Notes arrive newest day first, so grouping keeps that order.
-                days = cards.groupBy { it.day }.map { (day, list) -> JournalDayUi(day, dayHeader(LocalDate.ofEpochDay(day), today), list) },
+                days = cards.groupBy { it.day }.map { (day, list) -> JournalDayUi(day, dayHeader(LocalDate.ofEpochDay(day), today, strings), list) },
                 filter = filter,
                 // Active habits, plus archived ones that still have notes.
                 options = habits.filter { !it.archived || it.id in withNotes }
@@ -86,9 +88,9 @@ class JournalViewModel(repository: HabitRepository) : ViewModel() {
 
     companion object {
         /** "Today", "Yesterday", "Thursday, 24 Sep", or with the year when it isn't this one. */
-        fun dayHeader(date: LocalDate, today: LocalDate): String = when (date) {
-            today -> "Today"
-            today.minusDays(1) -> "Yesterday"
+        fun dayHeader(date: LocalDate, today: LocalDate, strings: Strings): String = when (date) {
+            today -> strings(R.string.today)
+            today.minusDays(1) -> strings(R.string.yesterday)
             else -> date.format(DateTimeFormatter.ofPattern(if (date.year == today.year) "EEEE, d MMM" else "EEEE, d MMM yyyy"))
         }
     }

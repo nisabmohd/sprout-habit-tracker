@@ -1,6 +1,7 @@
 package app.sprout.habits.ui.nav
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -16,6 +17,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavBackStackEntry
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -69,12 +71,12 @@ import app.sprout.habits.ui.today.TodayScreen
 import app.sprout.habits.ui.today.TodayViewModel
 import kotlin.reflect.KClass
 
-private enum class Tab(val route: Any, val routeClass: KClass<*>, val label: String, @DrawableRes val icon: Int) {
-    TODAY(TodayRoute, TodayRoute::class, "Today", R.drawable.ic_nav_today),
-    HABITS(HabitsRoute, HabitsRoute::class, "Habits", R.drawable.ic_nav_habits),
-    JOURNAL(JournalRoute, JournalRoute::class, "Journal", R.drawable.ic_nav_journal),
-    INSIGHTS(InsightsRoute, InsightsRoute::class, "Insights", R.drawable.ic_nav_insights),
-    MORE(MoreRoute, MoreRoute::class, "More", R.drawable.ic_nav_more),
+private enum class Tab(val route: Any, val routeClass: KClass<*>, @StringRes val label: Int, @DrawableRes val icon: Int) {
+    TODAY(TodayRoute, TodayRoute::class, R.string.today, R.drawable.ic_nav_today),
+    HABITS(HabitsRoute, HabitsRoute::class, R.string.tab_habits, R.drawable.ic_nav_habits),
+    JOURNAL(JournalRoute, JournalRoute::class, R.string.journal_title, R.drawable.ic_nav_journal),
+    INSIGHTS(InsightsRoute, InsightsRoute::class, R.string.insights_title, R.drawable.ic_nav_insights),
+    MORE(MoreRoute, MoreRoute::class, R.string.tab_more, R.drawable.ic_nav_more),
 }
 
 @Composable
@@ -112,7 +114,7 @@ fun SproutNavHost(
         ) {
             composable<TodayRoute> {
                 TabFrame {
-                val vm = viewModel { TodayViewModel(container.repository, container.settings) }
+                val vm = viewModel { TodayViewModel(container.repository, container.settings, container.strings) }
                 TodayScreen(
                     vm,
                     onAddHabit = { navController.navigate(EditHabitRoute()) },
@@ -135,7 +137,7 @@ fun SproutNavHost(
             }
             composable<HabitsRoute> {
                 TabFrame {
-                val vm = viewModel { HabitsViewModel(container.repository, container.settings) }
+                val vm = viewModel { HabitsViewModel(container.repository, container.settings, container.strings) }
                 HabitsScreen(
                     vm,
                     onAddHabit = { navController.navigate(EditHabitRoute()) },
@@ -146,7 +148,7 @@ fun SproutNavHost(
             }
             composable<HabitDetailRoute> { entry ->
                 val id = entry.toRoute<HabitDetailRoute>().habitId
-                val vm = viewModel { HabitDetailViewModel(container.repository, container.settings, id) }
+                val vm = viewModel { HabitDetailViewModel(container.repository, container.settings, container.strings, id) }
                 HabitDetailScreen(
                     vm,
                     onBack = { navController.popBackStack() },
@@ -166,7 +168,7 @@ fun SproutNavHost(
             }
             composable<JournalRoute> {
                 TabFrame {
-                val vm = viewModel { JournalViewModel(container.repository) }
+                val vm = viewModel { JournalViewModel(container.repository, container.strings) }
                 JournalScreen(
                     vm,
                     weekStart = settings.weekStart,
@@ -251,7 +253,7 @@ private fun SproutNavigationBar(current: Tab, onSelect: (Tab) -> Unit) {
                 icon = { Icon(painterResource(tab.icon), contentDescription = null, Modifier.size(22.dp)) },
                 label = {
                     Text(
-                        tab.label,
+                        stringResource(tab.label),
                         maxLines = 1,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,

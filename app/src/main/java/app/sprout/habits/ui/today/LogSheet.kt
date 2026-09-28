@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.today
 
+import androidx.compose.ui.res.stringResource
 import app.sprout.habits.ui.components.SproutSheet
 import androidx.compose.foundation.background
 import androidx.compose.ui.semantics.semantics
@@ -116,23 +117,24 @@ fun LogSheet(
                 }
                 // Clears the day back to not logged; only useful when something is logged.
                 if (sheet.hasEntry) {
+                    val clearLabel = if (sheet.isToday) stringResource(R.string.clear_today_entry, sheet.name) else stringResource(R.string.clear_entry_on, sheet.name, sheet.dayLabel)
                     FilledTonalButton(
                         onClick = onUndo,
                         contentPadding = PaddingValues(horizontal = 12.dp),
-                        modifier = Modifier.height(40.dp).semantics { contentDescription = if (sheet.isToday) "Clear today's entry for ${sheet.name}" else "Clear the entry for ${sheet.name} on ${sheet.dayLabel}" },
+                        modifier = Modifier.height(40.dp).semantics { contentDescription = clearLabel },
                         colors = ButtonDefaults.filledTonalButtonColors(containerColor = colors.surfaceContainerHigh, contentColor = colors.onSurface),
                     ) {
                         Icon(painterResource(R.drawable.ic_undo), contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Undo", style = type.labelLarge)
+                        Text(stringResource(R.string.action_undo), style = type.labelLarge)
                     }
                 }
             }
 
             val options = if (hasAmount) {
-                listOf(EntryStatus.DONE to "Done", EntryStatus.PARTIAL to "Partial", EntryStatus.SKIP to "Skip")
+                listOf(EntryStatus.DONE to stringResource(R.string.outcome_done), EntryStatus.PARTIAL to stringResource(R.string.outcome_partial), EntryStatus.SKIP to stringResource(R.string.outcome_skip))
             } else {
-                listOf(EntryStatus.DONE to "Done", EntryStatus.SKIP to "Skip")
+                listOf(EntryStatus.DONE to stringResource(R.string.outcome_done), EntryStatus.SKIP to stringResource(R.string.outcome_skip))
             }
             // Each segment is a fixed share of the row, so labels stop scaling at 1.3x.
             CappedFontScale {
@@ -160,7 +162,7 @@ fun LogSheet(
             if (hasAmount && status != EntryStatus.SKIP) {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        StepButton(R.drawable.ic_minus, "Less") { setAmount(amount - step) }
+                        StepButton(R.drawable.ic_minus, stringResource(R.string.less)) { setAmount(amount - step) }
                         Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 buildAnnotatedString {
@@ -173,9 +175,9 @@ fun LogSheet(
                                 color = colors.onSurface,
                             )
                             val pct = if (sheet.target > 0) (amount / sheet.target * 100).roundToInt() else 0
-                            Text("${sheet.unit} · $pct%".trimStart(' ', '·'), style = type.titleSmall, color = colors.onSurfaceVariant)
+                            Text(if (sheet.unit.isEmpty()) stringResource(R.string.percent, pct) else stringResource(R.string.unit_percent, sheet.unit, pct), style = type.titleSmall, color = colors.onSurfaceVariant)
                         }
-                        StepButton(R.drawable.ic_plus, "More") { setAmount(amount + step) }
+                        StepButton(R.drawable.ic_plus, stringResource(R.string.more)) { setAmount(amount + step) }
                     }
                     val sliderSteps = (sheet.target / step).roundToInt() - 1
                     Slider(
@@ -197,7 +199,7 @@ fun LogSheet(
             OutlinedTextField(
                 value = note,
                 onValueChange = { note = it },
-                placeholder = { Text("Add a note", style = type.bodyLarge) },
+                placeholder = { Text(stringResource(R.string.add_a_note), style = type.bodyLarge) },
                 textStyle = type.bodyLarge,
                 minLines = 2,
                 shape = RoundedCornerShape(16.dp),
@@ -211,7 +213,7 @@ fun LogSheet(
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
                 TextButton(onClick = onDismiss, modifier = Modifier.height(44.dp)) {
-                    Text("Cancel", style = type.labelLarge)
+                    Text(stringResource(R.string.action_cancel), style = type.labelLarge)
                 }
                 Spacer(Modifier.width(12.dp))
                 Button(
@@ -219,7 +221,7 @@ fun LogSheet(
                     modifier = Modifier.height(44.dp),
                     contentPadding = ButtonDefaults.ContentPadding,
                 ) {
-                    Text("Save", style = type.labelLarge)
+                    Text(stringResource(R.string.action_save), style = type.labelLarge)
                 }
             }
         }

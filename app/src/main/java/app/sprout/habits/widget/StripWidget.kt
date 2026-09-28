@@ -31,6 +31,7 @@ import androidx.glance.layout.padding
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import app.sprout.habits.R
 
 /** A slim strip: "5 of 8 today", the next habit, and one bar per habit. */
 class StripWidget : GlanceAppWidget() {
@@ -62,10 +63,10 @@ private fun StripContent(data: TodayWidgetData, bitmaps: WidgetBitmaps) {
         verticalAlignment = Alignment.Vertical.CenterVertically,
     ) {
         Row(GlanceModifier.fillMaxWidth()) {
-            Text("${data.done} of ${data.total} today", style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.onSurface))
+            Text(LocalContext.current.getString(R.string.widget_of_today, data.done, data.total), style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.onSurface))
             Spacer(GlanceModifier.defaultWeight())
             Text(
-                data.nextLabel?.let { "Next: $it" } ?: "All done",
+                data.nextLabel?.let { context.getString(R.string.widget_next, it) } ?: context.getString(R.string.widget_all_done),
                 maxLines = 1,
                 style = TextStyle(fontSize = 14.sp, color = colors.onSurfaceVariant),
             )
@@ -73,7 +74,7 @@ private fun StripContent(data: TodayWidgetData, bitmaps: WidgetBitmaps) {
         Spacer(GlanceModifier.height(10.dp))
         Image(
             ImageProvider(bitmaps.strip(data.today, width, 10f, track = color(colors.outline).copy(alpha = 0.35f), skip = color(colors.surfaceVariant))),
-            contentDescription = "${data.done} of ${data.total} habits done today",
+            contentDescription = LocalContext.current.getString(R.string.widget_habits_done_today, data.done, data.total),
             modifier = GlanceModifier.fillMaxWidth().height(10.dp),
         )
     }

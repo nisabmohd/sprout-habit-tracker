@@ -11,8 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.sprout.habits.R
 import kotlinx.coroutines.flow.collectLatest
 
 /**
@@ -21,10 +23,11 @@ import kotlinx.coroutines.flow.collectLatest
  */
 @Composable
 fun DayLogHost(logger: DayLogger, snackbar: SnackbarHostState) {
+    val undo = stringResource(R.string.action_undo)
     LaunchedEffect(logger) {
         logger.changes.collectLatest { change ->
             snackbar.currentSnackbarData?.dismiss()
-            val result = snackbar.showSnackbar(change.message, actionLabel = "Undo", duration = SnackbarDuration.Short)
+            val result = snackbar.showSnackbar(change.message, actionLabel = undo, duration = SnackbarDuration.Short)
             if (result == SnackbarResult.ActionPerformed) logger.undo(change)
         }
     }

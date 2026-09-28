@@ -54,6 +54,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -95,7 +97,7 @@ fun EditHabitScreen(viewModel: EditHabitViewModel, onClose: () -> Unit) {
         onToggleDay = viewModel::toggleDay,
         onSave = viewModel::save,
         onClose = onClose,
-        archiveLabel = if (viewModel.isArchived) "Restore" else "Archive",
+        archiveLabel = stringResource(if (viewModel.isArchived) R.string.restore else R.string.archive),
         onArchive = viewModel::archive,
         onDelete = { deleting = true },
     )
@@ -148,16 +150,16 @@ private fun EditHabitContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onClose) {
-                Icon(painterResource(R.drawable.ic_close), contentDescription = "Close", modifier = Modifier.size(22.dp))
+                Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.action_close), modifier = Modifier.size(22.dp))
             }
             Text(
-                if (form.isNew) "New habit" else "Edit habit",
+                stringResource(if (form.isNew) R.string.new_habit else R.string.edit_habit),
                 style = type.titleLarge,
                 color = colors.onBackground,
                 modifier = Modifier.weight(1f).padding(start = 8.dp),
             )
             Button(onClick = onSave, enabled = form.canSave, modifier = Modifier.height(40.dp)) {
-                Text("Save", style = type.labelLarge)
+                Text(stringResource(R.string.action_save), style = type.labelLarge)
             }
         }
 
@@ -177,7 +179,7 @@ private fun EditHabitContent(
                 OutlinedTextField(
                     value = form.name,
                     onValueChange = { v -> onEdit { it.copy(name = v) } },
-                    label = { Text("Name") },
+                    label = { Text(stringResource(R.string.name)) },
                     singleLine = true,
                     textStyle = type.titleMedium,
                     shape = RoundedCornerShape(14.dp),
@@ -186,7 +188,8 @@ private fun EditHabitContent(
                 )
             }
 
-            Section("Icon") {
+            val moreIcons = stringResource(R.string.more_icons)
+            Section(stringResource(R.string.icon)) {
                 // Seven suggestions and a More tile that opens every icon in a sheet.
                 var pickingIcon by rememberSaveable { mutableStateOf(false) }
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -201,8 +204,8 @@ private fun EditHabitContent(
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(14.dp))
                             .background(colors.surfaceContainerHigh)
-                            .clickable(onClickLabel = "More icons") { endTyping(); pickingIcon = true }
-                            .semantics { contentDescription = "More icons" },
+                            .clickable(onClickLabel = moreIcons) { endTyping(); pickingIcon = true }
+                            .semantics { contentDescription = moreIcons },
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(painterResource(R.drawable.ic_more_horiz), contentDescription = null, tint = colors.onSurface, modifier = Modifier.size(24.dp))
@@ -218,7 +221,7 @@ private fun EditHabitContent(
                 }
             }
 
-            Section("Color") {
+            Section(stringResource(R.string.color)) {
                 ColorSwatchRow(
                     swatches = HABIT_HUES.map { hue ->
                         val c = habitColors(hue.toFloat())
@@ -229,8 +232,8 @@ private fun EditHabitContent(
                 )
             }
 
-            Section("How do you track it?") {
-                val options = listOf(TrackType.CHECK to "Check off", TrackType.AMOUNT to "Amount", TrackType.DURATION to "Duration")
+            Section(stringResource(R.string.how_track)) {
+                val options = listOf(TrackType.CHECK to stringResource(R.string.track_check), TrackType.AMOUNT to stringResource(R.string.track_amount), TrackType.DURATION to stringResource(R.string.track_duration))
                 // Each segment is a fixed share of the row, so labels stop scaling at 1.3x.
                 CappedFontScale {
                 SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
@@ -246,20 +249,20 @@ private fun EditHabitContent(
                 }
                 when (form.trackType) {
                     TrackType.AMOUNT -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        NumberField("Target", form.target, Modifier.weight(1f)) { v -> onEdit { it.copy(target = v) } }
+                        NumberField(stringResource(R.string.target), form.target, Modifier.weight(1f)) { v -> onEdit { it.copy(target = v) } }
                         OutlinedTextField(
                             value = form.unit,
                             onValueChange = { v -> onEdit { it.copy(unit = v) } },
-                            label = { Text("Unit") },
-                            placeholder = { Text("pages") },
+                            label = { Text(stringResource(R.string.unit)) },
+                            placeholder = { Text(stringResource(R.string.unit_placeholder)) },
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.weight(1f),
                         )
                     }
                     TrackType.DURATION -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
-                        NumberField("Target", form.target, Modifier.weight(1f)) { v -> onEdit { it.copy(target = v) } }
-                        val units = listOf(DurationUnit.MINUTES to "Minutes", DurationUnit.HOURS to "Hours")
+                        NumberField(stringResource(R.string.target), form.target, Modifier.weight(1f)) { v -> onEdit { it.copy(target = v) } }
+                        val units = listOf(DurationUnit.MINUTES to stringResource(R.string.minutes), DurationUnit.HOURS to stringResource(R.string.hours))
                         CappedFontScale {
                         SingleChoiceSegmentedButtonRow(Modifier.weight(1.3f)) {
                             units.forEachIndexed { index, (value, label) ->
@@ -276,12 +279,12 @@ private fun EditHabitContent(
                     }
                     TrackType.CHECK -> Unit
                 }
-                Text("You can always log part of it with a long press.", style = type.labelMedium, fontWeight = FontWeight.Normal, color = colors.onSurfaceVariant)
+                Text(stringResource(R.string.partial_hint), style = type.labelMedium, fontWeight = FontWeight.Normal, color = colors.onSurfaceVariant)
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-                    Text("Days", style = type.titleSmall, color = colors.onBackground, modifier = Modifier.weight(1f))
+                    Text(stringResource(R.string.days), style = type.titleSmall, color = colors.onBackground, modifier = Modifier.weight(1f))
                     Text(daysLabel(form.daysMask), style = type.bodyMedium, color = colors.onSurfaceVariant)
                 }
                 Row(Modifier.fillMaxWidth()) {
@@ -323,7 +326,7 @@ private fun EditHabitContent(
                 }
             }
 
-            Section("Reminder") {
+            Section(stringResource(R.string.reminder)) {
                 Card {
                     Row(
                         Modifier.fillMaxWidth().clickable { endTyping(); pickingTime = true }.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -332,7 +335,7 @@ private fun EditHabitContent(
                         Icon(painterResource(R.drawable.ic_bell), contentDescription = null, tint = colors.onSurface, modifier = Modifier.size(22.dp))
                         Column(Modifier.weight(1f).padding(start = 14.dp)) {
                             Text(TodayViewModel.formatTime(form.reminderMinutes), style = type.titleLarge, color = colors.onSurface)
-                            Text("On the days above · tap to change", style = type.bodyMedium, color = colors.onSurfaceVariant)
+                            Text(stringResource(R.string.reminder_hint), style = type.bodyMedium, color = colors.onSurfaceVariant)
                         }
                         Switch(checked = form.reminderOn, onCheckedChange = { v -> needsNotifications(v); edit { it.copy(reminderOn = v) } })
                     }
@@ -342,30 +345,30 @@ private fun EditHabitContent(
             if (form.reminderOn && notifications.granted && !exactAlarms) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Reminders can be up to 10 minutes late unless you allow exact alarms.",
+                        stringResource(R.string.exact_alarm_hint),
                         style = type.bodyMedium,
                         color = colors.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
                     )
-                    TextButton(onClick = { Notifications.openExactAlarmSettings(context) }) { Text("Allow") }
+                    TextButton(onClick = { Notifications.openExactAlarmSettings(context) }) { Text(stringResource(R.string.allow)) }
                 }
             }
             if ((form.reminderOn || form.askForNote) && !notifications.granted) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Notifications are off, so reminders won't show.",
+                        stringResource(R.string.notifications_off_hint),
                         style = type.bodyMedium,
                         color = colors.error,
                         modifier = Modifier.weight(1f),
                     )
-                    TextButton(onClick = { Notifications.openSettings(context) }) { Text("Turn on") }
+                    TextButton(onClick = { Notifications.openSettings(context) }) { Text(stringResource(R.string.turn_on)) }
                 }
             }
 
             Card {
-                ToggleRow("Ask for a note when I skip", "Opens a note when you skip, and reminds you at 9 PM if it's empty", form.askForNote) { v -> needsNotifications(v); edit { it.copy(askForNote = v) } }
+                ToggleRow(stringResource(R.string.ask_note), stringResource(R.string.ask_note_desc), form.askForNote) { v -> needsNotifications(v); edit { it.copy(askForNote = v) } }
                 HorizontalDivider(color = colors.surfaceContainerHigh)
-                ToggleRow("Show on home screen widget", "Week view and Today widget", form.showOnWidget) { v -> edit { it.copy(showOnWidget = v) } }
+                ToggleRow(stringResource(R.string.show_widget), stringResource(R.string.show_widget_desc), form.showOnWidget) { v -> edit { it.copy(showOnWidget = v) } }
             }
 
             if (!form.isNew) {
@@ -374,7 +377,7 @@ private fun EditHabitContent(
                         Text(archiveLabel, style = type.labelLarge)
                     }
                     OutlinedButton(onClick = onDelete, modifier = Modifier.weight(1f).height(48.dp)) {
-                        Text("Delete", style = type.labelLarge, color = colors.error)
+                        Text(stringResource(R.string.action_delete), style = type.labelLarge, color = colors.error)
                     }
                 }
             }
@@ -383,7 +386,7 @@ private fun EditHabitContent(
 
     if (pickingTime) {
         TimePickerSheet(
-            title = "Reminder time",
+            title = stringResource(R.string.reminder_time),
             initialMinutes = form.reminderMinutes,
             onApply = { minutes ->
                 needsNotifications(true)
@@ -444,12 +447,13 @@ private fun NumberField(label: String, value: String, modifier: Modifier, onChan
 
 private fun orderedDays(weekStart: DayOfWeek): List<DayOfWeek> = List(7) { weekStart.plus(it.toLong()) }
 
+@Composable
 private fun daysLabel(mask: Int): String = when (mask) {
-    0b111_1111 -> "Every day"
-    0b001_1111 -> "Weekdays"
-    0b110_0000 -> "Weekends"
-    0 -> "Pick at least one day"
-    else -> "${Integer.bitCount(mask)} days a week"
+    0b111_1111 -> stringResource(R.string.every_day)
+    0b001_1111 -> stringResource(R.string.weekdays)
+    0b110_0000 -> stringResource(R.string.weekends)
+    0 -> stringResource(R.string.pick_one_day)
+    else -> Integer.bitCount(mask).let { pluralStringResource(R.plurals.days_a_week, it, it) }
 }
 
 private fun canScheduleExactAlarms(context: android.content.Context): Boolean =
@@ -457,14 +461,17 @@ private fun canScheduleExactAlarms(context: android.content.Context): Boolean =
         context.getSystemService(android.app.AlarmManager::class.java).canScheduleExactAlarms()
 
 /** Names TalkBack reads for the habit colors. */
-private fun colorName(hue: Int) = when (hue) {
-    275 -> "Purple"
-    215 -> "Blue"
-    192 -> "Teal"
-    150 -> "Green"
-    95 -> "Lime"
-    38 -> "Gold"
-    12 -> "Rust"
-    330 -> "Pink"
-    else -> "Color"
-}
+@Composable
+private fun colorName(hue: Int) = stringResource(
+    when (hue) {
+        275 -> R.string.color_purple
+        215 -> R.string.color_blue
+        192 -> R.string.color_teal
+        150 -> R.string.color_green
+        95 -> R.string.color_lime
+        38 -> R.string.color_gold
+        12 -> R.string.color_rust
+        330 -> R.string.color_pink
+        else -> R.string.color_color
+    },
+)

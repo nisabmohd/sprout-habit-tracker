@@ -75,16 +75,16 @@ private fun TodayContent(data: TodayWidgetData, bitmaps: WidgetBitmaps) {
         verticalAlignment = Alignment.Vertical.CenterVertically,
     ) {
         Box(GlanceModifier.size(104.dp).clickable(actionStartActivity(context.openAppIntent())), contentAlignment = Alignment.Center) {
-            Image(ImageProvider(ring), contentDescription = "${data.done} of ${data.total} done today", modifier = GlanceModifier.size(104.dp))
+            Image(ImageProvider(ring), contentDescription = LocalContext.current.getString(R.string.widget_done_today, data.done, data.total), modifier = GlanceModifier.size(104.dp))
             Column(horizontalAlignment = Alignment.Horizontal.CenterHorizontally) {
-                Text("${data.done}/${data.total}", style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Medium, color = colors.onSurface))
-                Text("today", style = TextStyle(fontSize = 12.sp, color = colors.onSurfaceVariant))
+                Text(LocalContext.current.getString(R.string.widget_ratio, data.done, data.total), style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Medium, color = colors.onSurface))
+                Text(LocalContext.current.getString(R.string.widget_today_lower), style = TextStyle(fontSize = 12.sp, color = colors.onSurfaceVariant))
             }
         }
         Spacer(GlanceModifier.width(16.dp))
         Column(GlanceModifier.defaultWeight()) {
             Text(
-                if (data.upNext.isEmpty()) "All done for today" else "Up next",
+                LocalContext.current.getString(if (data.upNext.isEmpty()) R.string.widget_all_done_today else R.string.widget_up_next),
                 style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.onSurfaceVariant),
             )
             data.upNext.take(2).forEach { habit ->
@@ -122,7 +122,7 @@ private fun TodayContent(data: TodayWidgetData, bitmaps: WidgetBitmaps) {
                     ) {
                         Image(
                             ImageProvider(R.drawable.widget_circle),
-                            contentDescription = "Mark ${habit.name} done",
+                            contentDescription = LocalContext.current.getString(R.string.mark_done, habit.name),
                             colorFilter = ColorFilter.tint(ColorProvider(hc.solid, hc.solid)),
                             modifier = GlanceModifier.size(34.dp),
                         )

@@ -3,6 +3,8 @@ package app.sprout.habits.ui.habits
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.sprout.habits.R
+import app.sprout.habits.Strings
 import app.sprout.habits.data.Entry
 import app.sprout.habits.data.Habit
 import app.sprout.habits.data.HabitIcon
@@ -90,9 +92,10 @@ const val OVERALL_WEEKS = 26
 class HabitsViewModel(
     private val repository: HabitRepository,
     settings: SettingsRepository,
+    private val strings: Strings,
 ) : ViewModel() {
     /** Tapping a past day mark opens the log sheet for that day. */
-    val logger = DayLogger(repository, settings, viewModelScope)
+    val logger = DayLogger(repository, settings, viewModelScope, strings)
 
     val mode = MutableStateFlow(HabitsMode.WEEK)
     private val weekOffset = MutableStateFlow(0)
@@ -150,7 +153,7 @@ class HabitsViewModel(
                 if (scheduled && day <= todayDay) credits += credit
                 markFor(scheduled, outcomeOf(entry, day, todayDay), (credit ?: 0.0).toFloat(), day > todayDay)
             }
-            HabitWeekUi(habit.id, habit.name, HabitIcon.fromKey(habit.icon).drawable, habit.colorHue.toFloat(), goalLabel(habit), marks)
+            HabitWeekUi(habit.id, habit.name, HabitIcon.fromKey(habit.icon).drawable, habit.colorHue.toFloat(), goalLabel(habit, strings), marks)
         }
         return WeekUi(
             label = rangeLabel(days.first(), days.last()),
@@ -200,19 +203,19 @@ class HabitsViewModel(
     }
 
     companion object {
-        fun goalLabel(habit: Habit): String = when (habit.trackType) {
+        fun goalLabel(habit: Habit, strings: Strings): String = when (habit.trackType) {
             TrackType.AMOUNT, TrackType.DURATION -> habit.measure(habit.target)
-            TrackType.CHECK -> daysLabel(habit.daysMask)
+            TrackType.CHECK -> daysLabel(habit.daysMask, strings)
         }
 
-        fun daysLabel(mask: Int): String = when (mask) {
-            0b111_1111 -> "Every day"
-            0b001_1111 -> "Weekdays"
-            0b110_0000 -> "Weekends"
+        fun daysLabel(mask: Int, strings: Strings): String = when (mask) {
+            0b111_1111 -> strings(R.string.every_day)
+            0b001_1111 -> strings(R.string.weekdays)
+            0b110_0000 -> strings(R.string.weekends)
             // A few days read best by name ("Mon, Wed, Fri"); more than three get too long.
             else -> DayOfWeek.entries.filter { mask and (1 shl (it.value - 1)) != 0 }.let { days ->
                 if (days.size <= 3) days.joinToString(", ") { it.getDisplayName(TextStyle.SHORT, Locale.getDefault()) }
-                else "${days.size} days a week"
+                else strings.plural(R.plurals.days_a_week, days.size, days.size)
             }
         }
 

@@ -21,6 +21,7 @@ class AppContainer(private val context: Context) {
     val reminderNotifier by lazy { ReminderNotifier(context, repository) }
     val widgets by lazy { WidgetUpdater(context, repository, settings) }
     val backup by lazy { BackupManager(repository, settings) }
+    val strings: Strings = ResourceStrings(context)
 
     /** Lives as long as the process, for work that isn't tied to a screen. */
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

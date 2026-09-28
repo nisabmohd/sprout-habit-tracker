@@ -30,11 +30,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.lifecycle.lifecycleScope
+import app.sprout.habits.R
 import app.sprout.habits.data.Habit
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.ui.theme.SproutTheme
@@ -65,7 +67,7 @@ class StreakWidgetConfigActivity : ComponentActivity() {
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     item {
-                        Text("Pick a habit", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(4.dp, 8.dp, 4.dp, 12.dp))
+                        Text(stringResource(R.string.pick_a_habit), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(4.dp, 8.dp, 4.dp, 12.dp))
                     }
                     items(habits.orEmpty(), key = { it.id }) { habit -> HabitRow(habit) { pick(appWidgetId, habit.id) } }
                 }

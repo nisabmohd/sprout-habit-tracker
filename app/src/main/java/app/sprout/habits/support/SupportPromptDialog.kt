@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -47,12 +48,12 @@ fun SupportPromptDialog(
                 Box(Modifier.size(64.dp).background(colors.primaryContainer, RoundedCornerShape(20.dp)), contentAlignment = Alignment.Center) {
                     Icon(painterResource(R.drawable.ic_seedling), contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(32.dp))
                 }
-                Text("Enjoying Sprout?", style = type.titleLarge, color = colors.onSurface)
+                Text(stringResource(R.string.support_title), style = type.titleLarge, color = colors.onSurface)
                 Text(
                     if (showRate) {
-                        "Sprout is free and open source. A rating or a star helps others find it, and sponsoring keeps it growing."
+                        stringResource(R.string.support_text_play)
                     } else {
-                        "Sprout is free and open source. A star helps others find it, and sponsoring keeps it growing."
+                        stringResource(R.string.support_text)
                     },
                     style = type.bodyMedium,
                     color = colors.onSurfaceVariant,
@@ -63,13 +64,13 @@ fun SupportPromptDialog(
                     Button(onClick = onRate, modifier = Modifier.fillMaxWidth().height(48.dp)) {
                         Icon(painterResource(R.drawable.ic_thumb_up), contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Rate on Play Store", style = type.labelLarge)
+                        Text(stringResource(R.string.rate_on_play), style = type.labelLarge)
                     }
                 }
                 FilledTonalButton(onClick = onStar, modifier = Modifier.fillMaxWidth().height(48.dp)) {
                     Icon(painterResource(R.drawable.ic_star), contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Star on GitHub", style = type.labelLarge)
+                    Text(stringResource(R.string.star_github), style = type.labelLarge)
                 }
                 FilledTonalButton(
                     onClick = onSponsor,
@@ -78,9 +79,9 @@ fun SupportPromptDialog(
                 ) {
                     Icon(painterResource(R.drawable.ic_heart), contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Sponsor", style = type.labelLarge)
+                    Text(stringResource(R.string.sponsor), style = type.labelLarge)
                 }
-                TextButton(onClick = onLater) { Text("Maybe later", style = type.labelLarge) }
+                TextButton(onClick = onLater) { Text(stringResource(R.string.maybe_later), style = type.labelLarge) }
             }
         }
     }

@@ -1,6 +1,9 @@
 package app.sprout.habits.ui.today
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
+import app.sprout.habits.R
+import app.sprout.habits.Strings
 import app.sprout.habits.data.Entry
 import app.sprout.habits.data.EntryStatus
 import app.sprout.habits.data.Habit
@@ -40,7 +43,7 @@ data class LogSheetUi(
     /** Shown value × this = stored value (60 for hours habits). */
     val storedPerShown: Double,
     val isToday: Boolean,
-    /** "today", or the date when logging a past day ("Friday, 25 Sep"). */
+    /** "Today", or the date when logging a past day ("Friday, 25 Sep"). */
     val dayLabel: String,
     /** "Goal 20 pages · today", or "Friday, 25 Sep · goal 20 pages" for a past day. */
     val subtitle: String,
@@ -72,6 +75,7 @@ class DayLogger(
     private val repository: HabitRepository,
     private val settings: SettingsRepository,
     private val scope: CoroutineScope,
+    private val strings: Strings,
     private val now: () -> Long = System::currentTimeMillis,
 ) {
     private val _sheet = MutableStateFlow<LogSheetUi?>(null)
@@ -90,7 +94,7 @@ class DayLogger(
      * Writes a new entry for [date]; [build] returns null to clear the day instead. A skip on a
      * habit that asks for a note opens the sheet so the note can be written right away.
      */
-    fun log(habitId: Long, date: LocalDate, verb: String, build: (Habit, Long) -> Entry?) {
+    fun log(habitId: Long, date: LocalDate, @StringRes verb: Int, build: (Habit, Long) -> Entry?) {
         if (date.isAfter(LocalDate.now())) return
         val day = date.toEpochDay()
         scope.launch {
@@ -101,23 +105,23 @@ class DayLogger(
             if (next != null && next.sameOutcomeAs(previous)) return@launch
             if (next == null) repository.clearEntry(habitId, day) else repository.setEntry(next)
             countCheckIn(next)
-            _changes.send(UndoableChange(message("${habit.name} $verb", date), habitId, day, previous))
+            _changes.send(UndoableChange(message(strings(verb, habit.name), date), habitId, day, previous))
             if (next?.status == EntryStatus.SKIP && habit.askForNote && repository.getNote(habitId, day) == null) {
                 open(habitId, date, focusNote = true)
             }
         }
     }
 
-    fun markDone(habitId: Long, date: LocalDate) = log(habitId, date, "marked done") { habit, day ->
+    fun markDone(habitId: Long, date: LocalDate) = log(habitId, date, R.string.log_marked_done) { habit, day ->
         Entry(habit.id, day, EntryStatus.DONE, habit.target)
     }
 
-    fun markSkipped(habitId: Long, date: LocalDate) = log(habitId, date, "skipped") { habit, day ->
+    fun markSkipped(habitId: Long, date: LocalDate) = log(habitId, date, R.string.log_skipped) { habit, day ->
         Entry(habit.id, day, EntryStatus.SKIP)
     }
 
     /** Clears the day back to not logged. */
-    fun reset(habitId: Long, date: LocalDate, verb: String = "undone") = log(habitId, date, verb) { _, _ -> null }
+    fun reset(habitId: Long, date: LocalDate, @StringRes verb: Int = R.string.log_undone) = log(habitId, date, verb) { _, _ -> null }
 
     /** Opens the log sheet for [habitId] on [date]; future days can't be logged. */
     fun open(habitId: Long, date: LocalDate, focusNote: Boolean = false) {
@@ -130,7 +134,7 @@ class DayLogger(
             val note = repository.getNote(habitId, day)
             val isToday = date == today
             val goal = if (habit.trackType == TrackType.CHECK) null else habit.measure(habit.target)
-            val dayLabel = if (isToday) "today" else date.format(LONG_DATE)
+            val dayLabel = if (isToday) strings(R.string.today) else date.format(LONG_DATE)
             _sheet.value = LogSheetUi(
                 habitId = habit.id,
                 day = day,
@@ -145,9 +149,9 @@ class DayLogger(
                 isToday = isToday,
                 dayLabel = dayLabel,
                 subtitle = when {
-                    goal == null -> if (isToday) "Today" else dayLabel
-                    isToday -> "Goal $goal · today"
-                    else -> "$dayLabel · goal $goal"
+                    goal == null -> dayLabel
+                    isToday -> strings(R.string.log_goal_today, goal)
+                    else -> strings(R.string.log_goal_on_day, dayLabel, goal)
                 },
                 status = entry?.status ?: if (habit.trackType == TrackType.CHECK) EntryStatus.DONE else EntryStatus.PARTIAL,
                 amount = habit.toShown(entry?.amount ?: 0.0),
@@ -179,10 +183,10 @@ class DayLogger(
                 repository.setEntry(next)
                 countCheckIn(next)
                 val text = when (finalStatus) {
-                    EntryStatus.DONE -> "${sheet.name} marked done"
+                    EntryStatus.DONE -> strings(R.string.log_marked_done, sheet.name)
                     // "Read · 15 of 20 pages"
-                    EntryStatus.PARTIAL -> "${sheet.name} · ${TodayViewModel.formatNumber(finalAmount)} of ${TodayViewModel.formatNumber(sheet.target)} ${sheet.unit}".trimEnd()
-                    EntryStatus.SKIP -> "${sheet.name} skipped"
+                    EntryStatus.PARTIAL -> strings(R.string.log_partial, sheet.name, TodayViewModel.formatNumber(finalAmount), "${TodayViewModel.formatNumber(sheet.target)} ${sheet.unit}".trimEnd())
+                    EntryStatus.SKIP -> strings(R.string.log_skipped, sheet.name)
                 }
                 _changes.send(UndoableChange(message(text, LocalDate.ofEpochDay(sheet.day)), sheet.habitId, sheet.day, previous))
             }
@@ -201,7 +205,7 @@ class DayLogger(
         scope.launch {
             val previous = repository.getEntry(sheet.habitId, sheet.day) ?: return@launch
             repository.clearEntry(sheet.habitId, sheet.day)
-            _changes.send(UndoableChange(message("${sheet.name} cleared", LocalDate.ofEpochDay(sheet.day)), sheet.habitId, sheet.day, previous))
+            _changes.send(UndoableChange(message(strings(R.string.log_cleared, sheet.name), LocalDate.ofEpochDay(sheet.day)), sheet.habitId, sheet.day, previous))
         }
     }
 
@@ -224,10 +228,11 @@ class DayLogger(
 
     /** Past days say which day changed: "Read marked done · Fri 25 Sep". */
     private fun message(text: String, date: LocalDate): String =
-        if (date == LocalDate.now()) text else "$text · ${date.format(SHORT_DATE)}"
+        if (date == LocalDate.now()) text else strings(R.string.on_date, text, date.format(SHORT_DATE))
 
     companion object {
-        private val LONG_DATE = DateTimeFormatter.ofPattern("EEEE, d MMM")
-        private val SHORT_DATE = DateTimeFormatter.ofPattern("EEE d MMM")
+        // Built on each use so a change of language shows up.
+        private val LONG_DATE get() = DateTimeFormatter.ofPattern("EEEE, d MMM")
+        private val SHORT_DATE get() = DateTimeFormatter.ofPattern("EEE d MMM")
     }
 }

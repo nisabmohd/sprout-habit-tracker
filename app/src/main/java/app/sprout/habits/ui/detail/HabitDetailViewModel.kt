@@ -3,6 +3,8 @@ package app.sprout.habits.ui.detail
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.sprout.habits.R
+import app.sprout.habits.Strings
 import app.sprout.habits.data.Entry
 import app.sprout.habits.data.Habit
 import app.sprout.habits.data.HabitIcon
@@ -67,10 +69,11 @@ data class HabitDetailUi(
 class HabitDetailViewModel(
     private val repository: HabitRepository,
     settings: app.sprout.habits.data.SettingsRepository,
+    private val strings: Strings,
     private val habitId: Long,
 ) : ViewModel() {
     /** Tapping a past day in the calendar opens the log sheet for that day. */
-    val logger = app.sprout.habits.ui.today.DayLogger(repository, settings, viewModelScope)
+    val logger = app.sprout.habits.ui.today.DayLogger(repository, settings, viewModelScope, strings)
 
     fun editDay(date: LocalDate) = logger.open(habitId, date)
 
@@ -124,16 +127,16 @@ class HabitDetailViewModel(
             )
         }
         val subtitle = buildList {
-            add(HabitsViewModel.daysLabel(habit.daysMask))
-            if (habit.trackType != app.sprout.habits.data.TrackType.CHECK) add(HabitsViewModel.goalLabel(habit))
-            habit.reminderMinutes?.let { add("reminder at ${TodayViewModel.formatTime(it)}") }
+            add(HabitsViewModel.daysLabel(habit.daysMask, strings))
+            if (habit.trackType != app.sprout.habits.data.TrackType.CHECK) add(HabitsViewModel.goalLabel(habit, strings))
+            habit.reminderMinutes?.let { add(strings(R.string.reminder_at_lower, TodayViewModel.formatTime(it))) }
         }.joinToString(" · ")
         return HabitDetailUi(
             habit = habit,
             icon = HabitIcon.fromKey(habit.icon).drawable,
             subtitle = subtitle,
             monthDone = (first..minOf(last, todayDay)).count { history.isScheduled(it) && history.isKept(it, todayDay) },
-            monthDoneLabel = if (ym == YearMonth.now()) "this month" else ym.month.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+            monthDoneLabel = if (ym == YearMonth.now()) strings(R.string.this_month) else ym.month.getDisplayName(TextStyle.FULL, Locale.getDefault()),
             currentStreak = history.currentStreak(todayDay),
             bestStreak = history.bestStreak(todayDay),
             noteCount = notes.size,
@@ -143,15 +146,15 @@ class HabitDetailViewModel(
             leadingBlanks = (ym.atDay(1).dayOfWeek.value - weekStart.value + 7) % 7,
             days = days,
             notes = notes.map { n ->
-                DetailNoteUi(NoteCardUi.of(n, habit, history.entries[n.date], today), relativeDate(LocalDate.ofEpochDay(n.date), today))
+                DetailNoteUi(NoteCardUi.of(n, habit, history.entries[n.date], today, strings), relativeDate(LocalDate.ofEpochDay(n.date), today, strings))
             },
         )
     }
 
     companion object {
-        fun relativeDate(date: LocalDate, today: LocalDate): String = when (date) {
-            today -> "Today"
-            today.minusDays(1) -> "Yesterday"
+        fun relativeDate(date: LocalDate, today: LocalDate, strings: Strings): String = when (date) {
+            today -> strings(R.string.today)
+            today.minusDays(1) -> strings(R.string.yesterday)
             else -> date.format(DateTimeFormatter.ofPattern(if (date.year == today.year) "EEE d MMM" else "d MMM yyyy"))
         }
     }

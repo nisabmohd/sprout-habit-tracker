@@ -39,6 +39,7 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import app.sprout.habits.R
 import app.sprout.habits.ui.theme.habitColors
 
 /** One habit's current streak and its last 7 days. The habit is picked when the widget is added. */
@@ -70,7 +71,7 @@ private fun StreakContent(data: StreakWidgetData?, bitmaps: WidgetBitmaps) {
                 .clickable(actionStartActivity(context.openAppIntent())),
             verticalAlignment = Alignment.Vertical.CenterVertically,
         ) {
-            Text("Add a habit to see its streak.", style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurfaceVariant))
+            Text(LocalContext.current.getString(R.string.streak_empty), style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurfaceVariant))
         }
         return
     }
@@ -104,12 +105,12 @@ private fun StreakContent(data: StreakWidgetData?, bitmaps: WidgetBitmaps) {
         }
         Spacer(GlanceModifier.defaultWeight())
         Text("${data.streak}", maxLines = 1, style = TextStyle(fontSize = if (compact) 28.sp else 40.sp, fontWeight = FontWeight.Medium, color = ink))
-        Text("day streak", maxLines = 1, style = TextStyle(fontSize = if (compact) 12.sp else 14.sp, fontWeight = FontWeight.Medium, color = ink))
+        Text(LocalContext.current.getString(R.string.day_streak), maxLines = 1, style = TextStyle(fontSize = if (compact) 12.sp else 14.sp, fontWeight = FontWeight.Medium, color = ink))
         if (!tiny) {
             Spacer(GlanceModifier.height(if (compact) 6.dp else 10.dp))
             Image(
                 ImageProvider(bitmaps.marks(data.last7, habit.hue, marksWidth, markSize)),
-                contentDescription = "Last 7 days",
+                contentDescription = LocalContext.current.getString(R.string.last_7_days),
                 modifier = GlanceModifier.fillMaxWidth().height(markSize.dp),
             )
         }

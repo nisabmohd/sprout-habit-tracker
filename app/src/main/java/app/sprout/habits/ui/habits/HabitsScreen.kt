@@ -34,6 +34,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import app.sprout.habits.ui.today.DayLogHost
 import app.sprout.habits.ui.today.UndoSnackbarHost
 import androidx.compose.ui.Alignment
@@ -83,10 +85,10 @@ fun HabitsScreen(
     ) {
         item(key = "header") {
             Row(Modifier.fillMaxWidth().padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Habits", style = MaterialTheme.typography.headlineMedium, color = colors.onBackground, modifier = Modifier.weight(1f))
-                HeaderButton(R.drawable.ic_drag, "Manage habits", onManage)
+                Text(stringResource(R.string.tab_habits), style = MaterialTheme.typography.headlineMedium, color = colors.onBackground, modifier = Modifier.weight(1f))
+                HeaderButton(R.drawable.ic_drag, stringResource(R.string.manage_habits), onManage)
                 Spacer(Modifier.width(8.dp))
-                HeaderButton(R.drawable.ic_plus, "New habit", onAddHabit)
+                HeaderButton(R.drawable.ic_plus, stringResource(R.string.new_habit), onAddHabit)
             }
         }
         item(key = "mode") {
@@ -99,7 +101,7 @@ fun HabitsScreen(
                         onClick = { viewModel.setMode(m) },
                         shape = SegmentedButtonDefaults.itemShape(index, HabitsMode.entries.size),
                         colors = SegmentedButtonDefaults.colors(activeContainerColor = colors.primaryContainer, activeContentColor = colors.onPrimaryContainer),
-                    ) { Text(if (m == HabitsMode.WEEK) "Week" else "Overall", style = MaterialTheme.typography.labelLarge) }
+                    ) { Text(stringResource(if (m == HabitsMode.WEEK) R.string.week else R.string.overall), style = MaterialTheme.typography.labelLarge) }
                 }
             }
             }
@@ -135,14 +137,14 @@ private fun WeekNavigator(week: WeekUi, onPrevious: () -> Unit, onNext: () -> Un
     val colors = MaterialTheme.colorScheme
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = onPrevious) {
-            Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = "Previous week", modifier = Modifier.size(22.dp))
+            Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = stringResource(R.string.previous_week), modifier = Modifier.size(22.dp))
         }
         Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(week.label, style = MaterialTheme.typography.titleMedium, color = colors.onBackground)
-            Text("${week.percent}% complete this week", style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+            Text(stringResource(R.string.week_complete, week.percent), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
         }
         IconButton(onClick = onNext, enabled = week.canGoForward) {
-            Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = "Next week", modifier = Modifier.size(22.dp))
+            Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = stringResource(R.string.next_week), modifier = Modifier.size(22.dp))
         }
     }
 }
@@ -177,7 +179,7 @@ private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit, o
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
             .background(colors.surfaceContainerLowest)
-            .clickable(onClickLabel = "Open ${habit.name}") { onOpen(habit.id) }
+            .clickable(onClickLabel = stringResource(R.string.open_habit, habit.name)) { onOpen(habit.id) }
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -192,16 +194,18 @@ private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit, o
                 val isToday = i == week.todayIndex
                 // Any scheduled day up to today can be edited; future and unscheduled days can't.
                 val editable = mark.kind != MarkKind.FUTURE && mark.kind != MarkKind.NOT_SCHEDULED
+                val editLabel = stringResource(R.string.edit_day, week.dayNames[i])
+                val description = stringResource(R.string.mark_description, habit.name, week.dayNames[i], describe(mark.kind, mark.fraction))
                 Column(
                     Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(16.dp))
                         .background(if (isToday) colors.surfaceContainerHigh else colors.surfaceContainerLowest)
-                        .then(if (editable) Modifier.clickable(onClickLabel = "Edit ${week.dayNames[i]}") { onEditDay(i) } else Modifier)
+                        .then(if (editable) Modifier.clickable(onClickLabel = editLabel) { onEditDay(i) } else Modifier)
                         .padding(vertical = 6.dp)
                         .clearAndSetSemantics {
-                            contentDescription = "${habit.name}, ${week.dayNames[i]}: ${describe(mark.kind, mark.fraction)}"
-                            if (editable) onClick("Edit ${week.dayNames[i]}") { onEditDay(i); true }
+                            contentDescription = description
+                            if (editable) onClick(editLabel) { onEditDay(i); true }
                         },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -221,13 +225,14 @@ private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit, o
     }
 }
 
+@Composable
 private fun describe(kind: MarkKind, fraction: Float) = when (kind) {
-    MarkKind.DONE -> "done"
-    MarkKind.PARTIAL -> "partial, ${(fraction * 100).toInt()}%"
-    MarkKind.SKIP -> "skipped"
-    MarkKind.OPEN_TODAY -> "not logged yet"
-    MarkKind.FUTURE -> "upcoming"
-    MarkKind.NOT_SCHEDULED -> "not scheduled"
+    MarkKind.DONE -> stringResource(R.string.mark_done_lower)
+    MarkKind.PARTIAL -> stringResource(R.string.mark_partial_lower, (fraction * 100).toInt())
+    MarkKind.SKIP -> stringResource(R.string.mark_skipped_lower)
+    MarkKind.OPEN_TODAY -> stringResource(R.string.mark_open_lower)
+    MarkKind.FUTURE -> stringResource(R.string.mark_future_lower)
+    MarkKind.NOT_SCHEDULED -> stringResource(R.string.mark_not_scheduled_lower)
 }
 
 @Composable
@@ -238,11 +243,11 @@ private fun Legend() {
         horizontalArrangement = Arrangement.SpaceBetween,
         itemVerticalAlignment = Alignment.CenterVertically,
     ) {
-        Text("Last $OVERALL_WEEKS weeks", style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant, modifier = Modifier.padding(end = 12.dp))
+        Text(pluralStringResource(R.plurals.last_weeks, OVERALL_WEEKS, OVERALL_WEEKS), style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant, modifier = Modifier.padding(end = 12.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-        LegendItem("Done") { drawRoundRect(colors.onSurfaceVariant, cornerRadius = CornerRadius(size.width * 0.3f)) }
-        LegendItem("Partial") { drawRoundRect(colors.outlineVariant, cornerRadius = CornerRadius(size.width * 0.3f)) }
-        LegendItem("Skipped") {
+        LegendItem(stringResource(R.string.outcome_done)) { drawRoundRect(colors.onSurfaceVariant, cornerRadius = CornerRadius(size.width * 0.3f)) }
+        LegendItem(stringResource(R.string.outcome_partial)) { drawRoundRect(colors.outlineVariant, cornerRadius = CornerRadius(size.width * 0.3f)) }
+        LegendItem(stringResource(R.string.outcome_skipped)) {
             val w = 1.dp.toPx()
             drawRoundRect(colors.outlineVariant, Offset(w / 2, w / 2), Size(size.width - w, size.height - w), CornerRadius(size.width * 0.3f), style = Stroke(w))
         }
@@ -266,11 +271,11 @@ private fun OverallCard(habit: HabitOverallUi, overall: OverallUi, onOpen: (Long
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
             .background(colors.surfaceContainerLowest)
-            .clickable(onClickLabel = "Open ${habit.name}") { onOpen(habit.id) }
+            .clickable(onClickLabel = stringResource(R.string.open_habit, habit.name)) { onOpen(habit.id) }
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        CardHeader(habit.icon, habit.hue, habit.name, "${habit.currentStreak}-day streak · best ${habit.bestStreak}") {}
+        CardHeader(habit.icon, habit.hue, habit.name, pluralStringResource(R.plurals.streak_best, habit.currentStreak, habit.currentStreak, habit.bestStreak)) {}
         // Labels sit over fixed heatmap columns, so they stop scaling at 1.3x.
         CappedFontScale {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
@@ -299,11 +304,12 @@ private fun Heatmap(habit: HabitOverallUi) {
     val hc = habitColors(habit.hue)
     val outline = colors.outlineVariant
     val faint = colors.surfaceContainer
+    val description = pluralStringResource(R.plurals.heatmap_description, habit.currentStreak, habit.name, habit.currentStreak, habit.bestStreak, OVERALL_WEEKS)
     Canvas(
         Modifier
             .fillMaxWidth()
             .aspectRatio(OVERALL_WEEKS / 7f)
-            .semantics { contentDescription = "${habit.name}: ${habit.currentStreak}-day streak, best ${habit.bestStreak}, last $OVERALL_WEEKS weeks" },
+            .semantics { contentDescription = description },
     ) {
         val pitch = size.width / OVERALL_WEEKS
         val cell = pitch * 0.72f

@@ -10,6 +10,7 @@ import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -37,6 +38,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
+import app.sprout.habits.R
 import app.sprout.habits.ui.theme.habitColors
 
 /** "This week": every habit with its 7 day marks and the week's score. */
@@ -67,10 +69,10 @@ private fun WeekContent(context: Context, data: WeekWidgetData, bitmaps: WidgetB
         // Only the header opens the app; each habit row opens that habit. Never nested.
         Row(GlanceModifier.fillMaxWidth().clickable(actionStartActivity(context.openAppIntent())), verticalAlignment = Alignment.Vertical.CenterVertically) {
             Column(GlanceModifier.defaultWeight()) {
-                Text("This week", style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Medium, color = GlanceTheme.colors.onSurface))
+                Text(LocalContext.current.getString(R.string.this_week), style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Medium, color = GlanceTheme.colors.onSurface))
                 Text(data.range, style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurfaceVariant))
             }
-            Text("${data.percent}%", style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Medium, color = GlanceTheme.colors.primary))
+            Text(LocalContext.current.getString(R.string.percent, data.percent), style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Medium, color = GlanceTheme.colors.primary))
         }
         Spacer(GlanceModifier.height(8.dp))
         Row(GlanceModifier.fillMaxWidth()) {
@@ -91,7 +93,7 @@ private fun WeekContent(context: Context, data: WeekWidgetData, bitmaps: WidgetB
             }
         }
         if (data.habits.isEmpty()) {
-            Text("No habits to show yet.", modifier = GlanceModifier.padding(top = 12.dp), style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurfaceVariant))
+            Text(LocalContext.current.getString(R.string.no_habits_yet), modifier = GlanceModifier.padding(top = 12.dp), style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurfaceVariant))
         }
         LazyColumn(GlanceModifier.fillMaxWidth()) {
             items(data.habits, itemId = { it.id }) { habit ->
@@ -114,7 +116,7 @@ private fun WeekContent(context: Context, data: WeekWidgetData, bitmaps: WidgetB
                     )
                     Image(
                         ImageProvider(bitmaps.marks(habit.marks, habit.hue, marksWidth, 20f)),
-                        contentDescription = "${habit.name} this week",
+                        contentDescription = LocalContext.current.getString(R.string.habit_this_week, habit.name),
                         modifier = GlanceModifier.width(marksWidth.dp).height(20.dp),
                     )
                 }
