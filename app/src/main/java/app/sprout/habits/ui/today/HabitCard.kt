@@ -159,7 +159,7 @@ private fun TrailingControl(habit: HabitRowUi, hc: HabitColors, onToggle: () -> 
             Box(Modifier.size(44.dp), contentAlignment = Alignment.Center) {
                 ProgressRing(habit.progress, hc.solid, hc.mid, 4.dp, Modifier.fillMaxSize())
                 Text(
-                    stringResource(R.string.percent, (habit.progress * 100).roundToInt()),
+                    stringResource(R.string.percent_compact, (habit.progress * 100).roundToInt()),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = hc.ink,

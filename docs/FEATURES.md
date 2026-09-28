@@ -6,7 +6,7 @@ What Sprout does today, and where each part lives in the code. Paths are under `
 
 The home screen shows the date, a score card for today, and every habit scheduled for today.
 
-A habit card has four looks: open (an empty circle), done (filled with the habit's color and a check), partial (filled as far as the amount goes, with a percentage ring) and skipped (dimmed). Swipe right to mark it done, swipe left to skip it, tap the circle to toggle done, and press and hold to log an amount, pick an outcome and add a note. Each change can be undone from the snackbar. Swiping the opposite way also undoes: swipe left on a done habit or right on a skipped one to clear it. The press-and-hold sheet has an Undo button when the day already has an entry. A done check-off card shows when it was logged ("Done at 6:52 AM"). Skipping a habit that asks for a note opens the sheet with the cursor in the note field.
+A habit card has four looks: open (an empty circle), done (filled with the habit's color and a check), partial (filled as far as the amount goes, with a percentage ring) and skipped (dimmed). Swipe right to mark it done, swipe left to skip it (a swipe has to drag the card past half its width, so scrolling never logs a habit), tap the circle to toggle done, and press and hold to log an amount, pick an outcome and add a note. Each change can be undone from the snackbar. Swiping the opposite way also undoes: swipe left on a done habit or right on a skipped one to clear it. The press-and-hold sheet has an Undo button when the day already has an entry. A done check-off card shows when it was logged ("Done at 6:52 AM"). Skipping a habit that asks for a note opens the sheet with the cursor in the note field.
 
 Code: `ui/today/`, scoring in `domain/Scoring.kt`.
 
@@ -56,9 +56,9 @@ Code: `data/backup/`, `ui/more/BackupSection.kt`.
 
 ## Settings
 
-The More tab covers backup, theme (system, light, dark), dynamic color or an accent color, font (system, Figtree, Outfit, Lexend, Atkinson Hyperlegible), text size, the first day of the week, the default reminder time, notification settings and About.
+The More tab covers backup, the app language (English, Hindi, Spanish, German, French, Portuguese (Brazil), Japanese or the phone's language, applied at once), theme (system, light, dark), dynamic color or an accent color, font (system, Figtree, Outfit, Lexend, Atkinson Hyperlegible), text size, the first day of the week, the default reminder time, notification settings and About.
 
-Code: `ui/more/`, `data/SettingsRepository.kt`, `ui/theme/`.
+Code: `ui/more/`, `data/SettingsRepository.kt`, `ui/theme/`, `AppLanguage.kt`; text in `res/values*/strings.xml`.
 
 ## Support
 

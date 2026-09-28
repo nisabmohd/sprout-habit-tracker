@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0
+
+New:
+
+- Sprout speaks Hindi, Spanish, German, French, Portuguese (Brazil) and Japanese. Pick one in More → General → Language, or follow the phone's language. On Android 13 and later it's also in Settings → App languages.
+- The More tab has a tune icon, and "Week starts on" uses the same sheet style as Language.
+
+Fixed:
+
+- Scrolling Today could mark a habit done or skipped. A swipe now has to drag the card past half its width.
+- Insights' "This week" ran to the end of the week and selected days that haven't happened yet. It now ends today.
+
 ## 0.3.1
 
 New:

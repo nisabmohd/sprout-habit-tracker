@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Sprout</string>
+    <!-- For small fixed-size rings, where "75 %" would not fit. -->
+    <string name="percent_compact" translatable="false">%1$d%%</string>
     <string name="widget_week_description">Every habit and its week</string>
     <string name="widget_today_description">Today\'s progress and what\'s next</string>
     <string name="widget_strip_description">A slim progress strip for today</string>
@@ -317,6 +319,8 @@
     <string name="language_system">System default</string>
     <string name="help_translate">Help translate Sprout</string>
     <string name="help_translate_desc">Add or improve a language</string>
+    <string name="nav_habits">Habits</string>
+    <string name="nav_insights">Insights</string>
     <plurals name="journal_show_for_habits">
         <item quantity="one">Show notes for %1$d habit</item>
         <item quantity="other">Show notes for %1$d habits</item>

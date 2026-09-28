@@ -316,6 +316,8 @@
     <string name="language_system">Systemstandard</string>
     <string name="help_translate">Hilf, Sprout zu übersetzen</string>
     <string name="help_translate_desc">Eine Sprache hinzufügen oder verbessern</string>
+    <string name="nav_habits">Routinen</string>
+    <string name="nav_insights">Statistik</string>
     <plurals name="count_done">
         <item quantity="one">%1$d erledigt</item>
         <item quantity="other">%1$d erledigt</item>

@@ -316,6 +316,8 @@
     <string name="language_system">システムのデフォルト</string>
     <string name="help_translate">Sprout の翻訳に協力する</string>
     <string name="help_translate_desc">言語を追加・改善する</string>
+    <string name="nav_habits">習慣</string>
+    <string name="nav_insights">統計</string>
     <plurals name="count_done">
         <item quantity="other">完了 %1$d</item>
     </plurals>

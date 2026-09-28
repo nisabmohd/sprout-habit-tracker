@@ -1,5 +1,9 @@
 package app.sprout.habits.ui.nav
 
+import androidx.compose.ui.unit.sp
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.foundation.text.BasicText
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
@@ -73,9 +77,9 @@ import kotlin.reflect.KClass
 
 private enum class Tab(val route: Any, val routeClass: KClass<*>, @StringRes val label: Int, @DrawableRes val icon: Int) {
     TODAY(TodayRoute, TodayRoute::class, R.string.today, R.drawable.ic_nav_today),
-    HABITS(HabitsRoute, HabitsRoute::class, R.string.tab_habits, R.drawable.ic_nav_habits),
+    HABITS(HabitsRoute, HabitsRoute::class, R.string.nav_habits, R.drawable.ic_nav_habits),
     JOURNAL(JournalRoute, JournalRoute::class, R.string.journal_title, R.drawable.ic_nav_journal),
-    INSIGHTS(InsightsRoute, InsightsRoute::class, R.string.insights_title, R.drawable.ic_nav_insights),
+    INSIGHTS(InsightsRoute, InsightsRoute::class, R.string.nav_insights, R.drawable.ic_nav_insights),
     MORE(MoreRoute, MoreRoute::class, R.string.tab_more, R.drawable.ic_nav_more),
 }
 
@@ -252,11 +256,16 @@ private fun SproutNavigationBar(current: Tab, onSelect: (Tab) -> Unit) {
                 onClick = { onSelect(tab) },
                 icon = { Icon(painterResource(tab.icon), contentDescription = null, Modifier.size(22.dp)) },
                 label = {
-                    Text(
+                    // Long translations ("Gewohnheiten", "Statistiques") shrink to fit instead of being cut off.
+                    val style = MaterialTheme.typography.labelMedium
+                    BasicText(
                         stringResource(tab.label),
                         maxLines = 1,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                        style = style.copy(
+                            color = LocalContentColor.current,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                        ),
+                        autoSize = TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = style.fontSize, stepSize = 0.5.sp),
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(

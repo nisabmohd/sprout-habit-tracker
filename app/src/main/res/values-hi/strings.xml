@@ -316,6 +316,8 @@
     <string name="language_system">सिस्टम डिफ़ॉल्ट</string>
     <string name="help_translate">Sprout का अनुवाद करने में मदद करें</string>
     <string name="help_translate_desc">कोई भाषा जोड़ें या सुधारें</string>
+    <string name="nav_habits">आदतें</string>
+    <string name="nav_insights">आंकड़े</string>
     <plurals name="count_done">
         <item quantity="one">%1$d पूरे</item>
         <item quantity="other">%1$d पूरे</item>

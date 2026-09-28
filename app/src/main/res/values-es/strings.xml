@@ -316,6 +316,8 @@
     <string name="language_system">Predeterminado del sistema</string>
     <string name="help_translate">Ayuda a traducir Sprout</string>
     <string name="help_translate_desc">Añade o mejora un idioma</string>
+    <string name="nav_habits">Hábitos</string>
+    <string name="nav_insights">Datos</string>
     <plurals name="count_done">
         <item quantity="one">%1$d\u00A0hecho</item>
         <item quantity="other">%1$d\u00A0hechos</item>

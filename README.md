@@ -29,6 +29,7 @@ You can also:
 - add four home-screen widgets that stay in sync with the app; the Today widget marks habits done from the home screen
 - export everything, including your settings, to a JSON file and import it again, or export a CSV for spreadsheets
 - choose light or dark, dynamic color from your wallpaper or an accent color, one of five fonts and a text size
+- use it in English, Hindi, Spanish, German, French, Portuguese (Brazil) or Japanese, separately from the phone's language
 
 [`docs/FEATURES.md`](docs/FEATURES.md) describes each feature in detail.
 

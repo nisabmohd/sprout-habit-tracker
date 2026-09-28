@@ -404,6 +404,22 @@ def more_settings_and_about():
 
 
 @check
+def more_language_sheet():
+    # Pick Spanish, see the app switch at once, then go back to the phone's language.
+    d.nav("More")
+    assert d.scroll_to("Language"), "Language row missing"
+    d.tap("Language")
+    assert d.exists("Help translate Sprout"), "Language sheet missing"
+    assert d.scroll_to("日本語"), "Japanese not listed"
+    d.tap("Español")
+    assert d.exists("Más", timeout=8), "app did not switch to Spanish"
+    assert d.scroll_to("Idioma"), "Language row not translated"
+    d.tap("Idioma")
+    d.tap("Predeterminado del sistema")
+    assert d.exists("More", timeout=8), "app did not return to the phone's language"
+
+
+@check
 def reminders_are_scheduled():
     alarms = d.shell("dumpsys alarm")
     assert "app.sprout.habits.action.REMINDER" in alarms, "no habit reminder alarms scheduled"
