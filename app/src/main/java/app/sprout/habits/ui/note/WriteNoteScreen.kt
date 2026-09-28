@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.note
 
+import app.sprout.habits.ui.datePattern
 import androidx.compose.ui.res.stringResource
 import app.sprout.habits.rememberStrings
 import java.time.LocalDate
@@ -156,7 +157,7 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
                         ) {
                             DayMarkView(mark, hc, MarkColors(colors.outlineVariant, colors.onSurfaceVariant, colors.outline), Modifier.size(16.dp))
                             Text(
-                                "$outcome · ${form.date.format(DateTimeFormatter.ofPattern("EEEE, d MMM"))}",
+                                "$outcome · ${form.date.format(datePattern("EEEE, d MMM"))}",
                                 style = type.bodyMedium,
                                 color = hc.ink.copy(alpha = 0.8f),
                                 maxLines = 1,

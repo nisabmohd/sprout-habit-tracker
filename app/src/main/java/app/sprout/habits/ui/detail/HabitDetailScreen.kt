@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.detail
 
+import app.sprout.habits.ui.datePattern
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -256,7 +257,7 @@ private fun CalendarDay(day: CalendarDayUi, hc: HabitColors, editable: Boolean, 
         MarkKind.FUTURE -> stringResource(R.string.mark_future_lower)
         MarkKind.NOT_SCHEDULED -> stringResource(R.string.mark_not_scheduled_lower)
     }
-    val fullDescription = stringResource(R.string.date_description, day.date.format(java.time.format.DateTimeFormatter.ofPattern("EEEE d MMMM")), description)
+    val fullDescription = stringResource(R.string.date_description, day.date.format(datePattern("EEEE d MMMM")), description)
     val editLabel = stringResource(R.string.edit_this_day)
     Box(
         Modifier

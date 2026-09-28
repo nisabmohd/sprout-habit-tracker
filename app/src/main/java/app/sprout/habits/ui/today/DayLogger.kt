@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.today
 
+import app.sprout.habits.ui.datePattern
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import app.sprout.habits.R
@@ -232,7 +233,7 @@ class DayLogger(
 
     companion object {
         // Built on each use so a change of language shows up.
-        private val LONG_DATE get() = DateTimeFormatter.ofPattern("EEEE, d MMM")
-        private val SHORT_DATE get() = DateTimeFormatter.ofPattern("EEE d MMM")
+        private val LONG_DATE get() = datePattern("EEEE, d MMM")
+        private val SHORT_DATE get() = datePattern("EEE d MMM")
     }
 }

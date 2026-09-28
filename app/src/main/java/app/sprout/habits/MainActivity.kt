@@ -34,6 +34,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // After a language change the activity is recreated but view models survive, holding
+        // text formatted in the old language ("Monday, 28 September"). Start them afresh.
+        if (savedInstanceState != null && savedInstanceState.getString(KEY_LANGUAGE) != language()) viewModelStore.clear()
         // Channel names follow the app language, which may have just changed.
         Notifications.createChannels(this)
         if (savedInstanceState == null) handleIntent(intent)
@@ -69,6 +72,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(KEY_LANGUAGE, language())
+    }
+
+    private fun language() = resources.configuration.locales.get(0).toLanguageTag()
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleIntent(intent)
@@ -83,5 +93,6 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val ACTION_OPEN_HABIT = "app.sprout.habits.action.OPEN_HABIT"
         const val EXTRA_HABIT_ID = "habitId"
+        private const val KEY_LANGUAGE = "language"
     }
 }

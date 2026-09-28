@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.today
 
+import app.sprout.habits.ui.datePattern
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -235,7 +236,7 @@ class TodayViewModel(
     companion object {
         // Built on each use so a change of language shows up.
         private val TIME get() = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
-        private val DATE_FORMAT get() = DateTimeFormatter.ofPattern("EEEE, d MMMM")
+        private val DATE_FORMAT get() = datePattern("EEEE, d MMMM")
 
         fun formatNumber(value: Double): String = app.sprout.habits.domain.formatNumber(value)
 

@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.journal
 
+import app.sprout.habits.ui.datePattern
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -91,7 +92,7 @@ class JournalViewModel(repository: HabitRepository, private val strings: Strings
         fun dayHeader(date: LocalDate, today: LocalDate, strings: Strings): String = when (date) {
             today -> strings(R.string.today)
             today.minusDays(1) -> strings(R.string.yesterday)
-            else -> date.format(DateTimeFormatter.ofPattern(if (date.year == today.year) "EEEE, d MMM" else "EEEE, d MMM yyyy"))
+            else -> date.format(datePattern(if (date.year == today.year) "EEEE, d MMM" else "EEEE, d MMM yyyy"))
         }
     }
 }

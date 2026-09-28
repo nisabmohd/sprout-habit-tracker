@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.components
 
+import app.sprout.habits.ui.englishDates
+import app.sprout.habits.ui.datePattern
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
@@ -73,7 +75,7 @@ fun DateRangeSheet(
     var start by remember { mutableStateOf(from?.let { minOf(it, today) }) }
     var end by remember { mutableStateOf(to?.let { minOf(it, today) }) }
     var month by remember { mutableStateOf(YearMonth.from(end ?: today)) }
-    val dm = DateTimeFormatter.ofPattern("d MMM")
+    val dm = datePattern("d MMM")
 
     SproutSheet(onDismissRequest = onDismiss) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding()) {
@@ -87,7 +89,7 @@ fun DateRangeSheet(
             Text(
                 when {
                     s == null || e == null -> stringResource(R.string.pick_first_day)
-                    s == e -> s.format(DateTimeFormatter.ofPattern("d MMM yyyy"))
+                    s == e -> s.format(datePattern("d MMM yyyy"))
                     else -> stringResource(R.string.range_same_year, s.format(dm), e.format(dm), e.year)
                 },
                 style = type.titleSmall,
@@ -114,7 +116,7 @@ fun DateRangeSheet(
                     when {
                         s == null || e == null -> stringResource(R.string.show)
                         s == e -> stringResource(R.string.show_value, s.format(dm))
-                        s.month == e.month -> stringResource(R.string.show_value, stringResource(R.string.range_short, s.dayOfMonth.toString(), e.format(dm)))
+                        s.month == e.month && englishDates() -> stringResource(R.string.show_value, stringResource(R.string.range_short, s.dayOfMonth.toString(), e.format(dm)))
                         else -> stringResource(R.string.show_value, stringResource(R.string.range_short, s.format(dm), e.format(dm)))
                     },
                     style = type.labelLarge,
@@ -145,14 +147,14 @@ fun DatePickerSheet(
                 Text(stringResource(R.string.date), style = type.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
                 TextButton(onClick = { picked = today; month = YearMonth.from(today) }) { Text(stringResource(R.string.today), style = type.labelLarge) }
             }
-            Text(picked.format(DateTimeFormatter.ofPattern("EEEE, d MMM yyyy")), style = type.titleSmall, color = colors.onSurfaceVariant)
+            Text(picked.format(datePattern("EEEE, d MMM yyyy")), style = type.titleSmall, color = colors.onSurfaceVariant)
             MonthHeader(month, today) { month = it }
             MonthGrid(month, weekStart, today, picked, picked) { picked = it }
             Button(
                 onClick = { onApply(picked) },
                 modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(48.dp),
             ) {
-                Text(stringResource(R.string.use_value, picked.format(DateTimeFormatter.ofPattern("d MMM"))), style = type.labelLarge)
+                Text(stringResource(R.string.use_value, picked.format(datePattern("d MMM"))), style = type.labelLarge)
             }
         }
     }
@@ -165,7 +167,7 @@ private fun MonthHeader(month: YearMonth, today: LocalDate, onMonth: (YearMonth)
             Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = stringResource(R.string.previous_month), modifier = Modifier.size(20.dp))
         }
         Text(
-            month.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+            month.format(datePattern("MMMM yyyy")),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,

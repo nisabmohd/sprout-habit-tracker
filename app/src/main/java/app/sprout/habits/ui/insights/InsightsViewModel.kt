@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.insights
 
+import app.sprout.habits.ui.englishDates
+import app.sprout.habits.ui.datePattern
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -170,10 +172,12 @@ class InsightsViewModel(
     companion object {
         /** "28 Sep 2026", "21 – 27 Sep 2026", "28 Sep – 4 Oct 2026", "29 Dec 2025 – 4 Jan 2026". */
         fun rangeLabel(from: LocalDate, to: LocalDate): String {
-            val dm = java.time.format.DateTimeFormatter.ofPattern("d MMM")
+            val dm = datePattern("d MMM")
+            val dmy = datePattern("d MMM yyyy")
             return when {
-                from == to -> "${from.format(dm)} ${from.year}"
-                from.year != to.year -> "${from.format(dm)} ${from.year} – ${to.format(dm)} ${to.year}"
+                from == to -> from.format(dmy)
+                from.year != to.year -> "${from.format(dmy)} – ${to.format(dmy)}"
+                !englishDates() -> "${from.format(dm)} – ${to.format(dmy)}"
                 from.month == to.month -> "${from.dayOfMonth} – ${to.format(dm)} ${to.year}"
                 else -> "${from.format(dm)} – ${to.format(dm)} ${to.year}"
             }

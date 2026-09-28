@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.detail
 
+import app.sprout.habits.ui.datePattern
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -140,7 +141,7 @@ class HabitDetailViewModel(
             currentStreak = history.currentStreak(todayDay),
             bestStreak = history.bestStreak(todayDay),
             noteCount = notes.size,
-            monthLabel = ym.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+            monthLabel = ym.format(datePattern("MMMM yyyy")),
             canGoForward = ym < YearMonth.now(),
             weekdayLabels = List(7) { weekStart.plus(it.toLong()).getDisplayName(TextStyle.NARROW, Locale.getDefault()) },
             leadingBlanks = (ym.atDay(1).dayOfWeek.value - weekStart.value + 7) % 7,
@@ -155,7 +156,7 @@ class HabitDetailViewModel(
         fun relativeDate(date: LocalDate, today: LocalDate, strings: Strings): String = when (date) {
             today -> strings(R.string.today)
             today.minusDays(1) -> strings(R.string.yesterday)
-            else -> date.format(DateTimeFormatter.ofPattern(if (date.year == today.year) "EEE d MMM" else "d MMM yyyy"))
+            else -> date.format(datePattern(if (date.year == today.year) "EEE d MMM" else "d MMM yyyy"))
         }
     }
 }

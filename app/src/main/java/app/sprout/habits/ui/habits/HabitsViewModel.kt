@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.habits
 
+import app.sprout.habits.ui.englishDates
+import app.sprout.habits.ui.datePattern
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -159,7 +161,7 @@ class HabitsViewModel(
             label = rangeLabel(days.first(), days.last()),
             percent = (score(credits) * 100).roundToInt(),
             dayLabels = days.map { it.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()) },
-            dayNames = days.map { it.format(DateTimeFormatter.ofPattern("EEEE d MMMM")) },
+            dayNames = days.map { it.format(datePattern("EEEE d MMMM")) },
             dates = days,
             todayIndex = days.indexOf(today),
             canGoForward = offset < 0,
@@ -219,10 +221,10 @@ class HabitsViewModel(
             }
         }
 
-        private fun rangeLabel(from: LocalDate, to: LocalDate): String = if (from.month == to.month) {
-            "${from.dayOfMonth} – ${to.format(DateTimeFormatter.ofPattern("d MMM"))}"
+        private fun rangeLabel(from: LocalDate, to: LocalDate): String = if (from.month == to.month && englishDates()) {
+            "${from.dayOfMonth} – ${to.format(datePattern("d MMM"))}"
         } else {
-            "${from.format(DateTimeFormatter.ofPattern("d MMM"))} – ${to.format(DateTimeFormatter.ofPattern("d MMM"))}"
+            "${from.format(datePattern("d MMM"))} – ${to.format(datePattern("d MMM"))}"
         }
     }
 }

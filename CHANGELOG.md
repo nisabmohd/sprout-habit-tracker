@@ -5,6 +5,7 @@
 New:
 
 - Sprout speaks Hindi, Spanish, German, French, Portuguese (Brazil) and Japanese. Pick one in More → General → Language, or follow the phone's language. On Android 13 and later it's also in Settings → App languages.
+- Dates follow the language too: "Montag, 28. September", "9月28日月曜日". English keeps "Monday, 28 September".
 - The More tab has a tune icon, and "Week starts on" uses the same sheet style as Language.
 
 Fixed:
