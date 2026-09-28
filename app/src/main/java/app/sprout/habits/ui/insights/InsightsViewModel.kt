@@ -62,7 +62,7 @@ class InsightsViewModel(
     private val repository: HabitRepository,
     private val settings: SettingsRepository,
 ) : ViewModel() {
-    /** Null = this week (follows the week-start setting and rolls over with the calendar). */
+    /** Null = this week up to today (follows the week-start setting and rolls over with the calendar). */
     private val range = MutableStateFlow<Pair<LocalDate, LocalDate>?>(null)
     private val filter = MutableStateFlow<Set<Long>>(emptySet())
 
@@ -88,7 +88,8 @@ class InsightsViewModel(
         filter.value = habitIds
     }
 
-    private fun thisWeek(today: LocalDate, weekStart: DayOfWeek) = weekOf(today, weekStart).let { it.first() to it.last() }
+    /** Start of this week through today; days still to come are never part of the range. */
+    private fun thisWeek(today: LocalDate, weekStart: DayOfWeek) = weekOf(today, weekStart).first() to today
 
     private fun build(
         today: LocalDate,
@@ -167,10 +168,11 @@ class InsightsViewModel(
     }
 
     companion object {
-        /** "21 – 27 Sep 2026", "28 Sep – 4 Oct 2026", "29 Dec 2025 – 4 Jan 2026". */
+        /** "28 Sep 2026", "21 – 27 Sep 2026", "28 Sep – 4 Oct 2026", "29 Dec 2025 – 4 Jan 2026". */
         fun rangeLabel(from: LocalDate, to: LocalDate): String {
             val dm = java.time.format.DateTimeFormatter.ofPattern("d MMM")
             return when {
+                from == to -> "${from.format(dm)} ${from.year}"
                 from.year != to.year -> "${from.format(dm)} ${from.year} – ${to.format(dm)} ${to.year}"
                 from.month == to.month -> "${from.dayOfMonth} – ${to.format(dm)} ${to.year}"
                 else -> "${from.format(dm)} – ${to.format(dm)} ${to.year}"

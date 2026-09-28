@@ -10,14 +10,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -29,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import app.sprout.habits.R
 import app.sprout.habits.domain.DayOutcome
 import app.sprout.habits.ui.theme.habitColors
+import kotlin.math.abs
 
 /**
  * [HabitCard] with swipe right = Done and swipe left = Skip; on a card that's already done or
@@ -52,8 +58,15 @@ fun SwipeableHabitCard(
     val currentOnSkip by rememberUpdatedState(onSkip)
     val currentOnUndo by rememberUpdatedState(onUndo)
     val outcome by rememberUpdatedState(habit.outcome)
+    var width by remember { mutableIntStateOf(0) }
+    // Read inside confirmValueChange, which is passed before the state exists.
+    val stateRef = remember { arrayOfNulls<SwipeToDismissBoxState>(1) }
     val state = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
+            // A quick flick counts as a swipe no matter how far the card moved, so a slightly
+            // diagonal scroll could log a habit. Only a drag past half the card's width counts.
+            val offset = stateRef[0]?.let { runCatching { it.requireOffset() }.getOrNull() } ?: 0f
+            if (value != SwipeToDismissBoxValue.Settled && abs(offset) < width * SWIPE_FRACTION) return@rememberSwipeToDismissBoxState false
             when (value) {
                 // The opposite swipe undoes: right on a skipped card, left on a done one.
                 SwipeToDismissBoxValue.StartToEnd -> {
@@ -69,13 +82,14 @@ fun SwipeableHabitCard(
             // Never stay dismissed: the card returns to rest showing its new state.
             false
         },
-        positionalThreshold = { distance -> distance * 0.35f },
+        positionalThreshold = { distance -> distance * SWIPE_FRACTION },
     )
+    stateRef[0] = state
     val done = habit.outcome == DayOutcome.DONE
     val skipped = habit.outcome == DayOutcome.SKIP
     SwipeToDismissBox(
         state = state,
-        modifier = modifier.semantics {
+        modifier = modifier.onSizeChanged { width = it.width }.semantics {
             customActions = buildList {
                 if (!done) add(CustomAccessibilityAction("Mark done") { onDone(); true })
                 if (!skipped) add(CustomAccessibilityAction("Skip") { onSkip(); true })
@@ -88,6 +102,8 @@ fun SwipeableHabitCard(
         HabitCard(habit, onToggle = onToggle, onLongPress = onLongPress, onClick = onClick)
     }
 }
+
+private const val SWIPE_FRACTION = 0.5f
 
 @Composable
 private fun SwipeBackground(habit: HabitRowUi, direction: SwipeToDismissBoxValue) {

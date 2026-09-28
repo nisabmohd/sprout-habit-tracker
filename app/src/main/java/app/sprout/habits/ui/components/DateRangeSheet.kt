@@ -68,11 +68,10 @@ fun DateRangeSheet(
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
     val today = LocalDate.now()
-    var start by remember { mutableStateOf<LocalDate?>(from) }
-    var end by remember { mutableStateOf<LocalDate?>(to) }
-    // Open on the month with the range end, but never a month still to come (this week can end
-    // in next month).
-    var month by remember { mutableStateOf(YearMonth.from(minOf(to ?: today, today))) }
+    // Future days can't be picked, so a range passed in is cut off at today.
+    var start by remember { mutableStateOf(from?.let { minOf(it, today) }) }
+    var end by remember { mutableStateOf(to?.let { minOf(it, today) }) }
+    var month by remember { mutableStateOf(YearMonth.from(end ?: today)) }
     val dm = DateTimeFormatter.ofPattern("d MMM")
 
     SproutSheet(onDismissRequest = onDismiss) {
