@@ -40,4 +40,4 @@ If this policy changes, the new version is published at this address with a new 
 
 ## Contact
 
-Open an issue at https://github.com/nisabmohd/sprout-habit-tracker/issues or email CONTACT_EMAIL.
+Open an issue at https://github.com/nisabmohd/sprout-habit-tracker/issues or email nisabmohd@gmail.com.
