@@ -290,7 +290,8 @@
     <string name="archived">アーカイブ済み</string>
     <string name="drag_to_reorder">ドラッグして並べ替え</string>
     <string name="support_title">Sprout を気に入っていただけましたか？</string>
-    <string name="support_text_play">Sprout は無料のオープンソースです。評価やスターは他の人が見つける助けになり、スポンサーは開発を支えます。</string>
+    <string name="support_text_play">Sprout は無料のオープンソースです。評価やスターは他の人が見つける助けになります。</string>
+    <string name="support_text_star">Sprout は無料のオープンソースです。スターは他の人が見つける助けになります。</string>
     <string name="support_text">Sprout は無料のオープンソースです。スターは他の人が見つける助けになり、スポンサーは開発を支えます。</string>
     <string name="star_github">GitHub でスター</string>
     <string name="maybe_later">あとで</string>

@@ -290,7 +290,8 @@
     <string name="archived">Archivées</string>
     <string name="drag_to_reorder">Faire glisser pour réorganiser</string>
     <string name="support_title">Vous aimez Sprout ?</string>
-    <string name="support_text_play">Sprout est libre et open source. Une note ou une étoile aide d\'autres personnes à le trouver, et le sponsoriser le fait grandir.</string>
+    <string name="support_text_play">Sprout est libre et open source. Une note ou une étoile aide d\'autres personnes à le trouver.</string>
+    <string name="support_text_star">Sprout est libre et open source. Une étoile aide d\'autres personnes à le trouver.</string>
     <string name="support_text">Sprout est libre et open source. Une étoile aide d\'autres personnes à le trouver, et le sponsoriser le fait grandir.</string>
     <string name="star_github">Étoile sur GitHub</string>
     <string name="maybe_later">Plus tard</string>

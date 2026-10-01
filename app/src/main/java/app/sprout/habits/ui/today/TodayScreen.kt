@@ -78,6 +78,7 @@ fun TodayScreen(
     if (showSupport) {
         SupportPromptDialog(
             showRate = BuildConfig.PLAY_LISTED,
+            showSponsor = !BuildConfig.PLAY_STORE,
             onRate = { openUrl(context, BuildConfig.PLAY_STORE_URL); viewModel.supportPromptClosed(dismissed = false) },
             onStar = { openUrl(context, BuildConfig.REPO_URL); viewModel.supportPromptClosed(dismissed = false) },
             onSponsor = { openUrl(context, BuildConfig.SPONSOR_URL); viewModel.supportPromptClosed(dismissed = false) },

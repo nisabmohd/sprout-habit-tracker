@@ -70,7 +70,8 @@ fun AboutScreen(updates: UpdateManager, onBack: () -> Unit, onOpenLicences: () -
                     color = colors.onPrimaryContainer,
                 )
             }
-            SettingsCard { SupportRow { openUrl(context, BuildConfig.SPONSOR_URL) } }
+            // Not in the play build: Google Play doesn't allow asking for money outside its own billing.
+            if (!BuildConfig.PLAY_STORE) SettingsCard { SupportRow { openUrl(context, BuildConfig.SPONSOR_URL) } }
             SettingsCard {
                 val repo = BuildConfig.REPO_URL
                 if (BuildConfig.PLAY_LISTED) {

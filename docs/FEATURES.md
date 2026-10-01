@@ -74,6 +74,6 @@ Code: `data/update/UpdateManager.kt`, `ui/update/UpdateUi.kt`, `domain/Versions.
 
 ## Support
 
-About has a Sponsor link and, in the `play` build once it is listed (`PLAY_LISTED`), a Rate on Play Store link; the support prompt offers the same button. The `foss` and `github` builds never link to Google Play. After a week of use and 30 check-ins, Sprout asks once whether you'd like to support it; it asks again after 60 days at most, and stops after two "Maybe later"s.
+About has a Sponsor link (not in the `play` build, where Google Play's payments policy rules it out; the support prompt drops its Sponsor button there too) and, in the `play` build once it is listed (`PLAY_LISTED`), a Rate on Play Store link; the support prompt offers the same button. The `foss` and `github` builds never link to Google Play. After a week of use and 30 check-ins, Sprout asks once whether you'd like to support it; it asks again after 60 days at most, and stops after two "Maybe later"s.
 
 Code: `support/`, `ui/about/`.

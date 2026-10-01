@@ -30,10 +30,14 @@ import androidx.compose.ui.window.Dialog
 import app.sprout.habits.R
 import app.sprout.habits.ui.theme.habitColors
 
-/** "Enjoying Sprout?": rate (play build only), star on GitHub, sponsor, or maybe later. */
+/**
+ * "Enjoying Sprout?": rate (play build, once listed), star on GitHub, sponsor (not in the play
+ * build: Google Play doesn't allow asking for money outside its own billing), or maybe later.
+ */
 @Composable
 fun SupportPromptDialog(
     showRate: Boolean,
+    showSponsor: Boolean,
     onRate: () -> Unit,
     onStar: () -> Unit,
     onSponsor: () -> Unit,
@@ -50,11 +54,13 @@ fun SupportPromptDialog(
                 }
                 Text(stringResource(R.string.support_title), style = type.titleLarge, color = colors.onSurface)
                 Text(
-                    if (showRate) {
-                        stringResource(R.string.support_text_play)
-                    } else {
-                        stringResource(R.string.support_text)
-                    },
+                    stringResource(
+                        when {
+                            showRate -> R.string.support_text_play
+                            showSponsor -> R.string.support_text
+                            else -> R.string.support_text_star
+                        },
+                    ),
                     style = type.bodyMedium,
                     color = colors.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -72,14 +78,16 @@ fun SupportPromptDialog(
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.star_github), style = type.labelLarge)
                 }
-                FilledTonalButton(
-                    onClick = onSponsor,
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
-                    colors = ButtonDefaults.filledTonalButtonColors(containerColor = pink.soft, contentColor = pink.ink),
-                ) {
-                    Icon(painterResource(R.drawable.ic_heart), contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.sponsor), style = type.labelLarge)
+                if (showSponsor) {
+                    FilledTonalButton(
+                        onClick = onSponsor,
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        colors = ButtonDefaults.filledTonalButtonColors(containerColor = pink.soft, contentColor = pink.ink),
+                    ) {
+                        Icon(painterResource(R.drawable.ic_heart), contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.sponsor), style = type.labelLarge)
+                    }
                 }
                 TextButton(onClick = onLater) { Text(stringResource(R.string.maybe_later), style = type.labelLarge) }
             }
