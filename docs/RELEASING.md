@@ -50,3 +50,7 @@ SPROUT_KEYSTORE_PASSWORD=... SPROUT_KEY_ALIAS=sprout SPROUT_KEY_PASSWORD=... \
 ```
 
 Without these variables, release builds are signed with the debug key so they can still be installed for testing.
+
+## Play Store listing
+
+The store icon, feature graphic, phone screenshots and listing text are in [`release/`](../release/README.md), with the Play Console checklist. The README screenshots are in `docs/screenshots/` and the per-screen design references in `design/`.
