@@ -53,4 +53,4 @@ Without these variables, release builds are signed with the debug key so they ca
 
 ## Play Store listing
 
-The store icon, feature graphic, phone screenshots and listing text are in [`release/`](../release/README.md), with the Play Console checklist. The README screenshots are in `docs/screenshots/` and the per-screen design references in `design/`.
+The store icon, feature graphic, phone screenshots and listing text are in [`release/`](../release/README.md). The README screenshots are in `docs/screenshots/` and the per-screen design references in `design/`.

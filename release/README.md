@@ -1,6 +1,6 @@
 # Play Store release assets
 
-Graphics and listing text for the Play Store. For the full release steps, start with [`HOW-TO-RELEASE.md`](HOW-TO-RELEASE.md).
+Graphics and listing text for the Play Store.
 
 ## Graphics
 
@@ -61,4 +61,4 @@ How they were taken: Pixel-size emulator (API 36), gesture navigation, status ba
 
 ## Play Console
 
-Every Play Console question with Sprout's answer, the build and signing steps, and the release checklist are in [`HOW-TO-RELEASE.md`](HOW-TO-RELEASE.md). The privacy policy is [`PRIVACY.md`](../PRIVACY.md) at the repo root.
+The privacy policy is [`PRIVACY.md`](../PRIVACY.md) at the repo root.
