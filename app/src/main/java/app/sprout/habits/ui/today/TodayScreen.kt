@@ -77,7 +77,7 @@ fun TodayScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     if (showSupport) {
         SupportPromptDialog(
-            showRate = BuildConfig.PLAY_STORE,
+            showRate = BuildConfig.PLAY_LISTED,
             onRate = { openUrl(context, BuildConfig.PLAY_STORE_URL); viewModel.supportPromptClosed(dismissed = false) },
             onStar = { openUrl(context, BuildConfig.REPO_URL); viewModel.supportPromptClosed(dismissed = false) },
             onSponsor = { openUrl(context, BuildConfig.SPONSOR_URL); viewModel.supportPromptClosed(dismissed = false) },

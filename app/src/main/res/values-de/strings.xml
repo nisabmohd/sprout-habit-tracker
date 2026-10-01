@@ -329,7 +329,6 @@
     <string name="up_to_date">Du hast die neueste Version</string>
     <string name="update_check_failed">Prüfung fehlgeschlagen. Nochmal versuchen</string>
     <string name="updates_from_fdroid">Updates kommen über F-Droid</string>
-    <string name="updates_from_play">Updates kommen über Google Play</string>
     <string name="update_available">Update verfügbar</string>
     <string name="update_version_line">Version %1$s · du hast %2$s</string>
     <string name="whats_new">Neu</string>

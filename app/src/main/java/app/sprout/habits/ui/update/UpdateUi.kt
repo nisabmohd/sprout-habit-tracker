@@ -160,18 +160,19 @@ private enum class CheckState { IDLE, CHECKING, LATEST, ERROR }
 
 /**
  * About's "Check for updates" pill: Checking… → "You're on the latest version" or the Update
- * dialog. The F-Droid and Play builds say where their updates come from instead.
+ * dialog. The F-Droid build says where its updates come from instead. The Play build's pill opens
+ * the store listing, and shows nothing until Sprout is listed there.
  */
 @Composable
 fun CheckForUpdates(updates: UpdateManager) {
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
     if (!updates.enabled) {
-        Text(
-            stringResource(if (BuildConfig.PLAY_STORE) R.string.updates_from_play else R.string.updates_from_fdroid),
-            style = type.bodyMedium,
-            color = colors.onSurfaceVariant,
-        )
+        when {
+            BuildConfig.PLAY_LISTED -> PlayUpdatesPill()
+            BuildConfig.PLAY_STORE -> Unit
+            else -> Text(stringResource(R.string.updates_from_fdroid), style = type.bodyMedium, color = colors.onSurfaceVariant)
+        }
         return
     }
     val scope = rememberCoroutineScope()
@@ -229,6 +230,23 @@ fun CheckForUpdates(updates: UpdateManager) {
             onLater = { found = null; scope.launch { updates.later(update) } },
             onDismiss = { found = null },
         )
+    }
+}
+
+/** The Play build's "Check for updates": Google Play's own page for Sprout, which offers the update. */
+@Composable
+private fun PlayUpdatesPill() {
+    val context = LocalContext.current
+    val colors = MaterialTheme.colorScheme
+    Button(
+        onClick = { openUrl(context, BuildConfig.PLAY_STORE_URL) },
+        modifier = Modifier.heightIn(min = 40.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 12.dp, end = 16.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = colors.surfaceContainerHigh, contentColor = colors.onSurface),
+    ) {
+        Icon(painterResource(R.drawable.ic_refresh), contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.size(8.dp))
+        Text(stringResource(R.string.check_for_updates), style = MaterialTheme.typography.labelLarge)
     }
 }
 

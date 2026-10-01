@@ -329,7 +329,6 @@
     <string name="up_to_date">最新バージョンです</string>
     <string name="update_check_failed">確認できませんでした。再試行</string>
     <string name="updates_from_fdroid">アップデートは F-Droid から届きます</string>
-    <string name="updates_from_play">アップデートは Google Play から届きます</string>
     <string name="update_available">アップデートがあります</string>
     <string name="update_version_line">バージョン %1$s・現在は %2$s</string>
     <string name="whats_new">新機能</string>

@@ -30,8 +30,11 @@ android {
         // Google sign-in + Drive appDataFolder backup.
         create("play") {
             dimension = "distribution"
-            // Shows "Rate on Play Store"; the foss build never links to Google Play.
             buildConfigField("boolean", "PLAY_STORE", "true")
+            // Set to true once Sprout is live on Google Play. It turns on "Rate on Play Store"
+            // (About and the support prompt) and About's "Check for updates", which both open
+            // the store listing. The other builds never link to Google Play.
+            buildConfigField("boolean", "PLAY_LISTED", "false")
             buildConfigField("boolean", "GITHUB_UPDATES", "false")
         }
         // No Google or Play Services code at all, and no network (F-Droid updates it).
@@ -39,6 +42,7 @@ android {
             dimension = "distribution"
             versionNameSuffix = "-foss"
             buildConfigField("boolean", "PLAY_STORE", "false")
+            buildConfigField("boolean", "PLAY_LISTED", "false")
             buildConfigField("boolean", "GITHUB_UPDATES", "false")
         }
         // The APK on GitHub Releases: foss plus a check for new releases that downloads and installs them.
@@ -46,6 +50,7 @@ android {
             dimension = "distribution"
             versionNameSuffix = "-github"
             buildConfigField("boolean", "PLAY_STORE", "false")
+            buildConfigField("boolean", "PLAY_LISTED", "false")
             buildConfigField("boolean", "GITHUB_UPDATES", "true")
         }
     }

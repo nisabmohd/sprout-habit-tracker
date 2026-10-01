@@ -73,7 +73,7 @@ fun AboutScreen(updates: UpdateManager, onBack: () -> Unit, onOpenLicences: () -
             SettingsCard { SupportRow { openUrl(context, BuildConfig.SPONSOR_URL) } }
             SettingsCard {
                 val repo = BuildConfig.REPO_URL
-                if (BuildConfig.PLAY_STORE) {
+                if (BuildConfig.PLAY_LISTED) {
                     LinkRow(stringResource(R.string.rate_on_play), stringResource(R.string.rate_desc)) { openUrl(context, BuildConfig.PLAY_STORE_URL) }
                     CardDivider()
                 }

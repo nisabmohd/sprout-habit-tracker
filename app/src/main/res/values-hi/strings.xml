@@ -329,7 +329,6 @@
     <string name="up_to_date">आपके पास नया वर्शन है</string>
     <string name="update_check_failed">जांच नहीं हो सकी। फिर कोशिश करें</string>
     <string name="updates_from_fdroid">अपडेट F-Droid से आते हैं</string>
-    <string name="updates_from_play">अपडेट Google Play से आते हैं</string>
     <string name="update_available">अपडेट उपलब्ध है</string>
     <string name="update_version_line">वर्शन %1$s · आपके पास %2$s है</string>
     <string name="whats_new">नया क्या है</string>
