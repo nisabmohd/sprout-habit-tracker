@@ -203,7 +203,9 @@
     <string name="contribute_desc">Code, design and translations welcome</string>
     <string name="licences">Open-source licences</string>
     <string name="licences_desc">Libraries and fonts this app uses</string>
-    <string name="made_by">Made by the Sprout contributors</string>
+    <string name="developer">Developer</string>
+    <string name="developer_name" translatable="false">Nisab Mohd</string>
+    <string name="made_by">Made by Nisab Mohd &amp; Contributors</string>
     <string name="support_sprout">Support Sprout</string>
     <string name="support_desc">Free forever, kept alive by sponsors</string>
     <string name="sponsor">Sponsor</string>

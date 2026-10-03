@@ -200,7 +200,8 @@
     <string name="contribute_desc">कोड, डिज़ाइन और अनुवाद का स्वागत है</string>
     <string name="licences">ओपन-सोर्स लाइसेंस</string>
     <string name="licences_desc">इस ऐप में इस्तेमाल लाइब्रेरी और फ़ॉन्ट</string>
-    <string name="made_by">Sprout में योगदान देने वालों ने बनाया</string>
+    <string name="developer">डेवलपर</string>
+    <string name="made_by">Nisab Mohd और योगदानकर्ताओं ने बनाया</string>
     <string name="support_sprout">Sprout का साथ दें</string>
     <string name="support_desc">हमेशा मुफ़्त, स्पॉन्सर के सहारे चलता है</string>
     <string name="sponsor">स्पॉन्सर करें</string>

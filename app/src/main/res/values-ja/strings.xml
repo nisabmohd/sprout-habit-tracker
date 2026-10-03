@@ -200,7 +200,8 @@
     <string name="contribute_desc">コード、デザイン、翻訳を歓迎します</string>
     <string name="licences">オープンソースライセンス</string>
     <string name="licences_desc">このアプリが使うライブラリとフォント</string>
-    <string name="made_by">Sprout のコントリビューターが作りました</string>
+    <string name="developer">開発者</string>
+    <string name="made_by">Nisab Mohd とコントリビューターが作りました</string>
     <string name="support_sprout">Sprout を支援する</string>
     <string name="support_desc">ずっと無料。スポンサーに支えられています</string>
     <string name="sponsor">スポンサー</string>

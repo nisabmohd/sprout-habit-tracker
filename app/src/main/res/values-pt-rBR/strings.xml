@@ -200,7 +200,8 @@
     <string name="contribute_desc">Código, design e traduções são bem-vindos</string>
     <string name="licences">Licenças de código aberto</string>
     <string name="licences_desc">Bibliotecas e fontes usadas por este app</string>
-    <string name="made_by">Feito pelas pessoas que contribuem com o Sprout</string>
+    <string name="developer">Desenvolvedor</string>
+    <string name="made_by">Feito por Nisab Mohd e colaboradores</string>
     <string name="support_sprout">Apoiar o Sprout</string>
     <string name="support_desc">Gratuito para sempre, mantido por patrocinadores</string>
     <string name="sponsor">Patrocinar</string>

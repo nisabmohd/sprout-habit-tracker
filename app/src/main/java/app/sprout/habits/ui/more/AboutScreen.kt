@@ -78,6 +78,8 @@ fun AboutScreen(updates: UpdateManager, onBack: () -> Unit, onOpenLicences: () -
                     LinkRow(stringResource(R.string.rate_on_play), stringResource(R.string.rate_desc)) { openUrl(context, BuildConfig.PLAY_STORE_URL) }
                     CardDivider()
                 }
+                LinkRow(stringResource(R.string.developer), stringResource(R.string.developer_name)) { openUrl(context, BuildConfig.DEVELOPER_URL) }
+                CardDivider()
                 LinkRow(stringResource(R.string.source_code), repo.removePrefix("https://")) { openUrl(context, repo) }
                 CardDivider()
                 LinkRow(stringResource(R.string.report_bug), stringResource(R.string.github_issues)) { openUrl(context, "$repo/issues") }
