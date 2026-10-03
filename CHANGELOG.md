@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.2.0
+
+New:
+
+- Journal and Insights show which filters are on: the calendar and filter buttons turn tinted, the filter button shows how many habits are picked, and a chip under the title lists them. Tap ✕ after the dates to clear the range, ✕ on the chip to clear the habits, or the chip to change them.
+- Insights has the same card style as Today and Habits: a score card with one bar per habit, a "Habits per day" card with a column for each weekday and the best day highlighted, and one "By habit" card with each habit's icon and score.
+- Insights groups ranges longer than two weeks by week ("Habits per week").
+- Swipe the Undo message left or right to dismiss it.
+
+Changed:
+
+- The score now counts a past day you never logged as 0. Only a day you marked Skip is left out. Before, one Done in an otherwise empty week showed as 100%.
+- A reminder that is still in your notifications goes away once you mark that habit done or skipped.
+- New installs start with the amber accent and Dynamic color off; turn it on in More → Appearance. If you already had Sprout, your colors stay as they were.
+- The accent colors Gold and Pink are now called Amber and Plum.
+- About says "Made by Nisab Mohd & Contributors".
+
 ## 1.1.0
 
 New:

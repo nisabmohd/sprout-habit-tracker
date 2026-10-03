@@ -1,5 +1,9 @@
 package app.sprout.habits.ui.today
 
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.runtime.key
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
@@ -42,16 +46,30 @@ fun DayLogHost(logger: DayLogger, snackbar: SnackbarHostState) {
     }
 }
 
-/** The Undo snackbar: dark inverse surface with 14 dp corners, as in the design. */
+/**
+ * The Undo snackbar: dark inverse surface with 14 dp corners, as in the design. Swiping it left or
+ * right dismisses it, the way Android's own snackbars do.
+ */
 @Composable
 fun UndoSnackbarHost(state: SnackbarHostState, modifier: Modifier = Modifier) {
     SnackbarHost(state, modifier) { data ->
-        Snackbar(
-            data,
-            shape = RoundedCornerShape(14.dp),
-            containerColor = MaterialTheme.colorScheme.inverseSurface,
-            contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-            actionColor = MaterialTheme.colorScheme.inversePrimary,
-        )
+        // A new state per snackbar, so the next one starts in place.
+        key(data) {
+            val swipe = rememberSwipeToDismissBoxState(
+                confirmValueChange = { value ->
+                    if (value != SwipeToDismissBoxValue.Settled) data.dismiss()
+                    true
+                },
+            )
+            SwipeToDismissBox(state = swipe, backgroundContent = {}) {
+                Snackbar(
+                    data,
+                    shape = RoundedCornerShape(14.dp),
+                    containerColor = MaterialTheme.colorScheme.inverseSurface,
+                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                    actionColor = MaterialTheme.colorScheme.inversePrimary,
+                )
+            }
+        }
     }
 }

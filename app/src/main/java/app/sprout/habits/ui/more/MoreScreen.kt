@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.more
 
+import app.sprout.habits.ui.today.UndoSnackbarHost
 import app.sprout.habits.ui.update.UpdateBadge
 import app.sprout.habits.domain.isNewerVersion
 import androidx.compose.ui.res.stringResource
@@ -209,7 +210,7 @@ fun MoreScreen(
                 }
             }
         }
-        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
+        UndoSnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
 
     if (pickingLanguage) {
