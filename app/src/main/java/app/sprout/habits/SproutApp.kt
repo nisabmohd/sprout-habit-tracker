@@ -25,6 +25,7 @@ class SproutApp : Application() {
             container.settings.markFirstOpen()
         }
         container.reminders.start(container.appScope)
+        container.reminderNotifier.start(container.appScope)
         container.widgets.start(container.appScope)
     }
 }

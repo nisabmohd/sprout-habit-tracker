@@ -18,6 +18,8 @@ import app.sprout.habits.data.TrackType
 import app.sprout.habits.ui.today.TodayViewModel.Companion.formatNumber
 import app.sprout.habits.domain.isScheduled
 import java.time.LocalDate
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /** Simple notifications: a title and one line, no action buttons; a tap opens the habit. */
 class ReminderNotifier(
@@ -32,6 +34,25 @@ class ReminderNotifier(
         if (entry?.status == EntryStatus.DONE || entry?.status == EntryStatus.SKIP) return
         val (title, text) = reminderText(habit, entry?.amount ?: 0.0, ResourceStrings(context))
         post(habit.id, Notifications.CHANNEL_REMINDERS, title, text, reminderId(habit.id))
+    }
+
+    /**
+     * Takes a reminder that is still showing out of the shade once its habit is done or skipped
+     * today, wherever that was logged (the app, a widget, an import).
+     */
+    fun start(scope: CoroutineScope) {
+        scope.launch {
+            // A week ahead covers a process that stays alive past midnight.
+            val start = LocalDate.now().toEpochDay()
+            repository.observeEntries(start, start + 7).collect { entries ->
+                val today = LocalDate.now().toEpochDay()
+                val manager = NotificationManagerCompat.from(context)
+                for (entry in entries) {
+                    if (entry.date != today || entry.status == EntryStatus.PARTIAL) continue
+                    manager.cancel(reminderId(entry.habitId))
+                }
+            }
+        }
     }
 
     /** For each habit that asks for a note: if it was skipped today and has no note yet, nudge. */
