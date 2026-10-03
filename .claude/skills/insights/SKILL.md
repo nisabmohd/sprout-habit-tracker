@@ -9,6 +9,8 @@ description: The Insights tab (score ring, habits per day bars, by-habit bars, p
 
 **Verify:** `python3 tools/verify/smoke.py insights`.
 
+**Filters (shared with Journal):** `TabHeader(onClearSubtitle)` draws the ✕ after the date line (Insights: back to this week; Journal: all dates), `HeaderIconButton(active, badge)` tints the button and shows the habit count ("9+" above nine), and `HabitFilterChip` under the header lists the picked habits (tap = reopen sheet, ✕ = clear). Up to 7 days the chart has a column per weekday, 8–14 days each weekday's average, longer one column per week ("Habits per week").
+
 **Score:** `domain/Scoring.kt` `dayCredit`: a logged Skip is left out, a past scheduled day with no entry counts as 0 (it still shows as a Skip mark). Otherwise one Done in an otherwise empty week reads 100%.
 
 **Pitfalls:** percentages use `softWrap = false` so "100%" never breaks at large text sizes.

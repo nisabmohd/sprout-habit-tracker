@@ -74,7 +74,21 @@ class SettingsRepository(context: Context) {
     suspend fun setSampleHabitIds(ids: Set<Long>) = store.edit {
         if (ids.isEmpty()) it.remove(SAMPLE_HABITS) else it[SAMPLE_HABITS] = ids.mapTo(HashSet()) { id -> id.toString() }
     }
-    suspend fun markFirstOpen(now: Long = System.currentTimeMillis()) = store.edit { if (it[FIRST_OPEN_AT] == null) it[FIRST_OPEN_AT] = now }
+    /**
+     * Also keeps the look of installs from before 1.2: they followed the wallpaper with a green
+     * fallback by default, and the new defaults (amber, dynamic color off) are for new installs.
+     */
+    suspend fun markFirstOpen(now: Long = System.currentTimeMillis()) = store.edit {
+        if (it[FIRST_OPEN_AT] == null) {
+            it[FIRST_OPEN_AT] = now
+            // Written down so the next launch doesn't take this for an older install.
+            if (it[DYNAMIC_COLOR] == null) it[DYNAMIC_COLOR] = false
+            if (it[ACCENT_HUE] == null) it[ACCENT_HUE] = DEFAULT_ACCENT_HUE
+        } else {
+            if (it[DYNAMIC_COLOR] == null) it[DYNAMIC_COLOR] = true
+            if (it[ACCENT_HUE] == null) it[ACCENT_HUE] = 150f
+        }
+    }
     suspend fun addCheckIn() = store.edit { it[CHECK_INS] = (it[CHECK_INS] ?: 0) + 1 }
     suspend fun supportPromptShown(dismissed: Boolean, now: Long = System.currentTimeMillis()) = store.edit {
         it[PROMPT_SHOWN_AT] = now

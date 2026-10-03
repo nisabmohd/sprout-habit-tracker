@@ -72,6 +72,7 @@ def sample_data_on_first_launch():
 
 @check
 def today_circle_toggles_done():
+    d.nav("Today")  # the check before this one ends on Journal
     assert d.scroll_to("Mark Vitamins done"), "Vitamins not on Today"
     d.tap("Mark Vitamins done")
     assert d.exists("Mark Vitamins not done"), "circle did not mark done"
@@ -360,8 +361,8 @@ def journal_filter_by_habit():
     d.tap("Deep work")  # made by measure_with_step; no sample note and no check writes one
     d.tap("Show notes for 1 habit")
     time.sleep(1)
-    assert d.exists("No notes for this habit yet"), "empty filter message missing"
-    d.tap("Show all notes")
+    assert d.exists("No notes for these filters"), "empty filter message missing"
+    d.tap("Clear filters")
     assert d.exists("Rough morning", contains=True), "filter didn't reset"
 
 
@@ -406,18 +407,21 @@ def note_date_in_a_sheet():
 @check
 def insights_render():
     d.nav("Insights")
-    assert d.exists("average score"), "score card missing"
+    assert d.exists("average"), "score card missing"
     assert d.exists("Habits per day", contains=True), "bar chart missing"
     d.tap("Change date range")
     assert d.exists("Date range"), "date range sheet didn't open"
     d.tap("1")  # the 1st of this month starts a new range
     d.tap("Show 1", contains=True)
     time.sleep(1)
-    assert d.exists("average score"), "insights missing after picking a range"
+    assert d.exists("average"), "insights missing after picking a range"
     d.tap("Filter by habit")
     d.tap("Read")
     d.tap("Show 1 habit")
-    assert not d.exists("By habit", timeout=1.0), "habit filter not applied"
+    assert d.exists("Remove habit filter"), "habit filter chip missing"
+    d.tap("Remove habit filter")
+    assert not d.exists("Remove habit filter", timeout=1.0), "chip's ✕ didn't clear the habit filter"
+    assert d.exists("Clear date filter"), "date line has no ✕ for a custom range"
     d.tap("Change date range")
     d.tap("This week")
 

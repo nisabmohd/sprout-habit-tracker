@@ -51,6 +51,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import android.content.Intent
 import app.sprout.habits.ui.components.DateRangeSheet
+import app.sprout.habits.ui.components.HabitFilterChip
 import app.sprout.habits.ui.components.HabitFilterSheet
 import app.sprout.habits.ui.components.HeaderIconButton
 
@@ -87,13 +88,29 @@ fun JournalScreen(
         ) {
             item(key = "title") {
                 // Every filter lives in a sheet: dates here, habits next to it.
-                TabHeader(stringResource(R.string.journal_title), subtitle = state?.rangeLabel, listSpacing = 8.dp) {
+                TabHeader(
+                    stringResource(R.string.journal_title),
+                    subtitle = state?.rangeLabel,
+                    listSpacing = 8.dp,
+                    clearLabel = stringResource(R.string.clear_date_filter),
+                    onClearSubtitle = { viewModel.setRange(null, null) },
+                ) {
                     state?.let { ui ->
                         HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.filter_by_date), active = ui.from != null) { pickingRange = true }
                         if (ui.options.isNotEmpty()) {
-                            HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty()) { choosing = true }
+                            HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty(), badge = ui.filter.size) { choosing = true }
                         }
                     }
+                }
+            }
+            state?.takeIf { it.filter.isNotEmpty() }?.let { ui ->
+                item(key = "chip") {
+                    HabitFilterChip(
+                        selected = ui.options.filter { it.habitId in ui.filter },
+                        removeLabel = stringResource(R.string.remove_habit_filter),
+                        onOpen = { choosing = true },
+                        onClear = { viewModel.setFilter(emptySet()) },
+                    )
                 }
             }
             val list = state?.days
@@ -102,16 +119,8 @@ fun JournalScreen(
             if (list != null && list.isEmpty() && (filter.isNotEmpty() || dated)) {
                 item(key = "empty-filter") {
                     Column(Modifier.fillMaxWidth().padding(vertical = 48.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(
-                            when {
-                                dated && filter.isEmpty() -> stringResource(R.string.journal_empty_dates)
-                                filter.size == 1 -> stringResource(R.string.journal_empty_habit)
-                                else -> stringResource(R.string.journal_empty_habits)
-                            },
-                            style = type.titleMedium,
-                            color = colors.onSurface,
-                        )
-                        TextButton(onClick = { viewModel.setFilter(emptySet()); viewModel.setRange(null, null) }) { Text(stringResource(R.string.journal_show_all)) }
+                        Text(stringResource(R.string.journal_empty_filters), style = type.titleMedium, color = colors.onSurface)
+                        TextButton(onClick = { viewModel.setFilter(emptySet()); viewModel.setRange(null, null) }) { Text(stringResource(R.string.clear_filters)) }
                     }
                 }
             } else if (list != null && list.isEmpty()) {

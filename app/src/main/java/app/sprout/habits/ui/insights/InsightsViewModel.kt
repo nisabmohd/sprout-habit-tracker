@@ -52,8 +52,12 @@ data class InsightsUi(
     val doneCount: Int,
     val partialCount: Int,
     val bestDay: String?,
+    /** False while the range is "this week"; true once the user picked dates. */
+    val customRange: Boolean,
     /** True when bars are averages per weekday rather than one week's counts. */
     val averaged: Boolean,
+    /** True when the range is longer than two weeks: one bar per week instead of per weekday. */
+    val byWeek: Boolean,
     val bars: List<DayBarUi>,
     val rates: List<HabitRateUi>,
 )
@@ -75,7 +79,7 @@ class InsightsViewModel(
                 repository.observeHabits(),
                 repository.observeEntries(from.toEpochDay(), to.toEpochDay()),
                 filter,
-            ) { habits, entries, f -> build(today, from, to, weekStart, habits, entries, f) }
+            ) { habits, entries, f -> build(today, from, to, r != null, weekStart, habits, entries, f) }
         }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -96,6 +100,7 @@ class InsightsViewModel(
         today: LocalDate,
         from: LocalDate,
         to: LocalDate,
+        customRange: Boolean,
         weekStart: DayOfWeek,
         allHabits: List<Habit>,
         entries: List<Entry>,
@@ -107,12 +112,21 @@ class InsightsViewModel(
         val first = from.toEpochDay()
         val last = minOf(to.toEpochDay(), todayDay)
 
+        // Up to a week: one column per weekday. Up to two weeks: each weekday's average.
+        // Longer: one column per week.
+        val span = to.toEpochDay() - first
+        val averaged = span in 7..13
+        val byWeek = span > 13
         val weekdays = List(7) { weekStart.plus(it.toLong()) }
-        val done = IntArray(7)
-        val partial = IntArray(7)
-        val credits = List(7) { mutableListOf<Double?>() }
-        val occurrences = IntArray(7)
-        for (day in first..last) occurrences[weekdays.indexOf(LocalDate.ofEpochDay(day).dayOfWeek)]++
+        val firstWeek = weekOf(from, weekStart).first().toEpochDay()
+        val columns = if (byWeek) ((last - firstWeek) / 7).toInt() + 1 else 7
+        fun columnOf(day: Long) = if (byWeek) ((day - firstWeek) / 7).toInt() else weekdays.indexOf(LocalDate.ofEpochDay(day).dayOfWeek)
+
+        val done = IntArray(columns)
+        val partial = IntArray(columns)
+        val credits = List(columns) { mutableListOf<Double?>() }
+        val occurrences = IntArray(columns)
+        for (day in first..last) occurrences[columnOf(day)]++
 
         val allCredits = mutableListOf<Double?>()
         val rates = habits.map { habit ->
@@ -121,35 +135,45 @@ class InsightsViewModel(
             for (day in first..last) {
                 if (!history.isScheduled(day)) continue
                 val entry = history.entries[day]
-                val w = weekdays.indexOf(LocalDate.ofEpochDay(day).dayOfWeek)
+                val c = columnOf(day)
                 when (outcomeOf(entry, day, todayDay)) {
-                    DayOutcome.DONE -> done[w]++
-                    DayOutcome.PARTIAL -> partial[w]++
+                    DayOutcome.DONE -> done[c]++
+                    DayOutcome.PARTIAL -> partial[c]++
                     else -> Unit
                 }
-                val c = dayCredit(entry, habit.target, day, todayDay)
-                habitCredits += c
-                credits[w] += c
+                val credit = dayCredit(entry, habit.target, day, todayDay)
+                habitCredits += credit
+                credits[c] += credit
             }
             allCredits += habitCredits
             HabitRateUi(habit.id, habit.name, HabitIcon.fromKey(habit.icon).drawable, habit.colorHue.toFloat(), (score(habitCredits) * 100).roundToInt())
         }.sortedByDescending { it.percent }
 
-        // Longer than a week: show each weekday's average instead of one week's counts.
-        val averaged = to.toEpochDay() - from.toEpochDay() > 6
         val bestIndex = credits.withIndex()
             .filter { (_, list) -> list.any { it != null } }
             .maxByOrNull { (_, list) -> score(list) }
             ?.index
-        val bars = weekdays.mapIndexed { i, d ->
-            val n = if (averaged) occurrences[i].coerceAtLeast(1) else 1
-            DayBarUi(
-                label = d.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
-                name = d.getDisplayName(TextStyle.FULL, Locale.getDefault()),
-                done = done[i].toFloat() / n,
-                partial = partial[i].toFloat() / n,
-                isBest = i == bestIndex,
-            )
+        val bars = List(columns) { i ->
+            if (byWeek) {
+                // A week is named by the day it starts on (or the range's first day).
+                val start = LocalDate.ofEpochDay(maxOf(firstWeek + i * 7L, first))
+                DayBarUi(
+                    label = start.format(datePattern(if (columns > 6) "d/M" else "d MMM")),
+                    name = start.format(datePattern("d MMM")),
+                    done = done[i].toFloat(),
+                    partial = partial[i].toFloat(),
+                    isBest = i == bestIndex,
+                )
+            } else {
+                val n = if (averaged) occurrences[i].coerceAtLeast(1) else 1
+                DayBarUi(
+                    label = weekdays[i].getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                    name = weekdays[i].getDisplayName(TextStyle.FULL, Locale.getDefault()),
+                    done = done[i].toFloat() / n,
+                    partial = partial[i].toFloat() / n,
+                    isBest = i == bestIndex,
+                )
+            }
         }
 
         return InsightsUi(
@@ -162,7 +186,9 @@ class InsightsViewModel(
             doneCount = done.sum(),
             partialCount = partial.sum(),
             bestDay = bestIndex?.let { bars[it].name },
+            customRange = customRange,
             averaged = averaged,
+            byWeek = byWeek,
             bars = bars,
             rates = rates,
         )

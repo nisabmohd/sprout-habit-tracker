@@ -1,5 +1,10 @@
 package app.sprout.habits.ui.components
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -103,9 +108,11 @@ fun HeaderIconButton(
     danger: Boolean = false,
     primary: Boolean = false,
     enabled: Boolean = true,
+    badge: Int = 0,
     onClick: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
+    Box {
     IconButton(
         onClick = onClick,
         enabled = enabled,
@@ -127,5 +134,52 @@ fun HeaderIconButton(
         ),
     ) {
         Icon(painterResource(icon), contentDescription = label, modifier = Modifier.size(22.dp))
+    }
+    // How many habits the filter holds; more than nine reads "9+" so the badge stays small.
+    if (badge > 0) {
+        CappedFontScale {
+            Box(
+                Modifier.align(Alignment.TopEnd).padding(4.dp).defaultMinSize(minWidth = 18.dp).height(18.dp).background(colors.primary, CircleShape).padding(horizontal = 4.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(if (badge > 9) "9+" else badge.toString(), style = MaterialTheme.typography.labelSmall, color = colors.onPrimary, maxLines = 1)
+            }
+        }
+    }
+    }
+}
+
+/**
+ * The habit filter that is on, shown under a tab header: overlapping dots in the habits' colors,
+ * their names and a ✕ that clears it. Tapping the chip opens the filter sheet again.
+ */
+@Composable
+fun HabitFilterChip(selected: List<HabitFilterOption>, removeLabel: String, onOpen: () -> Unit, onClear: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Row {
+        Row(
+            Modifier
+                .heightIn(min = 32.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(colors.primaryContainer)
+                .clickable(role = Role.Button, onClick = onOpen)
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy((-4).dp)) {
+                selected.take(5).forEach { option ->
+                    Box(Modifier.size(14.dp).background(colors.primaryContainer, CircleShape).padding(2.dp).background(habitColors(option.hue).solid, CircleShape))
+                }
+            }
+            Text(
+                selected.joinToString(", ") { it.name },
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.onPrimaryContainer,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false).padding(start = 8.dp, end = 8.dp),
+            )
+            SmallClearButton(removeLabel, 24.dp, Color.Transparent, colors.onPrimaryContainer, onClear)
+        }
     }
 }

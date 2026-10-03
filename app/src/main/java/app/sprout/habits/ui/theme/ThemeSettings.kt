@@ -10,7 +10,7 @@ enum class BodyFont { SYSTEM, FIGTREE, OUTFIT, LEXEND, ATKINSON }
 @Immutable
 data class ThemeSettings(
     val mode: ThemeMode = ThemeMode.SYSTEM,
-    val dynamicColor: Boolean = true,
+    val dynamicColor: Boolean = false,
     /** Seed hue for the app chrome when dynamic color is off or unavailable. */
     val accentHue: Float = DEFAULT_ACCENT_HUE,
     val font: BodyFont = BodyFont.LEXEND,
@@ -18,4 +18,4 @@ data class ThemeSettings(
     val textScale: Float = 1f,
 )
 
-const val DEFAULT_ACCENT_HUE = 150f
+const val DEFAULT_ACCENT_HUE = 38f

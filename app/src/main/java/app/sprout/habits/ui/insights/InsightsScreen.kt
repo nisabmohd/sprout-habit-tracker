@@ -45,6 +45,7 @@ import androidx.compose.runtime.setValue
 import app.sprout.habits.R
 import app.sprout.habits.ui.components.TabHeader
 import app.sprout.habits.ui.components.DateRangeSheet
+import app.sprout.habits.ui.components.HabitFilterChip
 import app.sprout.habits.ui.components.HabitFilterSheet
 import app.sprout.habits.ui.components.HeaderIconButton
 import app.sprout.habits.ui.components.BarSegment
@@ -67,14 +68,31 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek)
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item(key = "header") {
-            TabHeader(stringResource(R.string.insights_title), subtitle = ui.rangeLabel, listSpacing = 16.dp) {
-                HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.change_date_range)) { pickingRange = true }
-                HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty()) { filtering = true }
+            TabHeader(
+                stringResource(R.string.insights_title),
+                subtitle = ui.rangeLabel,
+                listSpacing = 16.dp,
+                clearLabel = stringResource(R.string.clear_date_filter),
+                // ✕ goes back to this week.
+                onClearSubtitle = if (ui.customRange) ({ viewModel.setRange(null, null) }) else null,
+            ) {
+                HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.change_date_range), active = ui.customRange) { pickingRange = true }
+                HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty(), badge = ui.filter.size) { filtering = true }
+            }
+        }
+        if (ui.filter.isNotEmpty()) {
+            item(key = "chip") {
+                HabitFilterChip(
+                    selected = ui.options.filter { it.habitId in ui.filter },
+                    removeLabel = stringResource(R.string.remove_habit_filter),
+                    onOpen = { filtering = true },
+                    onClear = { viewModel.setFilter(emptySet()) },
+                )
             }
         }
         item(key = "score") { ScoreCard(ui) }
         item(key = "bars") { DayBars(ui) }
-        if (ui.rates.size > 1) item(key = "rates") { ByHabit(ui.rates) }
+        if (ui.rates.isNotEmpty()) item(key = "rates") { ByHabit(ui.rates) }
     }
 
     if (pickingRange) {
@@ -141,16 +159,22 @@ private fun DayBars(ui: InsightsUi) {
                 Icon(painterResource(R.drawable.ic_nav_insights), contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(18.dp))
             }
             Text(
-                stringResource(if (ui.averaged) R.string.insights_per_day_avg else R.string.insights_per_day),
+                stringResource(
+                    when {
+                        ui.byWeek -> R.string.insights_per_week
+                        ui.averaged -> R.string.insights_per_day_avg
+                        else -> R.string.insights_per_day
+                    },
+                ),
                 style = type.titleMedium,
                 color = colors.onSurface,
                 modifier = Modifier.weight(1f).padding(horizontal = 10.dp),
             )
             ui.bestDay?.let { Text(stringResource(R.string.insights_best_day, it), style = type.bodyMedium, color = colors.onSurfaceVariant) }
         }
-        // 13 dp per habit, shrinking only when a day has more than fits the bar area.
-        val max = ui.bars.maxOf { it.done + it.partial }
-        val unit = if (max * 13f > BAR_AREA) BAR_AREA / max else 13f
+        // The tallest column fills about 96 dp; a column with only a few habits stops at 24 dp each.
+        val max = ui.bars.maxOf { it.done + it.partial }.coerceAtLeast(1f)
+        val unit = minOf(24f, 96f / max)
         // Seven equal columns that share the card's width; the labels stop scaling at 1.3x so
         // they never wrap.
         CappedFontScale {
@@ -165,7 +189,8 @@ private fun DayBars(ui: InsightsUi) {
                             .background(if (bar.isBest) colors.surfaceContainerHigh else colors.surfaceContainerLowest)
                             .padding(vertical = 8.dp)
                             .clearAndSetSemantics {
-                                contentDescription = res.getString(R.string.insights_bar_description, bar.name, bar.done.fmt(), bar.partial.fmt())
+                                val name = if (ui.byWeek) res.getString(R.string.insights_week_of, bar.name) else bar.name
+                                contentDescription = res.getString(R.string.insights_bar_description, name, bar.done.fmt(), bar.partial.fmt())
                             },
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -173,13 +198,14 @@ private fun DayBars(ui: InsightsUi) {
                         Text(bar.label, style = type.labelSmall, color = if (bar.isBest) colors.onSurface else colors.onSurfaceVariant, maxLines = 1, softWrap = false)
                         Canvas(Modifier.width(20.dp).height(BAR_AREA.dp)) {
                             val gap = 2.dp.toPx()
-                            val r = CornerRadius(size.width / 2)
                             val dh = bar.done * unit.dp.toPx()
                             val ph = bar.partial * unit.dp.toPx()
-                            if (dh > 0f) drawRoundRect(done, Offset(0f, size.height - dh), Size(size.width, dh), r)
+                            // A short segment gets a smaller radius so it stays a pill, not a lens.
+                            fun radius(h: Float) = CornerRadius(minOf(size.width, h) / 2)
+                            if (dh > 0f) drawRoundRect(done, Offset(0f, size.height - dh), Size(size.width, dh), radius(dh))
                             if (ph > 0f) {
                                 val top = size.height - dh - (if (dh > 0f) gap else 0f) - ph
-                                drawRoundRect(partial, Offset(0f, top.coerceAtLeast(0f)), Size(size.width, ph), r)
+                                drawRoundRect(partial, Offset(0f, top.coerceAtLeast(0f)), Size(size.width, ph), radius(ph))
                             }
                         }
                         Text(value, style = type.titleSmall, color = colors.onSurface, maxLines = 1, softWrap = false)

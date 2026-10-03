@@ -28,13 +28,13 @@ Code: `ui/edit/`, `ui/manage/`, `ui/habits/`, `ui/detail/`, statistics in `domai
 
 ## Journal and notes
 
-A note belongs to one habit and one day. The Journal tab lists every note, newest first, under date headers; each card shows the habit, that day's outcome and when the note was written. The two buttons at the top open bottom sheets to filter by date range and by one or more habits. Notes can be added from Today, the Journal, a habit's detail screen or the press-and-hold sheet, and edited or deleted later. Press and hold a note card in the Journal for a sheet with Edit note, Share and Delete note; deleting shows an Undo snackbar.
+A note belongs to one habit and one day. The Journal tab lists every note, newest first, under date headers; each card shows the habit, that day's outcome and when the note was written. The two buttons at the top open bottom sheets to filter by date range and by one or more habits. While a filter is on, its button is tinted, the filter button shows how many habits are picked, the date range under the title has a ✕ to clear it, and a chip lists the picked habits (tap it to change them, ✕ to clear). Notes can be added from Today, the Journal, a habit's detail screen or the press-and-hold sheet, and edited or deleted later. Press and hold a note card in the Journal for a sheet with Edit note, Share and Delete note; deleting shows an Undo snackbar.
 
 Code: `ui/journal/`, `ui/note/`.
 
 ## Insights
 
-A summary for any date range (this week by default), for all habits or the ones you pick. The range and habits are chosen in bottom sheets from the buttons at the top. It shows the average score, how many days were done or partial, the best weekday, habits completed per day, and each habit's score.
+A summary for any date range (this week by default), for all habits or the ones you pick. The range and habits are chosen in bottom sheets from the buttons at the top. It shows the average score, how many days were done or partial, the best weekday, habits completed per day, and each habit's score. Active filters look the same as in the Journal. A range of 8 to 14 days shows each weekday's average, and a longer one shows one column per week. A past day with no entry counts as 0 in the score; only a day marked Skip is left out.
 
 Code: `ui/insights/`.
 
