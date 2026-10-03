@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log duration · Sprout design</title>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&amp;family=Outfit:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:Lexend,system-ui,sans-serif}
+button{font-family:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+.h{font-family:Outfit,Lexend,sans-serif}
+textarea{font-family:inherit}
+</style>
+
+<style>html,body{margin:0;background:#1a1a1a}body{display:flex;justify-content:center;padding:24px 0}</style>
+</head><body>
+
+
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: hsl(38 30% 96%); color: hsl(38 15% 11%); font-family: Lexend, system-ui, sans-serif">
+<div aria-hidden="true" style="padding: 32px 20px; display: flex; flex-direction: column; gap: 10px">
+<div class="h" style="font-size: 28px; font-weight: 600; margin-bottom: 0">Today</div>
+<div style="font-size: 14px; font-weight: 600; color: hsl(38 8% 36%); margin-bottom: 70px">Sunday, 27 September</div>
+<div style="height: 68px; border-radius: 22px; background: hsl(38 40% 99%)"></div>
+<div style="height: 68px; border-radius: 22px; background: hsl(12 55% 92%); transform: scale(0.97); box-shadow: 0 0 0 2px hsl(12 48% 40%)"></div>
+<div style="height: 68px; border-radius: 22px; background: hsl(38 40% 99%)"></div>
+<div style="height: 68px; border-radius: 22px; background: hsl(38 40% 99%)"></div>
+</div>
+<div style="position: absolute; inset: 0; background: rgba(10,14,12,0.45)"></div>
+
+<div role="dialog" aria-label="Log progress for Workout" style="position: absolute; left: 0; right: 0; bottom: 0; border-radius: 28px 28px 0 0; background: hsl(38 40% 99%); padding: 10px 20px 24px 20px; display: flex; flex-direction: column; gap: 20px">
+<div style="align-self: center; width: 32px; height: 4px; border-radius: 2px; background: hsl(38 14% 84%)"></div>
+
+<div style="display: flex; align-items: center; gap: 14px">
+<div style="width: 48px; height: 48px; border-radius: 16px; background: hsl(12 55% 92%); display: flex; align-items: center; justify-content: center">
+
+
+<div style="width: 24px; height: 24px; display: flex; color: hsl(12 50% 24%)">
+
+
+
+
+
+
+
+
+
+
+
+<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="rotate(45 12 12)"><path d="M6.5 7v10M3.5 9.5v5M17.5 7v10M20.5 9.5v5M6.5 12h11"></path></g></svg>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1">
+<div class="h" style="font-size: 22px; font-weight: 600">Workout</div>
+<div style="font-size: 14px; color: hsl(38 8% 36%)">Goal 45 min · today</div>
+</div>
+
+</div>
+
+<div role="radiogroup" aria-label="Outcome" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid hsl(38 14% 84%); border-radius: 20px; overflow: hidden; height: 40px">
+
+<button role="radio" aria-checked="false" style="border: none; border-right: 1px solid hsl(38 14% 84%); background: transparent; color: hsl(38 15% 11%); font-size: 14px; font-weight: 600; padding: 0">Done</button>
+
+<button role="radio" aria-checked="true" style="border: none; border-right: 1px solid hsl(38 14% 84%); background: hsl(12 48% 82%); color: hsl(12 50% 24%); font-size: 14px; font-weight: 600; padding: 0">Partial</button>
+
+<button role="radio" aria-checked="false" style="border: none; border-right: 1px solid hsl(38 14% 84%); background: transparent; color: hsl(38 15% 11%); font-size: 14px; font-weight: 600; padding: 0">Skip</button>
+
+</div>
+
+
+<div style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<button aria-label="5 minutes less" style="width: 52px; height: 52px; border-radius: 26px; border: none; background: hsl(38 28% 91%); color: hsl(38 15% 11%); display: flex; align-items: center; justify-content: center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg>
+</button>
+<div style="display: flex; flex-direction: column; align-items: center">
+<div class="h" style="font-size: 40px; font-weight: 600; line-height: 1">30<span style="font-size: 22px; color: hsl(38 8% 36%)"> / 45</span></div>
+<div style="font-size: 14px; font-weight: 600; color: hsl(38 8% 36%); margin-top: 4px">min · 67%</div>
+</div>
+<button aria-label="5 minutes more" style="width: 52px; height: 52px; border-radius: 26px; border: none; background: hsl(38 28% 91%); color: hsl(38 15% 11%); display: flex; align-items: center; justify-content: center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+</button>
+</div>
+<div style="position: relative; height: 48px; display: flex; align-items: center; gap: 6px">
+<div style="height: 16px; width: calc(0.6666666666666666 * (100% - 10px - 40px)); flex-shrink: 0; border-radius: 8px 3px 3px 8px; background: hsl(12 48% 40%)"></div>
+<div style="width: 4px; height: 44px; flex-shrink: 0; border-radius: 2px; background: hsl(12 48% 40%)"></div>
+<div style="flex-grow: 1; height: 16px; border-radius: 3px 8px 8px 3px; background: hsl(12 55% 92%); display: flex; align-items: center; justify-content: space-around; padding: 0 4px">
+<span style="width: 4px; height: 4px; border-radius: 2px; background: hsl(12 48% 82%)"></span><span style="width: 4px; height: 4px; border-radius: 2px; background: hsl(12 48% 82%)"></span><span style="width: 4px; height: 4px; border-radius: 2px; background: hsl(12 48% 40%)"></span>
+</div>
+<input type="range" aria-label="Minutes" min="0" max="45" step="5" value="30" style="position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer">
+</div>
+</div>
+
+
+<label style="display: flex; flex-direction: column; gap: 8px">
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden">Note</span>
+<textarea rows="2" placeholder="Add a note" style="border: 1px solid hsl(38 14% 84%); border-radius: 16px; padding: 12px 14px; font-size: 16px; resize: none; background: hsl(38 30% 96%); color: hsl(38 15% 11%)"></textarea>
+</label>
+
+<div style="display: flex; gap: 12px; justify-content: flex-end">
+<a href="#" style="height: 44px; padding: 0 20px; border-radius: 22px; display: flex; align-items: center; font-size: 14px; font-weight: 600; color: hsl(38 48% 30%)">Cancel</a>
+<a href="#" style="height: 44px; padding: 0 28px; border-radius: 22px; display: flex; align-items: center; font-size: 14px; font-weight: 600; background: hsl(38 48% 30%); color: #ffffff">Save</a>
+</div>
+</div>
+</div>
+
+</body></html>

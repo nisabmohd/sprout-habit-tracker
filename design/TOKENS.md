@@ -3,7 +3,7 @@
 The designs are in `Habit Tracker UI.html` in this folder: open it in a browser to see every screen as a 390 dp wide artboard.
 
 ## Colors
-`tone(h, s, l)` = `hsl(h s% l%)`. App seed hue = **150**.
+`tone(h, s, l)` = `hsl(h s% l%)`. Default app seed hue = **38** (amber) since 1.2; it was 150 (green) before.
 
 App palette `pal(h, dark)`:
 
