@@ -210,7 +210,7 @@ class TodayViewModel(
             isToday = selected == today,
             dateLabel = selected.format(DATE_FORMAT),
             week = weekUi,
-            scorePercent = (score(rows.map { if (it.outcome == DayOutcome.SKIP) null else it.progress.toDouble() }) * 100).roundToInt(),
+            scorePercent = (score(scheduledOn(selected).map { dayCredit(byKey[it.id to day], it.target, day, todayDay) }) * 100).roundToInt(),
             doneCount = rows.count { it.outcome == DayOutcome.DONE },
             partialCount = rows.count { it.outcome == DayOutcome.PARTIAL },
             openCount = rows.count { it.outcome == DayOutcome.OPEN },

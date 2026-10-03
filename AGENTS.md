@@ -14,7 +14,7 @@ These rules apply to every change, whether a person or an AI agent makes it. The
 ## Behaviour rules
 
 - Each habit has one outcome per scheduled day: DONE, PARTIAL (with an amount) or SKIP. A past scheduled day with no entry counts as SKIP. Today without an entry is open and counts as 0.
-- Score = (DONE + PARTIAL amount ÷ target) ÷ scheduled days, leaving skips out of the total.
+- Score = (DONE + PARTIAL amount ÷ target) ÷ scheduled days, leaving logged skips out of the total; a past day with no entry counts as 0.
 - A streak is consecutive scheduled days that are DONE or PARTIAL. A SKIP ends it. Days the habit isn't scheduled are ignored, and today not being logged yet doesn't break it.
 - Swipe right marks DONE, swipe left marks SKIP, tapping the circle toggles DONE, and press and hold opens the amount sheet. Every change shows an Undo snackbar.
 - One entry is a Note (buttons say "Add note") and the tab listing them is Journal. Don't use the words "reflect" or "reflection" anywhere in the app.

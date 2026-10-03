@@ -36,9 +36,9 @@ class StatsTest {
         assertEquals(2.5 / 3, h.score(mon, mon + 2, today = mon + 2), 1e-9)
     }
 
-    @Test fun scoreExcludesSkipsAndUnloggedPastDays() {
+    @Test fun scoreExcludesLoggedSkipsButCountsUnloggedPastDaysAsZero() {
         val h = history(mon to DONE, mon + 1 to SKIP) // mon+2 has no entry and is in the past
-        assertEquals(1.0, h.score(mon, mon + 2, today = mon + 3), 1e-9)
+        assertEquals(0.5, h.score(mon, mon + 2, today = mon + 3), 1e-9)
     }
 
     @Test fun scoreIgnoresNonScheduledDays() {

@@ -9,4 +9,6 @@ description: The Insights tab (score ring, habits per day bars, by-habit bars, p
 
 **Verify:** `python3 tools/verify/smoke.py insights`.
 
+**Score:** `domain/Scoring.kt` `dayCredit`: a logged Skip is left out, a past scheduled day with no entry counts as 0 (it still shows as a Skip mark). Otherwise one Done in an otherwise empty week reads 100%.
+
 **Pitfalls:** percentages use `softWrap = false` so "100%" never breaks at large text sizes.

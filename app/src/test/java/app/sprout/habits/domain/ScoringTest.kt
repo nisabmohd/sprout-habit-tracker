@@ -25,9 +25,9 @@ class ScoringTest {
 
     @Test fun skipIsExcluded() = assertNull(dayCredit(entry(EntryStatus.SKIP), 1.0, today, today))
 
-    @Test fun pastDayWithNoEntryIsSkip() {
+    @Test fun pastDayWithNoEntryShowsAsSkipButCountsZero() {
         assertEquals(DayOutcome.SKIP, outcomeOf(null, today - 1, today))
-        assertNull(dayCredit(null, 1.0, today - 1, today))
+        assertEquals(0.0, dayCredit(null, 1.0, today - 1, today)!!, 0.0)
     }
 
     @Test fun todayNotYetLoggedIsOpenAndCountsZero() {

@@ -24,7 +24,7 @@ class HabitHistory(
 
 /**
  * Score over the days [from, to], both inclusive: (DONE + PARTIAL amount/target) ÷ scheduled days,
- * skips excluded. Days after [today] are not counted; today counts as 0 until it is logged.
+ * logged skips excluded. Days after [today] are not counted; a day with no entry counts as 0.
  */
 fun HabitHistory.score(from: Long, to: Long, today: Long): Double {
     val start = maxOf(from, firstDay)
