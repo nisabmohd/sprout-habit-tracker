@@ -34,10 +34,10 @@ import kotlinx.coroutines.flow.stateIn
 
 
 @Immutable
-data class DayBarUi(val label: String, val done: Float, val partial: Float, val isToday: Boolean)
+data class DayBarUi(val label: String, val name: String, val done: Float, val partial: Float, val isBest: Boolean)
 
 @Immutable
-data class HabitRateUi(val id: Long, val name: String, val hue: Float, val percent: Int)
+data class HabitRateUi(val id: Long, val name: String, val icon: Int, val hue: Float, val percent: Int)
 
 @Immutable
 data class InsightsUi(
@@ -51,7 +51,6 @@ data class InsightsUi(
     val scorePercent: Int,
     val doneCount: Int,
     val partialCount: Int,
-    val habitCount: Int,
     val bestDay: String?,
     /** True when bars are averages per weekday rather than one week's counts. */
     val averaged: Boolean,
@@ -133,24 +132,25 @@ class InsightsViewModel(
                 credits[w] += c
             }
             allCredits += habitCredits
-            HabitRateUi(habit.id, habit.name, habit.colorHue.toFloat(), (score(habitCredits) * 100).roundToInt())
+            HabitRateUi(habit.id, habit.name, HabitIcon.fromKey(habit.icon).drawable, habit.colorHue.toFloat(), (score(habitCredits) * 100).roundToInt())
         }.sortedByDescending { it.percent }
 
         // Longer than a week: show each weekday's average instead of one week's counts.
         val averaged = to.toEpochDay() - from.toEpochDay() > 6
+        val bestIndex = credits.withIndex()
+            .filter { (_, list) -> list.any { it != null } }
+            .maxByOrNull { (_, list) -> score(list) }
+            ?.index
         val bars = weekdays.mapIndexed { i, d ->
             val n = if (averaged) occurrences[i].coerceAtLeast(1) else 1
             DayBarUi(
-                label = d.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                label = d.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                name = d.getDisplayName(TextStyle.FULL, Locale.getDefault()),
                 done = done[i].toFloat() / n,
                 partial = partial[i].toFloat() / n,
-                isToday = d == today.dayOfWeek,
+                isBest = i == bestIndex,
             )
         }
-        val best = credits.withIndex()
-            .filter { (_, list) -> list.any { it != null } }
-            .maxByOrNull { (_, list) -> score(list) }
-            ?.let { weekdays[it.index].getDisplayName(TextStyle.FULL, Locale.getDefault()) }
 
         return InsightsUi(
             rangeLabel = rangeLabel(from, to),
@@ -161,8 +161,7 @@ class InsightsViewModel(
             scorePercent = (score(allCredits) * 100).roundToInt(),
             doneCount = done.sum(),
             partialCount = partial.sum(),
-            habitCount = habits.size,
-            bestDay = best,
+            bestDay = bestIndex?.let { bars[it].name },
             averaged = averaged,
             bars = bars,
             rates = rates,

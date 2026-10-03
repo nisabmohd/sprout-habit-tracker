@@ -5,7 +5,7 @@ description: The Insights tab (score ring, habits per day bars, by-habit bars, p
 
 # Insights
 
-**Code:** `ui/insights/InsightsViewModel.kt` (period This week / This month / Last 3 months, optional habit filter, computed off the main thread) and `InsightsScreen.kt` (all charts drawn with Compose `Canvas`, no chart library). For month and 3-month periods the per-day bars are averages per weekday.
+**Code:** `ui/insights/InsightsViewModel.kt` (period This week / This month / Last 3 months, optional habit filter, computed off the main thread) and `InsightsScreen.kt` (all charts drawn with Compose `Canvas`, no chart library; design in `design/insights.html`: a score card with Today's segment bar from `ui/components/SegmentBar.kt`, a Week-style "Habits per day" card with the best weekday highlighted, and one "By habit" card). For month and 3-month periods the per-day bars are averages per weekday.
 
 **Verify:** `python3 tools/verify/smoke.py insights`.
 

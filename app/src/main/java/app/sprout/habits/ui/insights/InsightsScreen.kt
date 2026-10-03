@@ -13,9 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,12 +24,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -42,7 +47,9 @@ import app.sprout.habits.ui.components.TabHeader
 import app.sprout.habits.ui.components.DateRangeSheet
 import app.sprout.habits.ui.components.HabitFilterSheet
 import app.sprout.habits.ui.components.HeaderIconButton
-import app.sprout.habits.ui.components.ProgressRing
+import app.sprout.habits.ui.components.BarSegment
+import app.sprout.habits.ui.components.CappedFontScale
+import app.sprout.habits.ui.components.SegmentBar
 import app.sprout.habits.ui.theme.habitColors
 import kotlin.math.ceil
 import kotlin.math.roundToInt
@@ -53,16 +60,14 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek)
     val ui = state ?: return
     var pickingRange by remember { mutableStateOf(false) }
     var filtering by remember { mutableStateOf(false) }
-    val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     val res = LocalContext.current.resources
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item(key = "header") {
-            TabHeader(stringResource(R.string.insights_title), subtitle = ui.rangeLabel, listSpacing = 14.dp) {
+            TabHeader(stringResource(R.string.insights_title), subtitle = ui.rangeLabel, listSpacing = 16.dp) {
                 HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.change_date_range)) { pickingRange = true }
                 HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty()) { filtering = true }
             }
@@ -95,32 +100,31 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek)
 }
 
 @Composable
-private fun Card(content: @Composable () -> Unit) {
-    Box(
-        Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(24.dp)).padding(18.dp),
-    ) { content() }
-}
-
-@Composable
 private fun ScoreCard(ui: InsightsUi) {
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
-    Card {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(104.dp), contentAlignment = Alignment.Center) {
-                ProgressRing(ui.scorePercent / 100f, colors.primary, colors.surfaceContainerHigh, 10.dp, Modifier.fillMaxSize())
-                Text(stringResource(R.string.percent, ui.scorePercent), style = type.headlineMedium, color = colors.onSurface)
-            }
-            Column(Modifier.padding(start = 20.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(stringResource(R.string.insights_average), style = type.titleSmall, color = colors.onSurfaceVariant)
-                val habits = pluralStringResource(R.plurals.habit_count, ui.habitCount, ui.habitCount)
-                Text(stringResource(R.string.insights_summary, ui.doneCount, ui.partialCount, habits), style = type.bodyLarge, color = colors.onSurface)
-                ui.bestDay?.let { Text(stringResource(R.string.insights_best_day, it), style = type.titleSmall, color = colors.primary) }
-            }
+    val summary = buildList {
+        add(pluralStringResource(R.plurals.count_done, ui.doneCount, ui.doneCount))
+        add(pluralStringResource(R.plurals.count_partial, ui.partialCount, ui.partialCount))
+    }.joinToString(" · ")
+    Column(
+        Modifier.fillMaxWidth().background(colors.surfaceContainerLowest, RoundedCornerShape(24.dp)).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(stringResource(R.string.percent, ui.scorePercent), style = type.headlineMedium, color = colors.onSurface, softWrap = false)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.insights_average), style = type.bodyMedium, color = colors.onSurfaceVariant, modifier = Modifier.padding(bottom = 4.dp))
+            Spacer(Modifier.width(12.dp))
+            // Takes the rest of the row and wraps at large text sizes.
+            Text(summary, style = type.titleSmall, color = colors.onSurfaceVariant, textAlign = TextAlign.End, modifier = Modifier.weight(1f).padding(bottom = 4.dp))
         }
+        // One segment per habit, filled up to that habit's score for the range.
+        SegmentBar(ui.rates.map { BarSegment(it.hue, it.percent / 100f) }, Modifier.clearAndSetSemantics {})
     }
 }
 
+/** Laid out like a Habits → Week card: a header row, then one column per weekday. */
 @Composable
 private fun DayBars(ui: InsightsUi) {
     val colors = MaterialTheme.colorScheme
@@ -128,86 +132,108 @@ private fun DayBars(ui: InsightsUi) {
     val res = LocalContext.current.resources
     val done = colors.primary
     val partial = colors.primaryContainer
-    Card {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(if (ui.averaged) R.string.insights_per_day_avg else R.string.insights_per_day), style = type.titleMedium, color = colors.onSurface, modifier = Modifier.weight(1f))
-                LegendDot(stringResource(R.string.outcome_done), done)
-                LegendDot(stringResource(R.string.outcome_partial), partial)
+    Column(
+        Modifier.fillMaxWidth().background(colors.surfaceContainerLowest, RoundedCornerShape(24.dp)).padding(start = 12.dp, top = 16.dp, end = 12.dp, bottom = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Row(Modifier.padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(32.dp).background(colors.primaryContainer, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
+                Icon(painterResource(R.drawable.ic_nav_insights), contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(18.dp))
             }
-            val max = ui.bars.maxOf { it.done + it.partial }.coerceAtLeast(1f)
-            Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(
+                stringResource(if (ui.averaged) R.string.insights_per_day_avg else R.string.insights_per_day),
+                style = type.titleMedium,
+                color = colors.onSurface,
+                modifier = Modifier.weight(1f).padding(horizontal = 10.dp),
+            )
+            ui.bestDay?.let { Text(stringResource(R.string.insights_best_day, it), style = type.bodyMedium, color = colors.onSurfaceVariant) }
+        }
+        // 13 dp per habit, shrinking only when a day has more than fits the bar area.
+        val max = ui.bars.maxOf { it.done + it.partial }
+        val unit = if (max * 13f > BAR_AREA) BAR_AREA / max else 13f
+        // Seven equal columns that share the card's width; the labels stop scaling at 1.3x so
+        // they never wrap.
+        CappedFontScale {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 ui.bars.forEach { bar ->
                     val total = bar.done + bar.partial
                     val value = if (ui.averaged) "%.1f".format(total) else total.roundToInt().toString()
                     Column(
-                        Modifier.width(30.dp).semantics(mergeDescendants = true) {
-                            contentDescription = res.getString(R.string.insights_bar_description, bar.label, bar.done.fmt(), bar.partial.fmt())
-                        },
+                        Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(if (bar.isBest) colors.surfaceContainerHigh else colors.surfaceContainerLowest)
+                            .padding(vertical = 8.dp)
+                            .clearAndSetSemantics {
+                                contentDescription = res.getString(R.string.insights_bar_description, bar.name, bar.done.fmt(), bar.partial.fmt())
+                            },
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        Text(value, style = type.labelMedium, color = colors.onSurface)
-                        Canvas(Modifier.width(26.dp).height(96.dp)) {
+                        Text(bar.label, style = type.labelSmall, color = if (bar.isBest) colors.onSurface else colors.onSurfaceVariant, maxLines = 1, softWrap = false)
+                        Canvas(Modifier.width(20.dp).height(BAR_AREA.dp)) {
                             val gap = 2.dp.toPx()
-                            val r = 6.dp.toPx()
-                            val dh = size.height * bar.done / max
-                            val ph = size.height * bar.partial / max
-                            if (dh > 0f) drawRoundRect(done, Offset(0f, size.height - dh), Size(size.width, dh), CornerRadius(r))
+                            val r = CornerRadius(size.width / 2)
+                            val dh = bar.done * unit.dp.toPx()
+                            val ph = bar.partial * unit.dp.toPx()
+                            if (dh > 0f) drawRoundRect(done, Offset(0f, size.height - dh), Size(size.width, dh), r)
                             if (ph > 0f) {
                                 val top = size.height - dh - (if (dh > 0f) gap else 0f) - ph
-                                drawRoundRect(partial, Offset(0f, top), Size(size.width, ph), CornerRadius(r))
+                                drawRoundRect(partial, Offset(0f, top.coerceAtLeast(0f)), Size(size.width, ph), r)
                             }
                         }
-                        Text(
-                            bar.label,
-                            style = type.labelMedium,
-                            color = if (bar.isToday) colors.onSurface else colors.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                        )
+                        Text(value, style = type.titleSmall, color = colors.onSurface, maxLines = 1, softWrap = false)
                     }
                 }
             }
         }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)) {
+            LegendDot(stringResource(R.string.outcome_done), done)
+            LegendDot(stringResource(R.string.outcome_partial), partial)
+        }
     }
 }
+
+/** Height of the bar area in dp. */
+private const val BAR_AREA = 100f
 
 private fun Float.fmt() = if (this == ceil(this)) toInt().toString() else "%.1f".format(this)
 
 @Composable
-private fun LegendDot(label: String, color: androidx.compose.ui.graphics.Color) {
-    Row(Modifier.padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-        Canvas(Modifier.size(10.dp)) { drawRoundRect(color, cornerRadius = CornerRadius(3.dp.toPx())) }
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 4.dp))
+private fun LegendDot(label: String, color: Color) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Canvas(Modifier.size(10.dp)) { drawCircle(color) }
+        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 6.dp))
     }
 }
 
+/** One card, a row per habit: tile, name and score, with a thin bar in the habit's color. */
 @Composable
 private fun ByHabit(rates: List<HabitRateUi>) {
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
     val track = colors.surfaceContainerHigh
-    Card {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.insights_by_habit), style = type.titleMedium, color = colors.onSurface)
-            rates.forEach { r ->
-                val solid = habitColors(r.hue).solid
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.semantics(mergeDescendants = true) {}) {
-                    Text(r.name, style = type.titleSmall, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(108.dp))
-                    Canvas(Modifier.weight(1f).height(10.dp).padding(horizontal = 10.dp)) {
+    Column(
+        Modifier.fillMaxWidth().background(colors.surfaceContainerLowest, RoundedCornerShape(24.dp)).padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
+    ) {
+        Text(stringResource(R.string.insights_by_habit), style = type.titleMedium, color = colors.onSurface, modifier = Modifier.padding(bottom = 4.dp))
+        rates.forEach { r ->
+            val hc = habitColors(r.hue)
+            Row(Modifier.padding(vertical = 10.dp).semantics(mergeDescendants = true) {}, verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(32.dp).background(hc.soft, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
+                    Icon(painterResource(r.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(18.dp))
+                }
+                Column(Modifier.weight(1f).padding(start = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text(r.name, style = type.titleSmall, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).padding(end = 8.dp))
+                        Text(stringResource(R.string.percent, r.percent), style = type.bodyMedium, color = colors.onSurfaceVariant, softWrap = false)
+                    }
+                    Canvas(Modifier.fillMaxWidth().height(6.dp)) {
                         val radius = CornerRadius(size.height / 2)
                         drawRoundRect(track, cornerRadius = radius)
                         val w = size.width * r.percent / 100f
-                        if (w > 0f) drawRoundRect(solid, size = Size(w, size.height), cornerRadius = radius)
+                        if (w > 0f) drawRoundRect(hc.solid, size = Size(w, size.height), cornerRadius = radius)
                     }
-                    Text(
-                        stringResource(R.string.percent, r.percent),
-                        style = type.titleSmall,
-                        color = colors.onSurface,
-                        textAlign = TextAlign.End,
-                        softWrap = false,
-                        modifier = Modifier.widthIn(min = 44.dp),
-                    )
                 }
             }
         }

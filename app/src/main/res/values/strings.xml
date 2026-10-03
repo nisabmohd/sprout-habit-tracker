@@ -47,9 +47,8 @@
     <string name="insights_title">Insights</string>
     <string name="change_date_range">Change date range</string>
     <string name="show_all_habits">Show all habits</string>
-    <string name="insights_average">Average score</string>
-    <string name="insights_summary">%1$d check-ins done, %2$d partial across %3$s.</string>
-    <string name="insights_best_day">Best day: %1$s</string>
+    <string name="insights_average">average score</string>
+    <string name="insights_best_day">Best: %1$s</string>
     <string name="insights_per_day">Habits per day</string>
     <string name="insights_per_day_avg">Habits per day (average)</string>
     <string name="insights_bar_description">%1$s: %2$s done, %3$s partial</string>

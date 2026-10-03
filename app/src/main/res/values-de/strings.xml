@@ -45,8 +45,7 @@
     <string name="change_date_range">Zeitraum ändern</string>
     <string name="show_all_habits">Alle Gewohnheiten anzeigen</string>
     <string name="insights_average">Durchschnitt</string>
-    <string name="insights_summary">%1$d erledigt, %2$d teilweise bei %3$s.</string>
-    <string name="insights_best_day">Bester Tag: %1$s</string>
+    <string name="insights_best_day">Top: %1$s</string>
     <string name="insights_per_day">Gewohnheiten pro Tag</string>
     <string name="insights_per_day_avg">Gewohnheiten pro Tag (Durchschnitt)</string>
     <string name="insights_bar_description">%1$s: %2$s erledigt, %3$s teilweise</string>

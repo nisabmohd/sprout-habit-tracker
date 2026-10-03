@@ -45,8 +45,7 @@
     <string name="change_date_range">期間を変更</string>
     <string name="show_all_habits">すべての習慣を表示</string>
     <string name="insights_average">平均スコア</string>
-    <string name="insights_summary">%3$sで完了 %1$d 回、一部 %2$d 回。</string>
-    <string name="insights_best_day">いちばん良い曜日：%1$s</string>
+    <string name="insights_best_day">ベスト：%1$s</string>
     <string name="insights_per_day">1日あたりの習慣</string>
     <string name="insights_per_day_avg">1日あたりの習慣（平均）</string>
     <string name="insights_bar_description">%1$s：完了 %2$s、一部 %3$s</string>

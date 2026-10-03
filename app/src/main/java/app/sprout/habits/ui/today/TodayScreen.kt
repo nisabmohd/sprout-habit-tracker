@@ -44,6 +44,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sprout.habits.BuildConfig
 import androidx.compose.runtime.getValue
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.BarSegment
+import app.sprout.habits.ui.components.SegmentBar
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.TextButton
 import app.sprout.habits.ui.components.HeaderIconButton
@@ -222,32 +224,17 @@ private fun summary(state: TodayUiState): String = buildList {
 /** One bar per habit: solid when done, part-filled when partial, faint when skipped. */
 @Composable
 private fun Segments(habits: List<HabitRowUi>, modifier: Modifier = Modifier) {
-    val colors = MaterialTheme.colorScheme
-    val line = colors.outlineVariant
-    val skip = colors.surfaceContainerHigh
-    val solids = habits.map { habitColors(it.hue).solid }
-    Canvas(modifier.fillMaxWidth().height(8.dp)) {
-        if (habits.isEmpty()) {
-            drawRoundRect(line, cornerRadius = CornerRadius(size.height / 2))
-            return@Canvas
-        }
-        val gap = 4.dp.toPx()
-        val w = (size.width - gap * (habits.size - 1)) / habits.size
-        val r = CornerRadius(size.height / 2)
-        habits.forEachIndexed { i, h ->
-            val x = i * (w + gap)
-            val base = if (h.outcome == DayOutcome.SKIP) skip else line
-            drawRoundRect(base, Offset(x, 0f), Size(w, size.height), r)
-            val fill = when (h.outcome) {
+    SegmentBar(
+        habits.map {
+            val fill = when (it.outcome) {
                 DayOutcome.DONE -> 1f
-                DayOutcome.PARTIAL -> h.progress
+                DayOutcome.PARTIAL -> it.progress
                 else -> 0f
             }
-            if (fill > 0f) {
-                clipRect(left = x, right = x + w * fill) { drawRoundRect(solids[i], Offset(x, 0f), Size(w, size.height), r) }
-            }
-        }
-    }
+            BarSegment(it.hue, fill, skipped = it.outcome == DayOutcome.SKIP)
+        },
+        modifier,
+    )
 }
 
 @Composable

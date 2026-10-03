@@ -45,8 +45,7 @@
     <string name="change_date_range">समय अवधि बदलें</string>
     <string name="show_all_habits">सभी आदतें दिखाएं</string>
     <string name="insights_average">औसत स्कोर</string>
-    <string name="insights_summary">%3$s में %1$d बार पूरा, %2$d बार आंशिक।</string>
-    <string name="insights_best_day">सबसे अच्छा दिन: %1$s</string>
+    <string name="insights_best_day">सबसे अच्छा: %1$s</string>
     <string name="insights_per_day">हर दिन की आदतें</string>
     <string name="insights_per_day_avg">हर दिन की आदतें (औसत)</string>
     <string name="insights_bar_description">%1$s: %2$s पूरे, %3$s आंशिक</string>

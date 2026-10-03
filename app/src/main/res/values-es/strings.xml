@@ -44,9 +44,8 @@
     <string name="insights_title">Estadísticas</string>
     <string name="change_date_range">Cambiar el periodo</string>
     <string name="show_all_habits">Ver todos los hábitos</string>
-    <string name="insights_average">Puntuación media</string>
-    <string name="insights_summary">%1$d registros hechos y %2$d parciales en %3$s.</string>
-    <string name="insights_best_day">Mejor día: %1$s</string>
+    <string name="insights_average">puntuación media</string>
+    <string name="insights_best_day">Mejor: %1$s</string>
     <string name="insights_per_day">Hábitos por día</string>
     <string name="insights_per_day_avg">Hábitos por día (media)</string>
     <string name="insights_bar_description">%1$s: %2$s hechos, %3$s parciales</string>
