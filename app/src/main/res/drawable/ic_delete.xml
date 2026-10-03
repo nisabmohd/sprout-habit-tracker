@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Material Symbols Rounded "delete" (Apache License 2.0). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-    <path
-        android:pathData="M4,7h16M9,7V5a1,1 0,0 1,1 -1h4a1,1 0,0 1,1 1v2M6,7l1,12a2,2 0,0 0,2 2h6a2,2 0,0 0,2 -2l1,-12M10,11v6M14,11v6"
-        android:strokeWidth="1.9"
-        android:strokeColor="#FF000000"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round" />
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+    <group android:translateY="960">
+        <path
+            android:fillColor="#FF000000"
+            android:pathData="M280-120q-33 0-56.500-23.500T200-200v-520q-17 0-28.500-11.500T160-760q0-17 11.500-28.500T200-800h160q0-17 11.500-28.500T400-840h160q17 0 28.500 11.500T600-800h160q17 0 28.500 11.500T800-760q0 17-11.500 28.500T760-720v520q0 33-23.500 56.500T680-120H280Zm400-600H280v520h400v-520ZM400-280q17 0 28.500-11.500T440-320v-280q0-17-11.500-28.500T400-640q-17 0-28.500 11.500T360-600v280q0 17 11.500 28.500T400-280Zm160 0q17 0 28.500-11.500T600-320v-280q0-17-11.500-28.500T560-640q-17 0-28.500 11.500T520-600v280q0 17 11.500 28.500T560-280ZM280-720v520-520Z" />
+    </group>
 </vector>
