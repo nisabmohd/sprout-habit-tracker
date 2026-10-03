@@ -219,11 +219,12 @@ private fun ByHabit(rates: List<HabitRateUi>) {
         Text(stringResource(R.string.insights_by_habit), style = type.titleMedium, color = colors.onSurface, modifier = Modifier.padding(bottom = 4.dp))
         rates.forEach { r ->
             val hc = habitColors(r.hue)
-            Row(Modifier.padding(vertical = 10.dp).semantics(mergeDescendants = true) {}, verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(32.dp).background(hc.soft, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
-                    Icon(painterResource(r.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(18.dp))
+            // The same 44 dp tile and 22 dp icon as the Today and Journal cards.
+            Row(Modifier.padding(vertical = 8.dp).semantics(mergeDescendants = true) {}, verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(44.dp).background(hc.soft, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
+                    Icon(painterResource(r.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(22.dp))
                 }
-                Column(Modifier.weight(1f).padding(start = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(Modifier.weight(1f).padding(start = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text(r.name, style = type.titleSmall, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).padding(end = 8.dp))
                         Text(stringResource(R.string.percent, r.percent), style = type.bodyMedium, color = colors.onSurfaceVariant, softWrap = false)
