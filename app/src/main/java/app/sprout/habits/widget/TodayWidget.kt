@@ -1,5 +1,6 @@
 package app.sprout.habits.widget
 
+import app.sprout.habits.ui.theme.WidgetType
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -77,15 +78,15 @@ private fun TodayContent(data: TodayWidgetData, bitmaps: WidgetBitmaps) {
         Box(GlanceModifier.size(104.dp).clickable(actionStartActivity(context.openAppIntent())), contentAlignment = Alignment.Center) {
             Image(ImageProvider(ring), contentDescription = LocalContext.current.getString(R.string.widget_done_today, data.done, data.total), modifier = GlanceModifier.size(104.dp))
             Column(horizontalAlignment = Alignment.Horizontal.CenterHorizontally) {
-                Text(LocalContext.current.getString(R.string.widget_ratio, data.done, data.total), style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Medium, color = colors.onSurface))
-                Text(LocalContext.current.getString(R.string.widget_today_lower), style = TextStyle(fontSize = 12.sp, color = colors.onSurfaceVariant))
+                Text(LocalContext.current.getString(R.string.widget_ratio, data.done, data.total), style = TextStyle(fontSize = WidgetType.screenTitle, fontWeight = FontWeight.Medium, color = colors.onSurface))
+                Text(LocalContext.current.getString(R.string.widget_today_lower), style = TextStyle(fontSize = WidgetType.caption, color = colors.onSurfaceVariant))
             }
         }
         Spacer(GlanceModifier.width(16.dp))
         Column(GlanceModifier.defaultWeight()) {
             Text(
                 LocalContext.current.getString(if (data.upNext.isEmpty()) R.string.widget_all_done_today else R.string.widget_up_next),
-                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.onSurfaceVariant),
+                style = TextStyle(fontSize = WidgetType.supporting, fontWeight = FontWeight.Bold, color = colors.onSurfaceVariant),
             )
             data.upNext.take(2).forEach { habit ->
                 val hc = habitColors(habit.hue, bitmaps.dark)
@@ -111,7 +112,7 @@ private fun TodayContent(data: TodayWidgetData, bitmaps: WidgetBitmaps) {
                         Text(
                             habit.name,
                             maxLines = 1,
-                            style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium, color = ColorProvider(hc.ink, hc.ink)),
+                            style = TextStyle(fontSize = WidgetType.cardTitle, fontWeight = FontWeight.Medium, color = ColorProvider(hc.ink, hc.ink)),
                         )
                     }
                     Box(

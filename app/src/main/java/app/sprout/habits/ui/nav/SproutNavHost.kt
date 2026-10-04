@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.nav
 
+import app.sprout.habits.ui.theme.NavLabelMinSize
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.foundation.text.TextAutoSize
@@ -267,15 +269,12 @@ private fun SproutNavigationBar(current: Tab, onSelect: (Tab) -> Unit) {
                 icon = { Icon(painterResource(tab.icon), contentDescription = null, Modifier.size(22.dp)) },
                 label = {
                     // Long translations ("Gewohnheiten", "Statistiques") shrink to fit instead of being cut off.
-                    val style = MaterialTheme.typography.labelMedium
+                    val style = if (selected) SproutType.captionStrong else SproutType.caption
                     BasicText(
                         stringResource(tab.label),
                         maxLines = 1,
-                        style = style.copy(
-                            color = LocalContentColor.current,
-                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                        ),
-                        autoSize = TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = style.fontSize, stepSize = 0.5.sp),
+                        style = style.copy(color = LocalContentColor.current),
+                        autoSize = TextAutoSize.StepBased(minFontSize = NavLabelMinSize, maxFontSize = style.fontSize, stepSize = 0.5.sp),
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(

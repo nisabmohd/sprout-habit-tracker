@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.journal
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -83,7 +84,6 @@ fun JournalScreen(
         }
     }
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     val res = LocalContext.current.resources
     val addNote = stringResource(R.string.add_note)
     Box(Modifier.fillMaxSize()) {
@@ -135,15 +135,15 @@ fun JournalScreen(
             if (list != null && list.isEmpty() && state?.hasNotes == true) {
                 item(key = "empty-filter") {
                     Column(Modifier.fillMaxWidth().padding(vertical = 48.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(stringResource(R.string.journal_empty_filters), style = type.titleMedium, color = colors.onSurface)
+                        Text(stringResource(R.string.journal_empty_filters), style = SproutType.cardTitle, color = colors.onSurface)
                         TextButton(onClick = { viewModel.setFilter(emptySet()); viewModel.showAllDates() }) { Text(stringResource(R.string.clear_filters)) }
                     }
                 }
             } else if (list != null && list.isEmpty()) {
                 item(key = "empty") {
                     Column(Modifier.fillMaxWidth().padding(vertical = 48.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(stringResource(R.string.journal_empty), style = type.titleMedium, color = colors.onSurface)
-                        Text(stringResource(R.string.journal_empty_hint), style = type.bodyMedium, color = colors.onSurfaceVariant)
+                        Text(stringResource(R.string.journal_empty), style = SproutType.cardTitle, color = colors.onSurface)
+                        Text(stringResource(R.string.journal_empty_hint), style = SproutType.supporting, color = colors.onSurfaceVariant)
                     }
                 }
             }
@@ -151,13 +151,14 @@ fun JournalScreen(
                 item(key = "d${day.day}") {
                     // The day on the left, how many notes it has on the right.
                     Row(
-                        Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = if (index == 0) 0.dp else 16.dp, bottom = 8.dp),
+                        // With the list's 2 dp gaps: 16 dp above the label, 8 dp below it.
+                        Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = if (index == 0) 0.dp else 14.dp, bottom = 6.dp),
                         verticalAlignment = Alignment.Bottom,
                     ) {
-                        Text(day.label, style = type.titleSmall, color = colors.onBackground, modifier = Modifier.weight(1f))
+                        Text(day.label, style = SproutType.label, color = colors.onSurfaceVariant, modifier = Modifier.weight(1f))
                         Text(
                             pluralStringResource(R.plurals.note_count, day.notes.size, day.notes.size),
-                            style = type.labelMedium.copy(fontWeight = FontWeight.Normal),
+                            style = SproutType.supporting,
                             color = colors.onSurfaceVariant,
                         )
                     }
@@ -174,7 +175,7 @@ fun JournalScreen(
             ExtendedFloatingActionButton(
                 onClick = onAddNote,
                 icon = { Icon(painterResource(R.drawable.ic_habit_pen), contentDescription = null, modifier = Modifier.size(22.dp)) },
-                text = { Text(stringResource(R.string.add_note), style = type.labelLarge) },
+                text = { Text(stringResource(R.string.add_note), style = SproutType.label) },
                 containerColor = colors.primaryContainer,
                 contentColor = colors.onPrimaryContainer,
                 shape = RoundedCornerShape(18.dp),
@@ -223,13 +224,12 @@ fun JournalScreen(
 @Composable
 private fun NoteActionsSheet(note: NoteCardUi, onEdit: (() -> Unit)?, onDelete: () -> Unit, onDismiss: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     val context = LocalContext.current
     val shareTitle = stringResource(R.string.action_share)
     SproutSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(note.habitName, style = type.titleLarge, color = colors.onSurface)
-            Text(note.text, style = type.bodyMedium, color = colors.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(note.habitName, style = SproutType.title, color = colors.onSurface)
+            Text(note.text, style = SproutType.supporting, color = colors.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         if (onEdit != null) ActionRow(R.drawable.ic_habit_pen, stringResource(R.string.edit_note), colors.onSurface, onEdit)
         ActionRow(R.drawable.ic_share, shareTitle, colors.onSurface) {
@@ -253,6 +253,6 @@ private fun ActionRow(icon: Int, label: String, color: Color, onClick: () -> Uni
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(painterResource(icon), contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
-        Text(label, style = MaterialTheme.typography.bodyLarge, color = color, modifier = Modifier.padding(start = 16.dp))
+        Text(label, style = SproutType.body, color = color, modifier = Modifier.padding(start = 16.dp))
     }
 }

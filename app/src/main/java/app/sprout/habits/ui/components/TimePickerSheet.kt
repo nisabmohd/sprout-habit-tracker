@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.components
 
+import app.sprout.habits.ui.theme.SproutType
 import android.text.format.DateFormat
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -74,7 +75,7 @@ fun TimePickerSheet(title: String, initialMinutes: Int, onApply: (Int) -> Unit, 
         Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 title,
-                style = MaterialTheme.typography.titleLarge,
+                style = SproutType.title,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
             )
@@ -90,7 +91,7 @@ fun TimePickerSheet(title: String, initialMinutes: Int, onApply: (Int) -> Unit, 
                         hour = if (is24Hour) (hour + delta).mod(24) else (hour - hour % 12) + (hour % 12 + delta).mod(12)
                     },
                 )
-                Text(":", style = MaterialTheme.typography.displaySmall, color = MaterialTheme.colorScheme.onSurface)
+                Text(":", style = SproutType.display, color = MaterialTheme.colorScheme.onSurface)
                 TimeField(
                     value = String.format(locale, "%02d", minute),
                     label = stringResource(R.string.time_minute),
@@ -107,7 +108,7 @@ fun TimePickerSheet(title: String, initialMinutes: Int, onApply: (Int) -> Unit, 
                 onClick = { onApply(hour * 60 + minute) },
                 modifier = Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 16.dp).height(48.dp),
             ) {
-                Text(stringResource(R.string.set_time), style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.set_time), style = SproutType.label)
             }
         }
     }
@@ -145,7 +146,7 @@ private fun TimeField(value: String, label: String, selected: Boolean, onSelect:
         ) {
             Text(
                 value,
-                style = MaterialTheme.typography.displaySmall,
+                style = SproutType.display,
                 color = if (selected) colors.onPrimaryContainer else colors.onSurface,
             )
         }
@@ -211,7 +212,7 @@ private fun AmPmToggle(am: String, pm: String, isPm: Boolean, onChange: (Boolean
             ) {
                 Text(
                     text,
-                    style = MaterialTheme.typography.labelLarge,
+                    style = SproutType.label,
                     color = if (chosen) colors.onPrimaryContainer else colors.onSurface,
                 )
             }

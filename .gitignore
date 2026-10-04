@@ -18,7 +18,8 @@ build/
 /docs/PLAN.md
 /release/HOW-TO-RELEASE.md
 
-# Built release files, one folder per version (dist/v1.2.0/...)
+# Built release files live in build/dist/, one folder per version (build/dist/v1.2.0/...);
+# build/ is already ignored above. /dist/ is the old location.
 /dist/
 
 # Release signing key and its passwords. Never commit; back them up elsewhere.

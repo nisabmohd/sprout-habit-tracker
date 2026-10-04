@@ -1,5 +1,6 @@
 package app.sprout.habits.widget
 
+import app.sprout.habits.ui.theme.WidgetType
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -69,10 +70,10 @@ private fun WeekContent(context: Context, data: WeekWidgetData, bitmaps: WidgetB
         // Only the header opens the app; each habit row opens that habit. Never nested.
         Row(GlanceModifier.fillMaxWidth().clickable(actionStartActivity(context.openAppIntent())), verticalAlignment = Alignment.Vertical.CenterVertically) {
             Column(GlanceModifier.defaultWeight()) {
-                Text(LocalContext.current.getString(R.string.this_week), style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Medium, color = GlanceTheme.colors.onSurface))
-                Text(data.range, style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurfaceVariant))
+                Text(LocalContext.current.getString(R.string.this_week), style = TextStyle(fontSize = WidgetType.title, fontWeight = FontWeight.Medium, color = GlanceTheme.colors.onSurface))
+                Text(data.range, style = TextStyle(fontSize = WidgetType.supporting, color = GlanceTheme.colors.onSurfaceVariant))
             }
-            Text(LocalContext.current.getString(R.string.percent, data.percent), style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Medium, color = GlanceTheme.colors.primary))
+            Text(LocalContext.current.getString(R.string.percent, data.percent), style = TextStyle(fontSize = WidgetType.screenTitle, fontWeight = FontWeight.Medium, color = GlanceTheme.colors.primary))
         }
         Spacer(GlanceModifier.height(8.dp))
         Row(GlanceModifier.fillMaxWidth()) {
@@ -83,7 +84,7 @@ private fun WeekContent(context: Context, data: WeekWidgetData, bitmaps: WidgetB
                         letter,
                         modifier = GlanceModifier.defaultWeight(),
                         style = TextStyle(
-                            fontSize = 11.sp,
+                            fontSize = WidgetType.tiny,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             color = if (i == data.todayIndex) GlanceTheme.colors.onSurface else GlanceTheme.colors.onSurfaceVariant,
@@ -93,7 +94,7 @@ private fun WeekContent(context: Context, data: WeekWidgetData, bitmaps: WidgetB
             }
         }
         if (data.habits.isEmpty()) {
-            Text(LocalContext.current.getString(R.string.no_habits_yet), modifier = GlanceModifier.padding(top = 12.dp), style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurfaceVariant))
+            Text(LocalContext.current.getString(R.string.no_habits_yet), modifier = GlanceModifier.padding(top = 12.dp), style = TextStyle(fontSize = WidgetType.supporting, color = GlanceTheme.colors.onSurfaceVariant))
         }
         LazyColumn(GlanceModifier.fillMaxWidth()) {
             items(data.habits, itemId = { it.id }) { habit ->
@@ -112,7 +113,7 @@ private fun WeekContent(context: Context, data: WeekWidgetData, bitmaps: WidgetB
                         habit.name,
                         maxLines = 1,
                         modifier = GlanceModifier.defaultWeight().padding(start = 10.dp),
-                        style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium, color = GlanceTheme.colors.onSurface),
+                        style = TextStyle(fontSize = WidgetType.cardTitle, fontWeight = FontWeight.Medium, color = GlanceTheme.colors.onSurface),
                     )
                     Image(
                         ImageProvider(bitmaps.marks(habit.marks, habit.hue, marksWidth, 20f)),

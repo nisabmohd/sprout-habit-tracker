@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.insights
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -135,7 +136,6 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek)
 @Composable
 private fun ScoreCard(ui: InsightsUi) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     val summary = buildList {
         add(pluralStringResource(R.plurals.count_done, ui.doneCount, ui.doneCount))
         add(pluralStringResource(R.plurals.count_partial, ui.partialCount, ui.partialCount))
@@ -145,12 +145,12 @@ private fun ScoreCard(ui: InsightsUi) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(stringResource(R.string.percent, ui.scorePercent), style = type.headlineMedium, color = colors.onSurface, softWrap = false)
+            Text(stringResource(R.string.percent, ui.scorePercent), style = SproutType.screenTitle, color = colors.onSurface, softWrap = false)
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.insights_average), style = type.bodyMedium, color = colors.onSurfaceVariant, modifier = Modifier.padding(bottom = 4.dp))
+            Text(stringResource(R.string.insights_average), style = SproutType.supporting, color = colors.onSurfaceVariant, modifier = Modifier.padding(bottom = 4.dp))
             Spacer(Modifier.width(12.dp))
             // Takes the rest of the row and wraps at large text sizes.
-            Text(summary, style = type.titleSmall, color = colors.onSurfaceVariant, textAlign = TextAlign.End, modifier = Modifier.weight(1f).padding(bottom = 4.dp))
+            Text(summary, style = SproutType.label, color = colors.onSurfaceVariant, textAlign = TextAlign.End, modifier = Modifier.weight(1f).padding(bottom = 4.dp))
         }
         // One segment per habit, filled up to that habit's score for the range.
         SegmentBar(ui.rates.map { BarSegment(it.hue, it.percent / 100f) }, Modifier.clearAndSetSemantics {})
@@ -161,12 +161,11 @@ private fun ScoreCard(ui: InsightsUi) {
 @Composable
 private fun DayBars(ui: InsightsUi) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     val res = LocalContext.current.resources
     val done = colors.primary
     val partial = colors.primaryContainer
     Column(
-        Modifier.fillMaxWidth().background(colors.surfaceContainerLowest, RoundedCornerShape(24.dp)).padding(start = 12.dp, top = 16.dp, end = 12.dp, bottom = 12.dp),
+        Modifier.fillMaxWidth().background(colors.surfaceContainerLowest, RoundedCornerShape(24.dp)).padding(start = 12.dp, top = 16.dp, end = 12.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(Modifier.padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -181,11 +180,11 @@ private fun DayBars(ui: InsightsUi) {
                         else -> R.string.insights_per_day
                     },
                 ),
-                style = type.titleMedium,
+                style = SproutType.cardTitle,
                 color = colors.onSurface,
                 modifier = Modifier.weight(1f).padding(horizontal = 10.dp),
             )
-            ui.bestDay?.let { Text(stringResource(R.string.insights_best_day, it), style = type.bodyMedium, color = colors.onSurfaceVariant) }
+            ui.bestDay?.let { Text(stringResource(R.string.insights_best_day, it), style = SproutType.supporting, color = colors.onSurfaceVariant) }
         }
         // The tallest column fills about 96 dp; a column with only a few habits stops at 24 dp each.
         val max = ui.bars.maxOf { it.done + it.partial }.coerceAtLeast(1f)
@@ -210,7 +209,7 @@ private fun DayBars(ui: InsightsUi) {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        Text(bar.label, style = type.labelSmall, color = if (bar.isBest) colors.onSurface else colors.onSurfaceVariant, maxLines = 1, softWrap = false)
+                        Text(bar.label, style = SproutType.tiny, color = if (bar.isBest) colors.onSurface else colors.onSurfaceVariant, maxLines = 1, softWrap = false)
                         Canvas(Modifier.width(20.dp).height(BAR_AREA.dp)) {
                             val gap = 2.dp.toPx()
                             val dh = bar.done * unit.dp.toPx()
@@ -223,7 +222,7 @@ private fun DayBars(ui: InsightsUi) {
                                 drawRoundRect(partial, Offset(0f, top.coerceAtLeast(0f)), Size(size.width, ph), radius(ph))
                             }
                         }
-                        Text(value, style = type.titleSmall, color = colors.onSurface, maxLines = 1, softWrap = false)
+                        Text(value, style = SproutType.label, color = colors.onSurface, maxLines = 1, softWrap = false)
                     }
                 }
             }
@@ -244,7 +243,7 @@ private fun Float.fmt() = if (this == ceil(this)) toInt().toString() else "%.1f"
 private fun LegendDot(label: String, color: Color) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Canvas(Modifier.size(10.dp)) { drawCircle(color) }
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 6.dp))
+        Text(label, style = SproutType.caption, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 6.dp))
     }
 }
 
@@ -255,31 +254,30 @@ private fun LegendDot(label: String, color: Color) {
 @Composable
 private fun ByHabit(rates: List<HabitRateUi>) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(stringResource(R.string.insights_by_habit), style = type.titleMedium, color = colors.onBackground, modifier = Modifier.padding(start = 4.dp, top = 8.dp, end = 4.dp, bottom = 8.dp))
+        Text(stringResource(R.string.insights_by_habit), style = SproutType.label, color = colors.onSurfaceVariant, modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 6.dp))
         rates.forEachIndexed { index, r ->
             val hc = habitColors(r.hue)
             Row(
                 Modifier
                     .fillMaxWidth()
                     .background(colors.surfaceContainerLowest, groupedShape(index, rates.size))
-                    .padding(start = 14.dp, top = 14.dp, end = 16.dp, bottom = 14.dp)
+                    .padding(16.dp)
                     .semantics(mergeDescendants = true) {},
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(Modifier.size(44.dp).background(hc.soft, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
                     Icon(painterResource(r.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(22.dp))
                 }
-                Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
-                    Text(r.name, style = type.titleMedium, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                    Text(r.name, style = SproutType.cardTitle, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     // One plain muted line: "6 of 7 days · 5-day streak" (the streak only when over 1).
                     Text(
                         listOfNotNull(
                             pluralStringResource(R.plurals.days_kept, r.scheduledDays, r.keptDays, r.scheduledDays),
                             if (r.streak > 1) pluralStringResource(R.plurals.streak_days, r.streak, r.streak) else null,
                         ).joinToString(" · "),
-                        style = type.labelMedium.copy(fontWeight = FontWeight.Normal),
+                        style = SproutType.supporting,
                         color = colors.onSurfaceVariant,
                         modifier = Modifier.padding(top = 2.dp),
                     )
@@ -308,7 +306,7 @@ private fun ByHabit(rates: List<HabitRateUi>) {
                 // The row's main value: plain text, right-aligned in a slot wide enough for "100%".
                 Text(
                     stringResource(R.string.percent, r.percent),
-                    style = type.titleSmall,
+                    style = SproutType.label,
                     color = colors.onSurface,
                     textAlign = TextAlign.End,
                     softWrap = false,

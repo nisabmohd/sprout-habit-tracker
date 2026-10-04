@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.today
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -115,7 +116,7 @@ fun TodayScreen(
                     onAddNote(suggested.id, state.selectedDate.toEpochDay())
                 },
                 icon = { Icon(painterResource(R.drawable.ic_habit_pen), contentDescription = null, modifier = Modifier.size(22.dp)) },
-                text = { Text(stringResource(R.string.add_note), style = MaterialTheme.typography.labelLarge) },
+                text = { Text(stringResource(R.string.add_note), style = SproutType.label) },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 shape = RoundedCornerShape(18.dp),
@@ -183,21 +184,20 @@ private fun Header(state: TodayUiState, onAddHabit: () -> Unit) {
 @Composable
 private fun ScoreCard(state: TodayUiState) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(bottom = 10.dp)
+            .padding(bottom = 8.dp)
             .background(colors.surfaceContainerLowest, RoundedCornerShape(24.dp))
-            .padding(horizontal = 18.dp, vertical = 16.dp),
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(stringResource(R.string.percent, state.scorePercent), style = type.headlineMedium, color = colors.onSurface)
+            Text(stringResource(R.string.percent, state.scorePercent), style = SproutType.screenTitle, color = colors.onSurface)
             Spacer(Modifier.width(8.dp))
             Text(
                 stringResource(if (state.isToday) R.string.of_today else R.string.of_the_day),
-                style = type.bodyMedium,
+                style = SproutType.supporting,
                 color = colors.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 4.dp),
             )
@@ -205,7 +205,7 @@ private fun ScoreCard(state: TodayUiState) {
             // Takes the rest of the row and wraps at large text sizes.
             Text(
                 summary(state),
-                style = type.titleSmall,
+                style = SproutType.label,
                 color = colors.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.End,
                 modifier = Modifier.weight(1f).padding(bottom = 4.dp),
@@ -247,8 +247,8 @@ private fun EmptyState() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Text(stringResource(R.string.today_empty), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-        Text(stringResource(R.string.today_empty_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.today_empty), style = SproutType.cardTitle, color = MaterialTheme.colorScheme.onSurface)
+        Text(stringResource(R.string.today_empty_hint), style = SproutType.supporting, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -256,19 +256,18 @@ private fun EmptyState() {
 @Composable
 private fun SampleDataCard(onRemove: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     Row(
         Modifier
             .fillMaxWidth()
             .background(colors.primaryContainer, RoundedCornerShape(24.dp))
-            .padding(start = 16.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f).padding(end = 12.dp)) {
-            Text(stringResource(R.string.sample_card_title), style = type.titleSmall, color = colors.onPrimaryContainer)
+            Text(stringResource(R.string.sample_card_title), style = SproutType.label, color = colors.onPrimaryContainer)
             Text(
                 stringResource(R.string.sample_card_body),
-                style = type.bodyMedium,
+                style = SproutType.supporting,
                 color = colors.onPrimaryContainer,
                 modifier = Modifier.padding(top = 2.dp),
             )

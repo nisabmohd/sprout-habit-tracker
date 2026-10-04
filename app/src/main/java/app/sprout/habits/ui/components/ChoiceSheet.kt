@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.components
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,7 +38,7 @@ fun ChoiceSheet(
     SproutSheet(onDismissRequest = onDismiss) {
         Text(
             title,
-            style = MaterialTheme.typography.titleLarge,
+            style = SproutType.title,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 8.dp),
         )
@@ -61,8 +62,8 @@ fun ChoiceRow(title: String, subtitle: String?, selected: Boolean, onClick: () -
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
-            subtitle?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant) }
+            Text(title, style = SproutType.cardTitle, color = colors.onSurface)
+            subtitle?.let { Text(it, style = SproutType.supporting, color = colors.onSurfaceVariant) }
         }
         RadioButton(selected = selected, onClick = null)
     }

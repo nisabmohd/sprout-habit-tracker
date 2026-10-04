@@ -1,7 +1,10 @@
 package app.sprout.habits.ui.theme
 
 import androidx.annotation.FontRes
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -35,42 +38,98 @@ fun BodyFont.family(): FontFamily = when (this) {
 }
 
 /**
- * The type scale from AGENTS.md. Only these sizes exist: 40, 28, 22, 16, 14, 12, 11.
+ * The type scale from TYPOGRAPHY.md, as Material slots so Material components pick it up too.
+ * Screens never read these slots or set a size or weight themselves: they use [SproutType].
  * Headings (display, headline, titleLarge) use Outfit; everything else uses [body].
  */
 fun sproutTypography(body: BodyFont, scale: Float): Typography {
     val bodyFamily = body.family()
-    fun style(family: FontFamily, size: Int, weight: FontWeight) = TextStyle(
+    fun style(family: FontFamily, size: Int, weight: FontWeight, lineHeight: Float = 1.3f) = TextStyle(
         fontFamily = family,
         fontWeight = weight,
         fontSize = (size * scale).sp,
-        lineHeight = (size * 1.3f * scale).sp,
+        lineHeight = (size * lineHeight * scale).sp,
     )
     val display = style(OutfitFamily, 40, FontWeight.SemiBold)
     val screenTitle = style(OutfitFamily, 28, FontWeight.SemiBold)
     val title = style(OutfitFamily, 22, FontWeight.SemiBold)
+    val label = style(bodyFamily, 14, FontWeight.SemiBold)
     return Typography(
-        // Display number: amount stepper, widget streak
+        // display
         displayLarge = display,
         displayMedium = display,
         displaySmall = display,
-        // Screen title: Today, Habits, Journal, Insights, More, big stat numbers
+        // screenTitle
         headlineLarge = screenTitle,
         headlineMedium = screenTitle,
-        // Title: top-bar titles, section headings, medium numbers
+        // title
         headlineSmall = title,
         titleLarge = title,
-        // Body / item title
+        // cardTitle and body (body reads at 1.5)
         titleMedium = style(bodyFamily, 16, FontWeight.SemiBold),
-        bodyLarge = style(bodyFamily, 16, FontWeight.Normal),
-        // Supporting: subtitles, chips, buttons, segmented buttons
-        titleSmall = style(bodyFamily, 14, FontWeight.SemiBold),
+        bodyLarge = style(bodyFamily, 16, FontWeight.Normal, lineHeight = 1.5f),
+        // supporting and label
         bodyMedium = style(bodyFamily, 14, FontWeight.Normal),
-        labelLarge = style(bodyFamily, 14, FontWeight.SemiBold),
-        // Label: nav bar labels, legends, small tags
+        titleSmall = label,
+        labelLarge = label,
+        // caption (Regular) and its SemiBold form
+        bodySmall = style(bodyFamily, 12, FontWeight.Normal),
         labelMedium = style(bodyFamily, 12, FontWeight.SemiBold),
-        bodySmall = style(bodyFamily, 12, FontWeight.SemiBold),
-        // Tiny: weekday letters, heatmap month labels
+        // tiny
         labelSmall = style(bodyFamily, 11, FontWeight.SemiBold),
     )
+}
+
+/**
+ * The only text styles screens use; TYPOGRAPHY.md says what each one is for. Colour is not part
+ * of a style: set it where the text is drawn.
+ */
+object SproutType {
+    /** Outfit 40 SemiBold: big input numbers, the Welcome headline. */
+    val display: TextStyle @Composable @ReadOnlyComposable get() = MaterialTheme.typography.displayLarge
+
+    /** Outfit 28 SemiBold: tab titles, the habit name in habit detail, hero numbers. */
+    val screenTitle: TextStyle @Composable @ReadOnlyComposable get() = MaterialTheme.typography.headlineMedium
+
+    /** Outfit 22 SemiBold: top-bar, sheet and dialog titles, stat values. */
+    val title: TextStyle @Composable @ReadOnlyComposable get() = MaterialTheme.typography.titleLarge
+
+    /** 16 SemiBold: habit names, card titles, list row titles. */
+    val cardTitle: TextStyle @Composable @ReadOnlyComposable get() = MaterialTheme.typography.titleMedium
+
+    /** 16 Regular, 1.5 line height: note text, paragraphs, text fields. */
+    val body: TextStyle @Composable @ReadOnlyComposable get() = MaterialTheme.typography.bodyLarge
+
+    /** 14 Regular: the line under a cardTitle, plain trailing text, descriptions. */
+    val supporting: TextStyle @Composable @ReadOnlyComposable get() = MaterialTheme.typography.bodyMedium
+
+    /** 14 SemiBold: buttons, chips, section labels, main trailing values, calendar day numbers. */
+    val label: TextStyle @Composable @ReadOnlyComposable get() = MaterialTheme.typography.labelLarge
+
+    /** 12 Regular: helper text, legends, font descriptions. */
+    val caption: TextStyle @Composable @ReadOnlyComposable get() = MaterialTheme.typography.bodySmall
+
+    /** 12 SemiBold: field labels, nav bar labels, small labels inside rings. */
+    val captionStrong: TextStyle @Composable @ReadOnlyComposable get() = MaterialTheme.typography.labelMedium
+
+    /** 11 SemiBold: weekday names, heatmap month labels. */
+    val tiny: TextStyle @Composable @ReadOnlyComposable get() = MaterialTheme.typography.labelSmall
+
+    /** Exception: the New note editor, 18 Regular at 1.55, for comfortable writing. */
+    val noteEditor: TextStyle
+        @Composable @ReadOnlyComposable get() = body.let { it.copy(fontSize = it.fontSize * (18f / 16f), lineHeight = it.fontSize * (18f / 16f) * 1.55f) }
+}
+
+/** The smallest a nav bar label may shrink to when a translation is too long for its tab. */
+val NavLabelMinSize = 9.sp
+
+/** Sizes for the Glance widgets, which can't use Compose text styles. Same scale as [SproutType]. */
+object WidgetType {
+    val display = 40.sp
+    val screenTitle = 28.sp
+    val title = 22.sp
+    val cardTitle = 16.sp
+    val supporting = 14.sp
+    val caption = 12.sp
+    val tiny = 11.sp
 }

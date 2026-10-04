@@ -1,5 +1,6 @@
 package app.sprout.habits.ui
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -35,7 +36,6 @@ import app.sprout.habits.ui.theme.habitColors
 @Composable
 fun WelcomeScreen(onStart: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     Column(
         Modifier.fillMaxSize().background(colors.background).safeDrawingPadding().verticalScroll(rememberScrollState()).padding(24.dp),
     ) {
@@ -44,12 +44,12 @@ fun WelcomeScreen(onStart: () -> Unit) {
             Icon(painterResource(R.drawable.ic_seedling), contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(36.dp))
         }
         Spacer(Modifier.height(24.dp))
-        Text(stringResource(R.string.app_name), style = type.titleSmall, color = colors.primary)
-        Text(stringResource(R.string.welcome_title), style = type.displayLarge, color = colors.onBackground)
+        Text(stringResource(R.string.app_name), style = SproutType.label, color = colors.primary)
+        Text(stringResource(R.string.welcome_title), style = SproutType.display, color = colors.onBackground)
         Spacer(Modifier.height(12.dp))
         Text(
             stringResource(R.string.welcome_body),
-            style = type.bodyLarge,
+            style = SproutType.body,
             color = colors.onSurfaceVariant,
         )
         Spacer(Modifier.height(32.dp))
@@ -60,11 +60,11 @@ fun WelcomeScreen(onStart: () -> Unit) {
         }
         Spacer(Modifier.weight(1f).height(32.dp))
         Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-            Text(stringResource(R.string.welcome_start), style = type.titleMedium)
+            Text(stringResource(R.string.welcome_start), style = SproutType.cardTitle)
         }
         Text(
             stringResource(R.string.welcome_footer),
-            style = type.bodyMedium,
+            style = SproutType.supporting,
             color = colors.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
@@ -79,6 +79,6 @@ private fun Feature(@DrawableRes icon: Int, hue: Float, text: String) {
         Box(Modifier.size(40.dp).background(hc.soft, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
             Icon(painterResource(icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(20.dp))
         }
-        Text(text, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(start = 16.dp))
+        Text(text, style = SproutType.cardTitle, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(start = 16.dp))
     }
 }

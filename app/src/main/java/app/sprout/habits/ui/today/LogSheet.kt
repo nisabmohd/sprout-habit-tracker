@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.today
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.ui.res.stringResource
 import app.sprout.habits.ui.components.SproutSheet
 import androidx.compose.foundation.background
@@ -73,7 +74,6 @@ fun LogSheet(
     onDismiss: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     val hc = habitColors(sheet.hue)
     val hasAmount = sheet.trackType != TrackType.CHECK
     val step = sheet.step
@@ -112,8 +112,8 @@ fun LogSheet(
                     Icon(painterResource(sheet.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(24.dp))
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(sheet.name, style = type.titleLarge, color = colors.onSurface)
-                    Text(sheet.subtitle, style = type.bodyMedium, color = colors.onSurfaceVariant)
+                    Text(sheet.name, style = SproutType.title, color = colors.onSurface)
+                    Text(sheet.subtitle, style = SproutType.supporting, color = colors.onSurfaceVariant)
                 }
                 // Clears the day back to not logged; only useful when something is logged.
                 if (sheet.hasEntry) {
@@ -126,7 +126,7 @@ fun LogSheet(
                     ) {
                         Icon(painterResource(R.drawable.ic_undo), contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text(stringResource(R.string.action_undo), style = type.labelLarge)
+                        Text(stringResource(R.string.action_undo), style = SproutType.label)
                     }
                 }
             }
@@ -154,7 +154,7 @@ fun LogSheet(
                             activeContentColor = hc.ink,
                             inactiveContainerColor = colors.surfaceContainerLowest,
                         ),
-                    ) { Text(label, style = type.labelLarge) }
+                    ) { Text(label, style = SproutType.label) }
                 }
             }
             }
@@ -167,15 +167,15 @@ fun LogSheet(
                             Text(
                                 buildAnnotatedString {
                                     append(TodayViewModel.formatNumber(amount))
-                                    withStyle(SpanStyle(fontSize = type.titleLarge.fontSize, color = colors.onSurfaceVariant)) {
+                                    withStyle(SpanStyle(fontSize = SproutType.title.fontSize, color = colors.onSurfaceVariant)) {
                                         append(" / ${TodayViewModel.formatNumber(sheet.target)}")
                                     }
                                 },
-                                style = type.displayLarge,
+                                style = SproutType.display,
                                 color = colors.onSurface,
                             )
                             val pct = if (sheet.target > 0) (amount / sheet.target * 100).roundToInt() else 0
-                            Text(if (sheet.unit.isEmpty()) stringResource(R.string.percent, pct) else stringResource(R.string.unit_percent, sheet.unit, pct), style = type.titleSmall, color = colors.onSurfaceVariant)
+                            Text(if (sheet.unit.isEmpty()) stringResource(R.string.percent, pct) else stringResource(R.string.unit_percent, sheet.unit, pct), style = SproutType.label, color = colors.onSurfaceVariant)
                         }
                         StepButton(R.drawable.ic_plus, stringResource(R.string.more)) { setAmount(amount + step) }
                     }
@@ -199,8 +199,8 @@ fun LogSheet(
             OutlinedTextField(
                 value = note,
                 onValueChange = { note = it },
-                placeholder = { Text(stringResource(R.string.add_a_note), style = type.bodyLarge) },
-                textStyle = type.bodyLarge,
+                placeholder = { Text(stringResource(R.string.add_a_note), style = SproutType.body) },
+                textStyle = SproutType.body,
                 minLines = 2,
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -213,7 +213,7 @@ fun LogSheet(
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
                 TextButton(onClick = onDismiss, modifier = Modifier.height(44.dp)) {
-                    Text(stringResource(R.string.action_cancel), style = type.labelLarge)
+                    Text(stringResource(R.string.action_cancel), style = SproutType.label)
                 }
                 Spacer(Modifier.width(12.dp))
                 Button(
@@ -221,7 +221,7 @@ fun LogSheet(
                     modifier = Modifier.height(44.dp),
                     contentPadding = ButtonDefaults.ContentPadding,
                 ) {
-                    Text(stringResource(R.string.action_save), style = type.labelLarge)
+                    Text(stringResource(R.string.action_save), style = SproutType.label)
                 }
             }
         }

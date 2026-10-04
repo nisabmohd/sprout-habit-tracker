@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.components
 
+import app.sprout.habits.ui.theme.SproutType
 import app.sprout.habits.ui.englishDates
 import app.sprout.habits.ui.datePattern
 import androidx.compose.foundation.verticalScroll
@@ -69,7 +70,6 @@ fun DateRangeSheet(
     onDismiss: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     val today = LocalDate.now()
     // Future days can't be picked, so a range passed in is cut off at today.
     var start by remember { mutableStateOf(from?.let { minOf(it, today) }) }
@@ -80,8 +80,8 @@ fun DateRangeSheet(
     SproutSheet(onDismissRequest = onDismiss) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.date_range), style = type.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
-                TextButton(onClick = onShortcut) { Text(shortcutLabel, style = type.labelLarge) }
+                Text(stringResource(R.string.date_range), style = SproutType.title, color = colors.onSurface, modifier = Modifier.weight(1f))
+                TextButton(onClick = onShortcut) { Text(shortcutLabel, style = SproutType.label) }
             }
             val s = start
             val e = end ?: start
@@ -92,7 +92,7 @@ fun DateRangeSheet(
                     s == e -> s.format(datePattern("d MMM yyyy"))
                     else -> stringResource(R.string.range_same_year, s.format(dm), e.format(dm), e.year)
                 },
-                style = type.titleSmall,
+                style = SproutType.supporting,
                 color = colors.onSurfaceVariant,
             )
             MonthHeader(month, today) { month = it }
@@ -119,7 +119,7 @@ fun DateRangeSheet(
                         s.month == e.month && englishDates() -> stringResource(R.string.show_value, stringResource(R.string.range_short, s.dayOfMonth.toString(), e.format(dm)))
                         else -> stringResource(R.string.show_value, stringResource(R.string.range_short, s.format(dm), e.format(dm)))
                     },
-                    style = type.labelLarge,
+                    style = SproutType.label,
                 )
             }
         }
@@ -136,7 +136,6 @@ fun DatePickerSheet(
     onDismiss: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     val today = LocalDate.now()
     var picked by remember { mutableStateOf(date) }
     var month by remember { mutableStateOf(YearMonth.from(date)) }
@@ -144,17 +143,17 @@ fun DatePickerSheet(
     SproutSheet(onDismissRequest = onDismiss) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.date), style = type.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
-                TextButton(onClick = { picked = today; month = YearMonth.from(today) }) { Text(stringResource(R.string.today), style = type.labelLarge) }
+                Text(stringResource(R.string.date), style = SproutType.title, color = colors.onSurface, modifier = Modifier.weight(1f))
+                TextButton(onClick = { picked = today; month = YearMonth.from(today) }) { Text(stringResource(R.string.today), style = SproutType.label) }
             }
-            Text(picked.format(datePattern("EEEE, d MMM yyyy")), style = type.titleSmall, color = colors.onSurfaceVariant)
+            Text(picked.format(datePattern("EEEE, d MMM yyyy")), style = SproutType.supporting, color = colors.onSurfaceVariant)
             MonthHeader(month, today) { month = it }
             MonthGrid(month, weekStart, today, picked, picked) { picked = it }
             Button(
                 onClick = { onApply(picked) },
                 modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).height(48.dp),
             ) {
-                Text(stringResource(R.string.use_value, picked.format(datePattern("d MMM"))), style = type.labelLarge)
+                Text(stringResource(R.string.use_value, picked.format(datePattern("d MMM"))), style = SproutType.label)
             }
         }
     }
@@ -168,7 +167,7 @@ private fun MonthHeader(month: YearMonth, today: LocalDate, onMonth: (YearMonth)
         }
         Text(
             month.format(datePattern("MMMM yyyy")),
-            style = MaterialTheme.typography.titleMedium,
+            style = SproutType.cardTitle,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f),
@@ -182,7 +181,6 @@ private fun MonthHeader(month: YearMonth, today: LocalDate, onMonth: (YearMonth)
 @Composable
 private fun MonthGrid(month: YearMonth, weekStart: DayOfWeek, today: LocalDate, start: LocalDate?, end: LocalDate?, onPick: (LocalDate) -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     val band = colors.primaryContainer
     val first = month.atDay(1)
     val lead = (first.dayOfWeek.value - weekStart.value + 7) % 7
@@ -193,7 +191,7 @@ private fun MonthGrid(month: YearMonth, weekStart: DayOfWeek, today: LocalDate, 
                 weekOf(first, weekStart).forEach { d ->
                     Text(
                         d.dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
-                        style = type.labelMedium,
+                        style = SproutType.tiny,
                         color = colors.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(1f).padding(vertical = 6.dp),
@@ -230,7 +228,7 @@ private fun MonthGrid(month: YearMonth, weekStart: DayOfWeek, today: LocalDate, 
                                 ) {
                                     Text(
                                         "${day.dayOfMonth}",
-                                        style = type.titleSmall,
+                                        style = SproutType.label,
                                         color = when {
                                             isEdge -> colors.onPrimary
                                             future -> colors.outline

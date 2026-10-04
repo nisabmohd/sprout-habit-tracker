@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.today
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -101,14 +102,14 @@ fun HabitCard(
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     habit.name,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = SproutType.cardTitle,
                     color = if (skipped) colors.onSurfaceVariant else colors.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     habit.subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = SproutType.supporting,
                     color = colors.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -146,7 +147,7 @@ private fun TrailingControl(habit: HabitRowUi, hc: HabitColors, onToggle: () -> 
                 .padding(horizontal = 12.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text(stringResource(R.string.outcome_skipped), style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant)
+            Text(stringResource(R.string.outcome_skipped), style = SproutType.label, color = colors.onSurfaceVariant)
         }
 
         DayOutcome.DONE -> CircleButton(label, onToggle) {
@@ -160,8 +161,7 @@ private fun TrailingControl(habit: HabitRowUi, hc: HabitColors, onToggle: () -> 
                 ProgressRing(habit.progress, hc.solid, hc.mid, 4.dp, Modifier.fillMaxSize())
                 Text(
                     stringResource(R.string.percent_compact, (habit.progress * 100).roundToInt()),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
+                    style = SproutType.captionStrong,
                     color = hc.ink,
                 )
             }

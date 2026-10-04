@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.components
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -65,8 +66,8 @@ fun HabitFilterSheet(
     var picked by remember { mutableStateOf(selected) }
     SproutSheet(onDismissRequest = onDismiss) {
         Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.filter_by_habit), style = MaterialTheme.typography.titleLarge, color = colors.onSurface, modifier = Modifier.weight(1f))
-            TextButton(onClick = { picked = emptySet() }, enabled = picked.isNotEmpty()) { Text(stringResource(R.string.clear), style = MaterialTheme.typography.labelLarge) }
+            Text(stringResource(R.string.filter_by_habit), style = SproutType.title, color = colors.onSurface, modifier = Modifier.weight(1f))
+            TextButton(onClick = { picked = emptySet() }, enabled = picked.isNotEmpty()) { Text(stringResource(R.string.clear), style = SproutType.label) }
         }
         LazyColumn(Modifier.weight(1f, fill = false), contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)) {
             items(options, key = { it.habitId }) { o ->
@@ -75,15 +76,15 @@ fun HabitFilterSheet(
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 56.dp)
+                        .heightIn(min = 60.dp)
                         .toggleable(checked, role = Role.Checkbox) { on -> picked = if (on) picked + o.habitId else picked - o.habitId }
                         .padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Box(Modifier.size(36.dp).background(hc.soft, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
-                        Icon(painterResource(o.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(20.dp))
+                    Box(Modifier.size(44.dp).background(hc.soft, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
+                        Icon(painterResource(o.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(22.dp))
                     }
-                    Text(o.name, style = MaterialTheme.typography.titleMedium, color = colors.onSurface, modifier = Modifier.weight(1f).padding(start = 14.dp))
+                    Text(o.name, style = SproutType.cardTitle, color = colors.onSurface, modifier = Modifier.weight(1f).padding(start = 12.dp))
                     Checkbox(checked = checked, onCheckedChange = null)
                 }
             }
@@ -91,7 +92,7 @@ fun HabitFilterSheet(
         Button(
             onClick = { onApply(picked) },
             modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 12.dp).navigationBarsPadding().height(48.dp),
-        ) { Text(applyLabel(picked.size), style = MaterialTheme.typography.labelLarge) }
+        ) { Text(applyLabel(picked.size), style = SproutType.label) }
     }
 }
 
@@ -167,7 +168,7 @@ fun DateFilterChip(label: String, openLabel: String, clearLabel: String, onOpen:
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(painterResource(R.drawable.ic_calendar), contentDescription = null, tint = content, modifier = Modifier.size(18.dp))
-        Text(label, style = MaterialTheme.typography.titleSmall, color = content, maxLines = 1, modifier = Modifier.padding(start = 6.dp, end = if (onClear != null) 6.dp else 0.dp))
+        Text(label, style = SproutType.label, color = content, maxLines = 1, modifier = Modifier.padding(start = 6.dp, end = if (onClear != null) 6.dp else 0.dp))
         if (onClear != null) SmallClearButton(clearLabel, 24.dp, Color.Transparent, content, onClear)
     }
 }
@@ -196,7 +197,7 @@ fun RowScope.HabitFilterChip(selected: List<HabitFilterOption>, label: String, r
         }
         Text(
             label,
-            style = MaterialTheme.typography.titleSmall,
+            style = SproutType.label,
             color = colors.onPrimaryContainer,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

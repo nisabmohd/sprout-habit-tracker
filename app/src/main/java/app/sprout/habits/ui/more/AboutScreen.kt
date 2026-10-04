@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.more
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.layout.Spacer
 import app.sprout.habits.ui.update.CheckForUpdates
 import app.sprout.habits.data.update.UpdateManager
@@ -39,7 +40,6 @@ import app.sprout.habits.ui.theme.habitColors
 fun AboutScreen(updates: UpdateManager, onBack: () -> Unit, onOpenLicences: () -> Unit) {
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     Column(Modifier.fillMaxSize().background(colors.background).statusBarsPadding().navigationBarsPadding()) {
         TopBar(stringResource(R.string.about), onBack)
         Column(
@@ -51,8 +51,8 @@ fun AboutScreen(updates: UpdateManager, onBack: () -> Unit, onOpenLicences: () -
                 Icon(painterResource(R.drawable.ic_seedling), contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(40.dp))
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(R.string.app_name), style = type.headlineMedium, color = colors.onBackground)
-                Text(stringResource(R.string.version_build, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE), style = type.bodyMedium, color = colors.onSurfaceVariant)
+                Text(stringResource(R.string.app_name), style = SproutType.screenTitle, color = colors.onBackground)
+                Text(stringResource(R.string.version_build, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE), style = SproutType.supporting, color = colors.onSurfaceVariant)
                 Spacer(Modifier.height(10.dp))
                 CheckForUpdates(updates)
             }
@@ -62,11 +62,11 @@ fun AboutScreen(updates: UpdateManager, onBack: () -> Unit, onOpenLicences: () -
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(painterResource(R.drawable.ic_code), contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(22.dp))
-                    Text(stringResource(R.string.free_open_source), style = type.titleMedium, color = colors.onPrimaryContainer, modifier = Modifier.padding(start = 12.dp))
+                    Text(stringResource(R.string.free_open_source), style = SproutType.cardTitle, color = colors.onPrimaryContainer, modifier = Modifier.padding(start = 12.dp))
                 }
                 Text(
                     stringResource(R.string.about_licence_text),
-                    style = type.bodyMedium,
+                    style = SproutType.supporting,
                     color = colors.onPrimaryContainer,
                 )
             }
@@ -88,7 +88,7 @@ fun AboutScreen(updates: UpdateManager, onBack: () -> Unit, onOpenLicences: () -
                     Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null, modifier = Modifier.size(20.dp))
                 }
             }
-            Text(stringResource(R.string.made_by), style = type.bodyMedium, color = colors.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(bottom = 24.dp))
+            Text(stringResource(R.string.made_by), style = SproutType.supporting, color = colors.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(bottom = 24.dp))
         }
     }
 }
@@ -100,7 +100,7 @@ private fun SupportRow(onClick: () -> Unit) {
     SettingsRow(stringResource(R.string.support_sprout), stringResource(R.string.support_desc), onClick = onClick) {
         Text(
             stringResource(R.string.sponsor),
-            style = MaterialTheme.typography.labelLarge,
+            style = SproutType.label,
             color = pink.ink,
             modifier = Modifier.background(pink.soft, RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 6.dp),
         )
@@ -117,6 +117,6 @@ private fun LinkRow(title: String, subtitle: String, onClick: () -> Unit) =
 fun TopBar(title: String, onBack: () -> Unit) {
     Row(Modifier.fillMaxWidth().height(64.dp).padding(start = 16.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         HeaderIconButton(R.drawable.ic_arrow_back, stringResource(R.string.action_back), onClick = onBack)
-        Text(title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(start = 14.dp))
+        Text(title, style = SproutType.title, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(start = 14.dp))
     }
 }

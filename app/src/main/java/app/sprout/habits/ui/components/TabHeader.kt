@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.components
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.requiredSize
@@ -51,10 +52,10 @@ fun TabHeader(
     ) {
         Column(Modifier.weight(1f)) {
             Box(Modifier.heightIn(min = 48.dp), contentAlignment = Alignment.CenterStart) {
-                Text(title, style = MaterialTheme.typography.headlineMedium, color = colors.onBackground)
+                Text(title, style = SproutType.screenTitle, color = colors.onBackground)
             }
             if (subtitle != null) {
-                Text(subtitle, style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant)
+                Text(subtitle, style = SproutType.label, color = colors.onSurfaceVariant)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), content = actions)

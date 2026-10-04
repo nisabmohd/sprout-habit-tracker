@@ -1,5 +1,6 @@
 package app.sprout.habits.widget
 
+import app.sprout.habits.ui.theme.SproutType
 import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Bundle
@@ -71,7 +72,7 @@ class StreakWidgetConfigActivity : ComponentActivity() {
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     item {
-                        Text(stringResource(R.string.pick_a_habit), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(4.dp, 8.dp, 4.dp, 12.dp))
+                        Text(stringResource(R.string.pick_a_habit), style = SproutType.title, modifier = Modifier.padding(4.dp, 8.dp, 4.dp, 12.dp))
                     }
                     items(habits.orEmpty(), key = { it.id }) { habit -> HabitRow(habit) { pick(appWidgetId, habit.id) } }
                 }
@@ -108,6 +109,6 @@ private fun HabitRow(habit: Habit, onClick: () -> Unit) {
         Box(Modifier.size(40.dp).background(hc.soft, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
             Icon(painterResource(HabitIcon.fromKey(habit.icon).drawable), contentDescription = null, tint = hc.ink, modifier = Modifier.size(20.dp))
         }
-        Text(habit.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 14.dp))
+        Text(habit.name, style = SproutType.cardTitle, modifier = Modifier.padding(start = 14.dp))
     }
 }

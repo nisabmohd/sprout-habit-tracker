@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.components
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,7 +24,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import app.sprout.habits.R
 import app.sprout.habits.Strings
 import app.sprout.habits.data.Entry
@@ -112,7 +112,6 @@ fun NoteCard(
     onLongPress: ((NoteCardUi) -> Unit)? = null,
 ) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     val hc = habitColors(note.hue)
     val marks = MarkColors(skip = colors.outlineVariant, skipInk = colors.onSurfaceVariant, outline = colors.outline)
     Column(
@@ -143,13 +142,13 @@ fun NoteCard(
             }
             Column(Modifier.weight(1f).padding(start = if (showHabit) 12.dp else 0.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 if (showHabit) {
-                    Text(note.habitName, style = type.titleMedium, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(note.habitName, style = SproutType.cardTitle, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     DayMarkView(note.mark, hc, marks, Modifier.size(16.dp))
                     Text(
                         listOfNotNull(note.outcome, dateLabel).joinToString(" · "),
-                        style = type.bodyMedium,
+                        style = SproutType.supporting,
                         color = colors.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -160,12 +159,12 @@ fun NoteCard(
             // Trailing text is always plain, never a pill.
             Text(
                 note.time,
-                style = type.labelMedium.copy(fontWeight = FontWeight.Normal),
+                style = SproutType.supporting,
                 color = colors.onSurfaceVariant,
                 maxLines = 1,
                 modifier = Modifier.padding(start = 8.dp).align(if (showHabit) Alignment.Top else Alignment.CenterVertically),
             )
         }
-        Text(note.text, style = type.bodyLarge.copy(lineHeight = 1.5.em), color = colors.onSurface)
+        Text(note.text, style = SproutType.body, color = colors.onSurface)
     }
 }

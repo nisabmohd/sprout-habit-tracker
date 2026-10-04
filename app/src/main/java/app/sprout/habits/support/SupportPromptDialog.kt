@@ -1,5 +1,6 @@
 package app.sprout.habits.support
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,7 +45,6 @@ fun SupportPromptDialog(
     onLater: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     val pink = habitColors(330f)
     Dialog(onDismissRequest = onLater) {
         Surface(shape = RoundedCornerShape(28.dp), color = colors.surfaceContainerLowest) {
@@ -52,7 +52,7 @@ fun SupportPromptDialog(
                 Box(Modifier.size(64.dp).background(colors.primaryContainer, RoundedCornerShape(20.dp)), contentAlignment = Alignment.Center) {
                     Icon(painterResource(R.drawable.ic_seedling), contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(32.dp))
                 }
-                Text(stringResource(R.string.support_title), style = type.titleLarge, color = colors.onSurface)
+                Text(stringResource(R.string.support_title), style = SproutType.title, color = colors.onSurface)
                 Text(
                     stringResource(
                         when {
@@ -61,7 +61,7 @@ fun SupportPromptDialog(
                             else -> R.string.support_text_star
                         },
                     ),
-                    style = type.bodyMedium,
+                    style = SproutType.supporting,
                     color = colors.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
@@ -70,13 +70,13 @@ fun SupportPromptDialog(
                     Button(onClick = onRate, modifier = Modifier.fillMaxWidth().height(48.dp)) {
                         Icon(painterResource(R.drawable.ic_thumb_up), contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.rate_on_play), style = type.labelLarge)
+                        Text(stringResource(R.string.rate_on_play), style = SproutType.label)
                     }
                 }
                 FilledTonalButton(onClick = onStar, modifier = Modifier.fillMaxWidth().height(48.dp)) {
                     Icon(painterResource(R.drawable.ic_star), contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.star_github), style = type.labelLarge)
+                    Text(stringResource(R.string.star_github), style = SproutType.label)
                 }
                 if (showSponsor) {
                     FilledTonalButton(
@@ -86,10 +86,10 @@ fun SupportPromptDialog(
                     ) {
                         Icon(painterResource(R.drawable.ic_heart), contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.sponsor), style = type.labelLarge)
+                        Text(stringResource(R.string.sponsor), style = SproutType.label)
                     }
                 }
-                TextButton(onClick = onLater) { Text(stringResource(R.string.maybe_later), style = type.labelLarge) }
+                TextButton(onClick = onLater) { Text(stringResource(R.string.maybe_later), style = SproutType.label) }
             }
         }
     }

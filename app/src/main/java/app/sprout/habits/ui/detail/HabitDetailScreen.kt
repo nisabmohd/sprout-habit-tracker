@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.detail
 
+import app.sprout.habits.ui.theme.SproutType
 import app.sprout.habits.ui.datePattern
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -70,7 +71,6 @@ fun HabitDetailScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val ui = state ?: return
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     val hc = habitColors(ui.habit.colorHue.toFloat())
     var deleting by remember { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
@@ -79,8 +79,8 @@ fun HabitDetailScreen(
     Box(Modifier.fillMaxSize().background(colors.background).statusBarsPadding()) {
         LazyColumn(
             Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 104.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 104.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item(key = "bar") {
                 Row(Modifier.fillMaxWidth().height(64.dp).padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -105,8 +105,8 @@ fun HabitDetailScreen(
                         Icon(painterResource(ui.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(28.dp))
                     }
                     Column(Modifier.padding(start = 14.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(ui.habit.name, style = type.headlineMedium, color = colors.onBackground)
-                        Text(ui.subtitle, style = type.bodyMedium, color = colors.onSurfaceVariant)
+                        Text(ui.habit.name, style = SproutType.screenTitle, color = colors.onBackground)
+                        Text(ui.subtitle, style = SproutType.supporting, color = colors.onSurfaceVariant)
                     }
                 }
             }
@@ -120,13 +120,13 @@ fun HabitDetailScreen(
             item(key = "calendar") { MonthCalendar(ui, hc, viewModel::previousMonth, viewModel::nextMonth, viewModel::editDay) }
             item(key = "notes-header") {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.notes_title), style = type.titleLarge, color = colors.onBackground, modifier = Modifier.weight(1f))
-                    if (ui.noteCount > 0) TextButton(onClick = onSeeAllNotes) { Text(stringResource(R.string.see_all), style = type.labelLarge) }
+                    Text(stringResource(R.string.notes_title), style = SproutType.label, color = colors.onSurfaceVariant, modifier = Modifier.weight(1f).padding(start = 4.dp))
+                    if (ui.noteCount > 0) TextButton(onClick = onSeeAllNotes) { Text(stringResource(R.string.see_all), style = SproutType.label) }
                 }
             }
             if (ui.notes.isEmpty()) {
                 item(key = "no-notes") {
-                    Text(stringResource(R.string.no_notes_yet), style = type.bodyMedium, color = colors.onSurfaceVariant)
+                    Text(stringResource(R.string.no_notes_yet), style = SproutType.supporting, color = colors.onSurfaceVariant)
                 }
             }
             items(ui.notes.take(5), key = { it.card.id }) { note -> NoteCard(note.card, onOpenNote, showHabit = false, dateLabel = note.dateLabel) }
@@ -139,7 +139,7 @@ fun HabitDetailScreen(
             ExtendedFloatingActionButton(
                 onClick = onAddNote,
                 icon = { Icon(painterResource(R.drawable.ic_habit_pen), contentDescription = null, modifier = Modifier.size(22.dp)) },
-                text = { Text(stringResource(R.string.add_note), style = type.labelLarge) },
+                text = { Text(stringResource(R.string.add_note), style = SproutType.label) },
                 containerColor = colors.primaryContainer,
                 contentColor = colors.onPrimaryContainer,
                 shape = RoundedCornerShape(18.dp),
@@ -162,18 +162,17 @@ private fun StatTile(value: String, label: String, hc: HabitColors, modifier: Mo
     Column(
         modifier
             .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(18.dp))
-            .padding(horizontal = 14.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Text(value, style = MaterialTheme.typography.titleLarge, color = hc.ink, maxLines = 1)
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
+        Text(value, style = SproutType.title, color = hc.ink, maxLines = 1)
+        Text(label, style = SproutType.supporting, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
     }
 }
 
 @Composable
 private fun MonthCalendar(ui: HabitDetailUi, hc: HabitColors, onPrevious: () -> Unit, onNext: () -> Unit, onEditDay: (java.time.LocalDate) -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     Column(
         Modifier
             .fillMaxWidth()
@@ -182,7 +181,7 @@ private fun MonthCalendar(ui: HabitDetailUi, hc: HabitColors, onPrevious: () -> 
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Row(Modifier.fillMaxWidth().padding(start = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(ui.monthLabel, style = type.titleMedium, color = colors.onSurface, modifier = Modifier.weight(1f))
+            Text(ui.monthLabel, style = SproutType.cardTitle, color = colors.onSurface, modifier = Modifier.weight(1f))
             IconButton(onClick = onPrevious) {
                 Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = stringResource(R.string.previous_month), modifier = Modifier.size(18.dp))
             }
@@ -197,7 +196,7 @@ private fun MonthCalendar(ui: HabitDetailUi, hc: HabitColors, onPrevious: () -> 
                     ui.weekdayLabels.forEach { label ->
                         Text(
                             label,
-                            style = type.labelSmall,
+                            style = SproutType.tiny,
                             color = colors.onSurfaceVariant,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             modifier = Modifier.weight(1f),
@@ -258,6 +257,6 @@ private fun CalendarDay(day: CalendarDayUi, hc: HabitColors, editable: Boolean, 
             },
         contentAlignment = Alignment.Center,
     ) {
-        Text("${day.day}", style = MaterialTheme.typography.titleSmall, color = fg)
+        Text("${day.day}", style = SproutType.label, color = fg)
     }
 }

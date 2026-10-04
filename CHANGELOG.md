@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.2
+
+Changed:
+
+- Text is consistent across screens: nine text styles, used the same way everywhere. Section labels ("Today", "By habit", "Notes", "Backup & restore", "Icon", "Days") are small and grey, and the text on the right of a card is always the same size.
+- Journal: the day headings are grey, and the note count and note time are a little larger.
+- Insights: the line under each habit's name is a little larger.
+- Habit detail: the labels under the three numbers are a little larger.
+- More: the values on the right ("System default", "Monday") are smaller, and the section labels are grey instead of the accent color.
+- Date range sheet: the selected range is regular weight and the weekday letters are smaller.
+- Only two text weights are used now, Regular and SemiBold.
+- Gaps and sizes are consistent too: cards sit the same distance apart on every tab, every card has the same padding, section labels have the same space above and below, and the habit icon tile is the same size in the filter and habit pickers as on Today.
+
 ## 1.2.1
 
 New:

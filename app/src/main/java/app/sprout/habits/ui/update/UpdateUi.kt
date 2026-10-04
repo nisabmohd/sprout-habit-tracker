@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.update
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -66,7 +67,6 @@ fun UpdateDialog(update: AppUpdate, updates: UpdateManager, onLater: () -> Unit,
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     var state by remember { mutableStateOf<DownloadState?>(null) }
     // Checked again on return from "Install unknown apps", so the hint goes once it's allowed.
     var canInstall by remember { mutableStateOf(updates.canInstall()) }
@@ -82,10 +82,10 @@ fun UpdateDialog(update: AppUpdate, updates: UpdateManager, onLater: () -> Unit,
                     Icon(painterResource(R.drawable.ic_seedling), contentDescription = null, tint = colors.onPrimaryContainer, modifier = Modifier.size(32.dp))
                 }
                 Spacer(Modifier.height(16.dp))
-                Text(stringResource(R.string.update_available), style = type.titleLarge, color = colors.onSurface, textAlign = TextAlign.Center)
+                Text(stringResource(R.string.update_available), style = SproutType.title, color = colors.onSurface, textAlign = TextAlign.Center)
                 Text(
                     stringResource(R.string.update_version_line, update.version, currentVersion),
-                    style = type.bodyMedium,
+                    style = SproutType.supporting,
                     color = colors.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top = 4.dp),
@@ -95,11 +95,11 @@ fun UpdateDialog(update: AppUpdate, updates: UpdateManager, onLater: () -> Unit,
                         Modifier.padding(top = 20.dp).fillMaxWidth().background(colors.surfaceContainerHigh, RoundedCornerShape(16.dp)).padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Text(stringResource(R.string.whats_new), style = type.titleSmall, color = colors.onSurface)
+                        Text(stringResource(R.string.whats_new), style = SproutType.label, color = colors.onSurface)
                         update.notes.forEach { line ->
                             Row(verticalAlignment = Alignment.Top) {
                                 Box(Modifier.padding(top = 8.dp).size(6.dp).background(colors.primary, CircleShape))
-                                Text(line, style = type.bodyMedium, color = colors.onSurface, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 10.dp))
+                                Text(line, style = SproutType.supporting, color = colors.onSurface, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 10.dp))
                             }
                         }
                     }
@@ -113,14 +113,14 @@ fun UpdateDialog(update: AppUpdate, updates: UpdateManager, onLater: () -> Unit,
                             else LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
                             Text(
                                 if (fraction == null) stringResource(R.string.downloading) else stringResource(R.string.downloading_percent, (fraction * 100).toInt()),
-                                style = type.bodyMedium,
+                                style = SproutType.supporting,
                                 color = colors.onSurfaceVariant,
                             )
                         }
                     }
                     is DownloadState.Ready -> {
                         if (!canInstall) {
-                            Text(stringResource(R.string.allow_installs_hint), style = type.bodyMedium, color = colors.onSurfaceVariant, textAlign = TextAlign.Center)
+                            Text(stringResource(R.string.allow_installs_hint), style = SproutType.supporting, color = colors.onSurfaceVariant, textAlign = TextAlign.Center)
                             Spacer(Modifier.height(12.dp))
                         }
                         PrimaryButton(stringResource(R.string.install)) {
@@ -128,7 +128,7 @@ fun UpdateDialog(update: AppUpdate, updates: UpdateManager, onLater: () -> Unit,
                         }
                     }
                     DownloadState.Failed -> {
-                        Text(stringResource(R.string.update_failed), style = type.bodyMedium, color = colors.error, textAlign = TextAlign.Center)
+                        Text(stringResource(R.string.update_failed), style = SproutType.supporting, color = colors.error, textAlign = TextAlign.Center)
                         Spacer(Modifier.height(12.dp))
                         PrimaryButton(stringResource(R.string.open_release_page)) { openUrl(context, update.pageUrl); onDismiss() }
                     }
@@ -142,7 +142,7 @@ fun UpdateDialog(update: AppUpdate, updates: UpdateManager, onLater: () -> Unit,
                     }
                 }
                 TextButton(onClick = onLater, modifier = Modifier.padding(top = 4.dp).heightIn(min = 48.dp)) {
-                    Text(stringResource(R.string.later), style = type.labelLarge)
+                    Text(stringResource(R.string.later), style = SproutType.label)
                 }
             }
         }
@@ -152,7 +152,7 @@ fun UpdateDialog(update: AppUpdate, updates: UpdateManager, onLater: () -> Unit,
 @Composable
 private fun PrimaryButton(label: String, onClick: () -> Unit) {
     Button(onClick = onClick, modifier = Modifier.fillMaxWidth().height(48.dp)) {
-        Text(label, style = MaterialTheme.typography.labelLarge)
+        Text(label, style = SproutType.label)
     }
 }
 
@@ -166,12 +166,11 @@ private enum class CheckState { IDLE, CHECKING, LATEST, ERROR }
 @Composable
 fun CheckForUpdates(updates: UpdateManager) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     if (!updates.enabled) {
         when {
             BuildConfig.PLAY_LISTED -> PlayUpdatesPill()
             BuildConfig.PLAY_STORE -> Unit
-            else -> Text(stringResource(R.string.updates_from_fdroid), style = type.bodyMedium, color = colors.onSurfaceVariant)
+            else -> Text(stringResource(R.string.updates_from_fdroid), style = SproutType.supporting, color = colors.onSurfaceVariant)
         }
         return
     }
@@ -220,7 +219,7 @@ fun CheckForUpdates(updates: UpdateManager) {
                     CheckState.ERROR -> R.string.update_check_failed
                 },
             ),
-            style = type.labelLarge,
+            style = SproutType.label,
         )
     }
     found?.let { update ->
@@ -246,7 +245,7 @@ private fun PlayUpdatesPill() {
     ) {
         Icon(painterResource(R.drawable.ic_refresh), contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.size(8.dp))
-        Text(stringResource(R.string.check_for_updates), style = MaterialTheme.typography.labelLarge)
+        Text(stringResource(R.string.check_for_updates), style = SproutType.label)
     }
 }
 
@@ -275,7 +274,7 @@ fun UpdatePrompt(updates: UpdateManager) {
 fun UpdateBadge() {
     Text(
         stringResource(R.string.update_available),
-        style = MaterialTheme.typography.labelMedium,
+        style = SproutType.captionStrong,
         color = MaterialTheme.colorScheme.onPrimaryContainer,
         modifier = Modifier
             .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(11.dp))

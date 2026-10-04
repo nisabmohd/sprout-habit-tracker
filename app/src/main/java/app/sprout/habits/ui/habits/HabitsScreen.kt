@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.habits
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -89,20 +90,21 @@ fun HabitsScreen(
     }
     LazyColumn(
         Modifier.weight(1f).fillMaxWidth(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
+        // Cards sit 8 dp apart on every tab.
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item(key = "mode") {
             // Each segment is a fixed share of the row, so labels stop scaling at 1.3x.
             CappedFontScale {
-            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
                 HabitsMode.entries.forEachIndexed { index, m ->
                     SegmentedButton(
                         selected = mode == m,
                         onClick = { viewModel.setMode(m) },
                         shape = SegmentedButtonDefaults.itemShape(index, HabitsMode.entries.size),
                         colors = SegmentedButtonDefaults.colors(activeContainerColor = colors.primaryContainer, activeContentColor = colors.onPrimaryContainer),
-                    ) { Text(stringResource(if (m == HabitsMode.WEEK) R.string.week else R.string.overall), style = MaterialTheme.typography.labelLarge) }
+                    ) { Text(stringResource(if (m == HabitsMode.WEEK) R.string.week else R.string.overall), style = SproutType.label) }
                 }
             }
             }
@@ -131,8 +133,8 @@ private fun WeekNavigator(week: WeekUi, onPrevious: () -> Unit, onNext: () -> Un
             Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = stringResource(R.string.previous_week), modifier = Modifier.size(22.dp))
         }
         Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(week.label, style = MaterialTheme.typography.titleMedium, color = colors.onBackground)
-            Text(stringResource(R.string.week_complete, week.percent), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+            Text(week.label, style = SproutType.cardTitle, color = colors.onBackground)
+            Text(stringResource(R.string.week_complete, week.percent), style = SproutType.supporting, color = colors.onSurfaceVariant)
         }
         IconButton(onClick = onNext, enabled = week.canGoForward) {
             Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = stringResource(R.string.next_week), modifier = Modifier.size(22.dp))
@@ -149,8 +151,8 @@ private fun CardHeader(icon: Int, hue: Float, title: String, subtitle: String?, 
             Icon(painterResource(icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(22.dp))
         }
         Column(Modifier.weight(1f).padding(start = 12.dp, end = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            subtitle?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            Text(title, style = SproutType.cardTitle, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            subtitle?.let { Text(it, style = SproutType.supporting, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
         trailing()
     }
@@ -176,7 +178,7 @@ private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit, o
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         CardHeader(habit.icon, habit.hue, habit.name, null) {
-            Text(habit.goal, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+            Text(habit.goal, style = SproutType.supporting, color = colors.onSurfaceVariant)
         }
         // Seven equal columns that share the card's width, so they fit narrow phones; the day
         // labels stop scaling at 1.3x so they never wrap.
@@ -204,7 +206,7 @@ private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit, o
                 ) {
                     Text(
                         week.dayLabels[i],
-                        style = MaterialTheme.typography.labelMedium,
+                        style = SproutType.tiny,
                         color = if (isToday) colors.onSurface else colors.onSurfaceVariant,
                         maxLines = 1,
                         softWrap = false,
@@ -235,7 +237,7 @@ private fun Legend() {
         horizontalArrangement = Arrangement.SpaceBetween,
         itemVerticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(pluralStringResource(R.plurals.last_weeks, OVERALL_WEEKS, OVERALL_WEEKS), style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant, modifier = Modifier.padding(end = 12.dp))
+        Text(pluralStringResource(R.plurals.last_weeks, OVERALL_WEEKS, OVERALL_WEEKS), style = SproutType.label, color = colors.onSurfaceVariant, modifier = Modifier.padding(end = 12.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
         LegendItem(stringResource(R.string.outcome_done)) { drawRoundRect(colors.onSurfaceVariant, cornerRadius = CornerRadius(size.width * 0.3f)) }
         // Neutral greys: the cells themselves are in each habit's own color.
@@ -249,7 +251,7 @@ private fun Legend() {
 private fun LegendItem(label: String, draw: androidx.compose.ui.graphics.drawscope.DrawScope.() -> Unit) {
     Row(Modifier.padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) {
         Canvas(Modifier.size(10.dp), onDraw = draw)
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 6.dp))
+        Text(label, style = SproutType.caption, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 6.dp))
     }
 }
 
@@ -263,12 +265,12 @@ private fun OverallCard(habit: HabitOverallUi, overall: OverallUi, onOpen: (Long
             .background(colors.surfaceContainerLowest)
             .clickable(onClickLabel = stringResource(R.string.open_habit, habit.name)) { onOpen(habit.id) }
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         CardHeader(habit.icon, habit.hue, habit.name, pluralStringResource(R.plurals.best_streak_days, habit.bestStreak, habit.bestStreak)) {
             Text(
                 pluralStringResource(R.plurals.streak_days, habit.currentStreak, habit.currentStreak),
-                style = MaterialTheme.typography.bodyMedium,
+                style = SproutType.supporting,
                 color = colors.onSurfaceVariant,
             )
         }
@@ -280,7 +282,7 @@ private fun OverallCard(habit: HabitOverallUi, overall: OverallUi, onOpen: (Long
                 overall.months.forEach { (label, col) ->
                     Text(
                         label,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = SproutType.tiny,
                         color = colors.onSurfaceVariant,
                         maxLines = 1,
                         modifier = Modifier.offset(x = column * col),

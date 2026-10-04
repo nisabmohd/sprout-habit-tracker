@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.note
 
+import app.sprout.habits.ui.theme.SproutType
 import app.sprout.habits.ui.datePattern
 import androidx.compose.ui.res.stringResource
 import app.sprout.habits.rememberStrings
@@ -10,7 +11,6 @@ import app.sprout.habits.ui.components.NoteCardUi
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.foundation.text.BasicTextField
@@ -80,7 +80,6 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
     if (!form.loaded) return
 
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     var pickingHabit by remember { mutableStateOf(false) }
     var pickingDate by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
@@ -94,9 +93,9 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
             HeaderIconButton(R.drawable.ic_close, stringResource(R.string.action_close), onClick = onClose)
             Text(
                 stringResource(if (form.isNew) R.string.new_note else R.string.edit_note),
-                style = type.titleLarge,
+                style = SproutType.title,
                 color = colors.onBackground,
-                modifier = Modifier.weight(1f).padding(start = 14.dp),
+                modifier = Modifier.weight(1f).padding(start = 12.dp),
             )
             if (!form.isNew) {
                 HeaderIconButton(R.drawable.ic_delete, stringResource(R.string.action_delete), danger = true) { confirmDelete = true }
@@ -118,7 +117,7 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
             if (habit == null) {
                 Text(
                     stringResource(R.string.note_no_habits),
-                    style = type.bodyLarge,
+                    style = SproutType.body,
                     color = colors.onSurfaceVariant,
                     modifier = Modifier.padding(16.dp),
                 )
@@ -139,7 +138,7 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
                         Icon(painterResource(HabitIcon.fromKey(habit.icon).drawable), contentDescription = null, tint = hc.ink, modifier = Modifier.size(22.dp))
                     }
                     Column(Modifier.weight(1f).padding(start = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(habit.name, style = type.titleMedium, color = hc.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(habit.name, style = SproutType.cardTitle, color = hc.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Row(
                             Modifier.clickable(onClickLabel = stringResource(R.string.change_date)) { pickingDate = true },
                             verticalAlignment = Alignment.CenterVertically,
@@ -147,7 +146,7 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
                             DayMarkView(mark, hc, MarkColors(colors.outlineVariant, colors.onSurfaceVariant, colors.outline), Modifier.size(16.dp))
                             Text(
                                 "$outcome · ${form.date.format(datePattern("EEEE, d MMM"))}",
-                                style = type.bodyMedium,
+                                style = SproutType.supporting,
                                 color = hc.ink.copy(alpha = 0.8f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -160,7 +159,7 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
                     }
                 }
                 val noteLabel = stringResource(R.string.note)
-                val textStyle = type.bodyLarge.copy(fontSize = 18.sp, lineHeight = 1.55.em, color = colors.onSurface)
+                val textStyle = SproutType.noteEditor.copy(color = colors.onSurface)
                 BasicTextField(
                     value = form.text,
                     onValueChange = viewModel::setText,
@@ -229,7 +228,7 @@ private fun HabitPickerSheet(
     SproutSheet(onDismissRequest = onDismiss) {
         Text(
             stringResource(R.string.choose_habit),
-            style = MaterialTheme.typography.titleLarge,
+            style = SproutType.title,
             color = colors.onSurface,
             modifier = Modifier.padding(start = 24.dp, bottom = 8.dp),
         )
@@ -240,21 +239,21 @@ private fun HabitPickerSheet(
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 56.dp)
+                        .heightIn(min = 60.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(if (selected) c.soft else colors.surfaceContainerLowest)
                         .selectable(selected, role = Role.RadioButton) { onPick(h.id) }
                         .padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Box(Modifier.size(36.dp).background(c.soft, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
-                        Icon(painterResource(HabitIcon.fromKey(h.icon).drawable), contentDescription = null, tint = c.ink, modifier = Modifier.size(20.dp))
+                    Box(Modifier.size(44.dp).background(c.soft, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
+                        Icon(painterResource(HabitIcon.fromKey(h.icon).drawable), contentDescription = null, tint = c.ink, modifier = Modifier.size(22.dp))
                     }
                     Text(
                         h.name,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = SproutType.cardTitle,
                         color = colors.onSurface,
-                        modifier = Modifier.weight(1f).padding(start = 14.dp),
+                        modifier = Modifier.weight(1f).padding(start = 12.dp),
                     )
                     if (selected) {
                         Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = c.solid, modifier = Modifier.size(20.dp))

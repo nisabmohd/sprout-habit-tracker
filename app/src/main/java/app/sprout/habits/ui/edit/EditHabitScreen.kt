@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.edit
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -115,7 +116,6 @@ private fun EditHabitContent(
     onDelete: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    val type = MaterialTheme.typography
     val hc = habitColors(form.hue.toFloat())
     var pickingTime by rememberSaveable { mutableStateOf(false) }
     // Tapping anything that isn't a text field ends typing, so the keyboard doesn't come back
@@ -149,7 +149,7 @@ private fun EditHabitContent(
             HeaderIconButton(R.drawable.ic_close, stringResource(R.string.action_close), onClick = onClose)
             Text(
                 stringResource(if (form.isNew) R.string.new_habit else R.string.edit_habit),
-                style = type.titleLarge,
+                style = SproutType.title,
                 color = colors.onBackground,
                 modifier = Modifier.weight(1f).padding(start = 14.dp),
             )
@@ -160,10 +160,10 @@ private fun EditHabitContent(
             Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 16.dp)
                 .padding(top = 8.dp, bottom = 24.dp)
                 .navigationBarsPadding(),
-            verticalArrangement = Arrangement.spacedBy(22.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // The text field keeps 8 dp above its outline for the floating label; match it so the
@@ -176,7 +176,7 @@ private fun EditHabitContent(
                     onValueChange = { v -> onEdit { it.copy(name = v) } },
                     label = { Text(stringResource(R.string.name)) },
                     singleLine = true,
-                    textStyle = type.titleMedium,
+                    textStyle = SproutType.cardTitle,
                     shape = RoundedCornerShape(14.dp),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     modifier = Modifier.weight(1f).padding(start = 12.dp),
@@ -238,7 +238,7 @@ private fun EditHabitContent(
                             onClick = { edit { it.copy(trackType = value) } },
                             shape = SegmentedButtonDefaults.itemShape(index, options.size),
                             icon = {},
-                        ) { Text(label, style = type.labelLarge) }
+                        ) { Text(label, style = SproutType.label) }
                     }
                 }
                 }
@@ -259,16 +259,15 @@ private fun EditHabitContent(
                 }
                 Text(
                     stringResource(if (form.trackType == TrackType.AMOUNT) R.string.step_hint else R.string.partial_hint),
-                    style = type.labelMedium,
-                    fontWeight = FontWeight.Normal,
+                    style = SproutType.caption,
                     color = colors.onSurfaceVariant,
                 )
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-                    Text(stringResource(R.string.days), style = type.titleSmall, color = colors.onBackground, modifier = Modifier.weight(1f))
-                    Text(daysLabel(form.daysMask), style = type.bodyMedium, color = colors.onSurfaceVariant)
+                    Text(stringResource(R.string.days), style = SproutType.label, color = colors.onSurfaceVariant, modifier = Modifier.weight(1f).padding(start = 4.dp))
+                    Text(daysLabel(form.daysMask), style = SproutType.supporting, color = colors.onSurfaceVariant)
                 }
                 Row(Modifier.fillMaxWidth()) {
                     orderedDays(form.weekStart).forEach { day ->
@@ -296,8 +295,7 @@ private fun EditHabitContent(
                                 CappedFontScale {
                                     Text(
                                         day.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
-                                        style = type.titleSmall,
-                                        fontWeight = FontWeight.Bold,
+                                        style = SproutType.label,
                                         color = if (on) hc.on else colors.onSurface,
                                         // The full day name is on the toggle; don't also read "M".
                                         modifier = Modifier.clearAndSetSemantics {},
@@ -321,8 +319,8 @@ private fun EditHabitContent(
                         }
                         Column(Modifier.weight(1f).padding(start = 14.dp, end = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             // 16sp like the titles in the card below; 22sp looked too big next to them.
-                            Text(TodayViewModel.formatTime(form.reminderMinutes), style = type.titleMedium, color = colors.onSurface)
-                            Text(stringResource(R.string.reminder_hint), style = type.bodyMedium, color = colors.onSurfaceVariant)
+                            Text(TodayViewModel.formatTime(form.reminderMinutes), style = SproutType.cardTitle, color = colors.onSurface)
+                            Text(stringResource(R.string.reminder_hint), style = SproutType.supporting, color = colors.onSurfaceVariant)
                         }
                         Switch(checked = form.reminderOn, onCheckedChange = { v -> needsNotifications(v); edit { it.copy(reminderOn = v) } })
                     }
@@ -333,7 +331,7 @@ private fun EditHabitContent(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         stringResource(R.string.exact_alarm_hint),
-                        style = type.bodyMedium,
+                        style = SproutType.supporting,
                         color = colors.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
                     )
@@ -344,7 +342,7 @@ private fun EditHabitContent(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         stringResource(R.string.notifications_off_hint),
-                        style = type.bodyMedium,
+                        style = SproutType.supporting,
                         color = colors.error,
                         modifier = Modifier.weight(1f),
                     )
@@ -361,10 +359,10 @@ private fun EditHabitContent(
             if (!form.isNew) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(onClick = onArchive, modifier = Modifier.weight(1f).height(48.dp)) {
-                        Text(archiveLabel, style = type.labelLarge)
+                        Text(archiveLabel, style = SproutType.label)
                     }
                     OutlinedButton(onClick = onDelete, modifier = Modifier.weight(1f).height(48.dp)) {
-                        Text(stringResource(R.string.action_delete), style = type.labelLarge, color = colors.error)
+                        Text(stringResource(R.string.action_delete), style = SproutType.label, color = colors.error)
                     }
                 }
             }
@@ -387,8 +385,9 @@ private fun EditHabitContent(
 
 @Composable
 private fun Section(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onBackground)
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // A section label: muted, 4 dp in from the card's edge.
+        Text(title, style = SproutType.label, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 4.dp))
         content()
     }
 }
@@ -411,8 +410,8 @@ private fun ToggleRow(title: String, subtitle: String, checked: Boolean, onChang
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(title, style = SproutType.cardTitle, color = MaterialTheme.colorScheme.onSurface)
+            Text(subtitle, style = SproutType.supporting, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Switch(checked = checked, onCheckedChange = null)
     }

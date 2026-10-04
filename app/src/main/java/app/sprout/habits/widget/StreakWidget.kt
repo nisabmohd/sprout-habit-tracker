@@ -1,5 +1,6 @@
 package app.sprout.habits.widget
 
+import app.sprout.habits.ui.theme.WidgetType
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -71,7 +72,7 @@ private fun StreakContent(data: StreakWidgetData?, bitmaps: WidgetBitmaps) {
                 .clickable(actionStartActivity(context.openAppIntent())),
             verticalAlignment = Alignment.Vertical.CenterVertically,
         ) {
-            Text(LocalContext.current.getString(R.string.streak_empty), style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurfaceVariant))
+            Text(LocalContext.current.getString(R.string.streak_empty), style = TextStyle(fontSize = WidgetType.supporting, color = GlanceTheme.colors.onSurfaceVariant))
         }
         return
     }
@@ -100,12 +101,12 @@ private fun StreakContent(data: StreakWidgetData?, bitmaps: WidgetBitmaps) {
                 habit.name,
                 maxLines = 1,
                 modifier = GlanceModifier.defaultWeight(),
-                style = TextStyle(fontSize = if (compact) 12.sp else 14.sp, fontWeight = FontWeight.Bold, color = ink, textAlign = TextAlign.End),
+                style = TextStyle(fontSize = if (compact) WidgetType.caption else WidgetType.supporting, fontWeight = FontWeight.Bold, color = ink, textAlign = TextAlign.End),
             )
         }
         Spacer(GlanceModifier.defaultWeight())
-        Text("${data.streak}", maxLines = 1, style = TextStyle(fontSize = if (compact) 28.sp else 40.sp, fontWeight = FontWeight.Medium, color = ink))
-        Text(LocalContext.current.getString(R.string.day_streak), maxLines = 1, style = TextStyle(fontSize = if (compact) 12.sp else 14.sp, fontWeight = FontWeight.Medium, color = ink))
+        Text("${data.streak}", maxLines = 1, style = TextStyle(fontSize = if (compact) WidgetType.screenTitle else WidgetType.display, fontWeight = FontWeight.Medium, color = ink))
+        Text(LocalContext.current.getString(R.string.day_streak), maxLines = 1, style = TextStyle(fontSize = if (compact) WidgetType.caption else WidgetType.supporting, fontWeight = FontWeight.Medium, color = ink))
         if (!tiny) {
             Spacer(GlanceModifier.height(if (compact) 6.dp else 10.dp))
             Image(

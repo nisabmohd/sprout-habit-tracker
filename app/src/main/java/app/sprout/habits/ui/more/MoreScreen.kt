@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.more
 
+import app.sprout.habits.ui.theme.SproutType
 import app.sprout.habits.ui.today.UndoSnackbarHost
 import app.sprout.habits.ui.update.UpdateBadge
 import app.sprout.habits.domain.isNewerVersion
@@ -130,8 +131,8 @@ fun MoreScreen(
             item(key = "appearance") {
                 SectionLabel(stringResource(R.string.appearance))
                 SettingsCard {
-                    Column(Modifier.padding(horizontal = 20.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(stringResource(R.string.theme), style = MaterialTheme.typography.titleMedium)
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(stringResource(R.string.theme), style = SproutType.cardTitle)
                         // Each segment is a fixed share of the row, so labels stop scaling at 1.3x.
                         CappedFontScale {
                         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
@@ -146,7 +147,7 @@ fun MoreScreen(
                                         activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
                                         activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                                     ),
-                                ) { Text(label, style = MaterialTheme.typography.labelLarge) }
+                                ) { Text(label, style = SproutType.label) }
                             }
                         }
                         }
@@ -158,7 +159,7 @@ fun MoreScreen(
                     if (!dynamicSupported || !theme.dynamicColor) {
                         AccentPicker(theme.accentHue) { hue -> save { setAccentHue(hue) } }
                     }
-                    Text(stringResource(R.string.font), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 20.dp, top = 8.dp, bottom = 4.dp))
+                    Text(stringResource(R.string.font), style = SproutType.cardTitle, modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp))
                     BodyFont.entries.forEach { font ->
                         FontRow(font, selected = theme.font == font) { save { setFont(font) } }
                     }
@@ -203,7 +204,7 @@ fun MoreScreen(
             }
 
             item(key = "about") {
-                Box(Modifier.padding(top = 12.dp)) {
+                Box(Modifier.padding(top = 8.dp)) {
                     SettingsCard {
                         val update = settings.availableUpdate?.takeIf { isNewerVersion(it, BuildConfig.VERSION_NAME) }
                         SettingsRow(
@@ -257,8 +258,8 @@ fun MoreScreen(
 
 @Composable
 private fun AccentPicker(selectedHue: Float, onSelect: (Float) -> Unit) {
-    Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(stringResource(R.string.accent), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 8.dp))
+    Column(Modifier.padding(horizontal = 8.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(stringResource(R.string.accent), style = SproutType.cardTitle, modifier = Modifier.padding(start = 8.dp))
         ColorSwatchRow(
             swatches = ACCENT_HUES.map { hue ->
                 val scheme = seedColorScheme(hue, false)
@@ -278,7 +279,7 @@ private fun FontRow(font: BodyFont, selected: Boolean, onClick: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 2.dp)
+            .padding(horizontal = 8.dp, vertical = 2.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(if (selected) MaterialTheme.colorScheme.surfaceContainerHigh else Color.Transparent)
             .selectable(selected, role = Role.RadioButton, onClick = onClick)
@@ -287,10 +288,10 @@ private fun FontRow(font: BodyFont, selected: Boolean, onClick: () -> Unit) {
     ) {
         RadioButton(selected = selected, onClick = null)
         Column(Modifier.weight(1f).padding(start = 12.dp)) {
-            Text(name, style = MaterialTheme.typography.bodyLarge.copy(fontFamily = font.family()))
-            Text(description, style = MaterialTheme.typography.bodySmall.copy(fontFamily = font.family()), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(name, style = SproutType.body.copy(fontFamily = font.family()))
+            Text(description, style = SproutType.caption.copy(fontFamily = font.family()), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Text("Aa", style = MaterialTheme.typography.titleLarge.copy(fontFamily = font.family()), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("Aa", style = SproutType.title.copy(fontFamily = font.family()), color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -299,10 +300,10 @@ private fun TextSizeRow(scale: Float, onChange: (Float) -> Unit) {
     // Unknown saved value → show "Default"; index 0 (Small) is a real choice.
     val index = TEXT_SCALES.indexOfFirst { it.first == scale }.takeIf { it >= 0 } ?: 1
     val label = stringResource(TEXT_SCALES[index].second)
-    Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
+    Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.text_size), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-            Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.text_size), style = SproutType.cardTitle, modifier = Modifier.weight(1f))
+            Text(label, style = SproutType.supporting, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Slider(
             value = index.toFloat(),

@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.more
 
+import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,9 +31,10 @@ import androidx.compose.ui.unit.dp
 fun SectionLabel(text: String) {
     Text(
         text,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 8.dp, top = 12.dp, bottom = 4.dp),
+        style = SproutType.label,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        // With the list's 8 dp gaps: 16 dp above the label, 8 dp below it.
+        modifier = Modifier.padding(start = 4.dp, top = 8.dp),
     )
 }
 
@@ -64,7 +66,7 @@ fun SettingsRow(
             .fillMaxWidth()
             .heightIn(min = 56.dp)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
@@ -72,12 +74,12 @@ fun SettingsRow(
             androidx.compose.foundation.layout.Spacer(Modifier.size(16.dp))
         }
         Column(Modifier.weight(1f).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+            Text(title, style = SproutType.cardTitle, color = MaterialTheme.colorScheme.onSurface)
             if (badge == null) {
-                subtitle?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                subtitle?.let { Text(it, style = SproutType.supporting, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             } else {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    subtitle?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f, fill = false)) }
+                    subtitle?.let { Text(it, style = SproutType.supporting, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f, fill = false)) }
                     badge()
                 }
             }
@@ -94,12 +96,12 @@ fun SwitchRow(title: String, subtitle: String?, checked: Boolean, onChange: (Boo
             .fillMaxWidth()
             .heightIn(min = 56.dp)
             .toggleable(value = checked, role = Role.Switch, onValueChange = onChange)
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-            subtitle?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            Text(title, style = SproutType.cardTitle, color = MaterialTheme.colorScheme.onSurface)
+            subtitle?.let { Text(it, style = SproutType.supporting, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
         Switch(checked = checked, onCheckedChange = null)
     }
@@ -107,4 +109,4 @@ fun SwitchRow(title: String, subtitle: String?, checked: Boolean, onChange: (Boo
 
 @Composable
 fun TrailingValue(text: String) =
-    Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(text, style = SproutType.supporting, color = MaterialTheme.colorScheme.onSurfaceVariant)
