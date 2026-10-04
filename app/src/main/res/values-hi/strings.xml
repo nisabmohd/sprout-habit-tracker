@@ -145,7 +145,7 @@
     <string name="text_largest">सबसे बड़ा</string>
     <string name="font_system">सिस्टम डिफ़ॉल्ट</string>
     <string name="font_system_desc">आपके फ़ोन का फ़ॉन्ट</string>
-    <string name="font_figtree_desc">दोस्ताना और साफ़</string>
+    <string name="font_space_grotesk_desc">साफ़ और आधुनिक</string>
     <string name="font_outfit_desc">गोलाकार, ज्यामितीय</string>
     <string name="font_lexend_desc">डिफ़ॉल्ट · आसानी से पढ़ने के लिए बना</string>
     <string name="font_atkinson_desc">कम दृष्टि वालों के लिए बना</string>
@@ -375,10 +375,6 @@
         <item quantity="one">पिछला %1$d हफ़्ता</item>
         <item quantity="other">पिछले %1$d हफ़्ते</item>
     </plurals>
-    <plurals name="streak_best">
-        <item quantity="one">%1$d दिन का सिलसिला · सबसे लंबा %2$d</item>
-        <item quantity="other">%1$d दिन का सिलसिला · सबसे लंबा %2$d</item>
-    </plurals>
     <plurals name="heatmap_description">
         <item quantity="one">%1$s: %2$d दिन का सिलसिला, सबसे लंबा %3$d, पिछले %4$d हफ़्ते</item>
         <item quantity="other">%1$s: %2$d दिन का सिलसिला, सबसे लंबा %3$d, पिछले %4$d हफ़्ते</item>
@@ -423,4 +419,16 @@
     <string name="sample_remove">उदाहरण डेटा हटाएं</string>
     <string name="sample_removed">उदाहरण डेटा हटाया गया</string>
     <string name="sample_remove_subtitle">उदाहरण वाली आदतें, उनका इतिहास और नोट मिटाता है</string>
+    <plurals name="days_kept">
+        <item quantity="one">%2$d में से %1$d दिन</item>
+        <item quantity="other">%2$d में से %1$d दिन</item>
+    </plurals>
+    <plurals name="streak_days">
+        <item quantity="one">%1$d दिन का सिलसिला</item>
+        <item quantity="other">%1$d दिन का सिलसिला</item>
+    </plurals>
+    <plurals name="best_streak_days">
+        <item quantity="one">सबसे लंबा सिलसिला · %1$d दिन</item>
+        <item quantity="other">सबसे लंबा सिलसिला · %1$d दिन</item>
+    </plurals>
 </resources>

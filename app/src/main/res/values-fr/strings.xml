@@ -145,7 +145,7 @@
     <string name="text_largest">Très grand</string>
     <string name="font_system">Police du système</string>
     <string name="font_system_desc">La police de votre téléphone</string>
-    <string name="font_figtree_desc">Amicale et claire</string>
+    <string name="font_space_grotesk_desc">Nette et moderne</string>
     <string name="font_outfit_desc">Arrondie, géométrique</string>
     <string name="font_lexend_desc">Par défaut · conçue pour une lecture facile</string>
     <string name="font_atkinson_desc">Conçue pour la basse vision</string>
@@ -383,11 +383,6 @@
         <item quantity="other">%1$d dernières semaines</item>
         <item quantity="many">%1$d dernières semaines</item>
     </plurals>
-    <plurals name="streak_best">
-        <item quantity="one">Série de %1$d jour · record %2$d</item>
-        <item quantity="other">Série de %1$d jours · record %2$d</item>
-        <item quantity="many">Série de %1$d jours · record %2$d</item>
-    </plurals>
     <plurals name="heatmap_description">
         <item quantity="one">%1$s : série de %2$d jour, record %3$d, %4$d dernières semaines</item>
         <item quantity="other">%1$s : série de %2$d jours, record %3$d, %4$d dernières semaines</item>
@@ -437,4 +432,19 @@
     <string name="sample_remove">Supprimer les données d\'exemple</string>
     <string name="sample_removed">Données d\'exemple supprimées</string>
     <string name="sample_remove_subtitle">Supprime les habitudes d\'exemple, leur historique et leurs notes</string>
+    <plurals name="days_kept">
+        <item quantity="one">%1$d sur %2$d jour</item>
+        <item quantity="other">%1$d sur %2$d jours</item>
+        <item quantity="many">%1$d sur %2$d jours</item>
+    </plurals>
+    <plurals name="streak_days">
+        <item quantity="one">Série de %1$d jour</item>
+        <item quantity="other">Série de %1$d jours</item>
+        <item quantity="many">Série de %1$d jours</item>
+    </plurals>
+    <plurals name="best_streak_days">
+        <item quantity="one">Meilleure série · %1$d jour</item>
+        <item quantity="other">Meilleure série · %1$d jours</item>
+        <item quantity="many">Meilleure série · %1$d jours</item>
+    </plurals>
 </resources>

@@ -176,7 +176,7 @@ fun SproutNavHost(
             }
             composable<JournalRoute> {
                 TabFrame {
-                val vm = viewModel { JournalViewModel(container.repository, container.strings) }
+                val vm = viewModel { JournalViewModel(container.repository, container.settings, container.strings) }
                 JournalScreen(
                     vm,
                     weekStart = settings.weekStart,
@@ -187,7 +187,7 @@ fun SproutNavHost(
             }
             composable<InsightsRoute> {
                 TabFrame {
-                val vm = viewModel { InsightsViewModel(container.repository, container.settings) }
+                val vm = viewModel { InsightsViewModel(container.repository, container.settings, container.strings) }
                 InsightsScreen(vm, settings.weekStart)
                 }
             }

@@ -148,7 +148,7 @@
     <string name="text_largest">Largest</string>
     <string name="font_system">System default</string>
     <string name="font_system_desc">Your phone\'s font</string>
-    <string name="font_figtree_desc">Friendly and clear</string>
+    <string name="font_space_grotesk_desc">Sharp and modern</string>
     <string name="font_outfit_desc">Rounded, geometric</string>
     <string name="font_lexend_desc">Default · built for easy reading</string>
     <string name="font_atkinson_desc">Designed for low vision</string>
@@ -366,10 +366,6 @@
         <item quantity="one">Last %1$d week</item>
         <item quantity="other">Last %1$d weeks</item>
     </plurals>
-    <plurals name="streak_best">
-        <item quantity="one">%1$d-day streak · best %2$d</item>
-        <item quantity="other">%1$d-day streak · best %2$d</item>
-    </plurals>
     <plurals name="heatmap_description">
         <item quantity="one">%1$s: %2$d-day streak, best %3$d, last %4$d weeks</item>
         <item quantity="other">%1$s: %2$d-day streak, best %3$d, last %4$d weeks</item>
@@ -426,4 +422,17 @@
     <string name="sample_remove">Remove sample data</string>
     <string name="sample_removed">Sample data removed</string>
     <string name="sample_remove_subtitle">Deletes the sample habits, their history and notes</string>
+    <!-- Insights, By habit: kept days out of the scheduled ones (the plural follows the second number), and the current streak. -->
+    <plurals name="days_kept">
+        <item quantity="one">%1$d of %2$d day</item>
+        <item quantity="other">%1$d of %2$d days</item>
+    </plurals>
+    <plurals name="streak_days">
+        <item quantity="one">%1$d-day streak</item>
+        <item quantity="other">%1$d-day streak</item>
+    </plurals>
+    <plurals name="best_streak_days">
+        <item quantity="one">Best streak · %1$d day</item>
+        <item quantity="other">Best streak · %1$d days</item>
+    </plurals>
 </resources>

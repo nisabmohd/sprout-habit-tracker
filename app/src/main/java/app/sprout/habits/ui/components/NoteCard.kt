@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -88,13 +89,28 @@ data class NoteCardUi(
     }
 }
 
+/** The 24/6 dp corners of a grouped list: big on the outside of the group, small between its rows. */
+fun groupedShape(index: Int, count: Int): RoundedCornerShape {
+    val top = if (index == 0) 24.dp else 6.dp
+    val bottom = if (index == count - 1) 24.dp else 6.dp
+    return RoundedCornerShape(top, top, bottom, bottom)
+}
+
 /**
- * A note card in the Today card style: habit tile, name, the day's mark and outcome, the time on
- * the right, then the note. Without [showHabit] (on a habit's own page) the first line is the mark
- * and "[outcome] · [dateLabel]".
+ * A note, built from the same pieces as a Today habit card: the habit tile, the name, the day's
+ * mark and outcome under it, the time as plain text at the top right, then the note itself.
+ * Without [showHabit] (on a habit's own page) the first line is the mark and
+ * "[outcome] · [dateLabel]". [shape] rounds it as part of a day's group.
  */
 @Composable
-fun NoteCard(note: NoteCardUi, onOpen: ((Long) -> Unit)?, showHabit: Boolean = true, dateLabel: String? = null, onLongPress: ((NoteCardUi) -> Unit)? = null) {
+fun NoteCard(
+    note: NoteCardUi,
+    onOpen: ((Long) -> Unit)?,
+    showHabit: Boolean = true,
+    dateLabel: String? = null,
+    shape: RoundedCornerShape = RoundedCornerShape(24.dp),
+    onLongPress: ((NoteCardUi) -> Unit)? = null,
+) {
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
     val hc = habitColors(note.hue)
@@ -102,7 +118,7 @@ fun NoteCard(note: NoteCardUi, onOpen: ((Long) -> Unit)?, showHabit: Boolean = t
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(shape)
             .background(colors.surfaceContainerLowest)
             .then(
                 if (onOpen != null || onLongPress != null) {
@@ -119,7 +135,7 @@ fun NoteCard(note: NoteCardUi, onOpen: ((Long) -> Unit)?, showHabit: Boolean = t
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Row(verticalAlignment = if (showHabit) Alignment.Top else Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             if (showHabit) {
                 Box(Modifier.size(44.dp).background(hc.soft, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
                     Icon(painterResource(note.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(22.dp))
@@ -141,7 +157,14 @@ fun NoteCard(note: NoteCardUi, onOpen: ((Long) -> Unit)?, showHabit: Boolean = t
                     )
                 }
             }
-            Text(note.time, style = type.labelMedium, color = colors.onSurfaceVariant, modifier = Modifier.padding(start = 8.dp))
+            // Trailing text is always plain, never a pill.
+            Text(
+                note.time,
+                style = type.labelMedium.copy(fontWeight = FontWeight.Normal),
+                color = colors.onSurfaceVariant,
+                maxLines = 1,
+                modifier = Modifier.padding(start = 8.dp).align(if (showHabit) Alignment.Top else Alignment.CenterVertically),
+            )
         }
         Text(note.text, style = type.bodyLarge.copy(lineHeight = 1.5.em), color = colors.onSurface)
     }

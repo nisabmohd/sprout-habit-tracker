@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import app.sprout.habits.BuildConfig
 import androidx.compose.runtime.setValue
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.HeaderIconButton
 import app.sprout.habits.ui.components.TabHeader
 import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.data.Settings
@@ -84,7 +85,7 @@ private val TEXT_SCALES = listOf(0.85f to R.string.text_small, 1f to R.string.te
 private val FONT_INFO = mapOf(
     // Font names stay as they are in every language; null = "System default".
     BodyFont.SYSTEM to (null to R.string.font_system_desc),
-    BodyFont.FIGTREE to ("Figtree" to R.string.font_figtree_desc),
+    BodyFont.SPACE_GROTESK to ("Space Grotesk" to R.string.font_space_grotesk_desc),
     BodyFont.OUTFIT to ("Outfit" to R.string.font_outfit_desc),
     BodyFont.LEXEND to ("Lexend" to R.string.font_lexend_desc),
     BodyFont.ATKINSON to ("Atkinson Hyperlegible" to R.string.font_atkinson_desc),
@@ -109,14 +110,17 @@ fun MoreScreen(
     fun save(block: suspend SettingsRepository.() -> Unit) { scope.launch { repository.block() } }
 
     Box(Modifier.fillMaxSize()) {
+        // The header stays put while the list scrolls under it, so its buttons are always in reach.
+        Column(Modifier.fillMaxSize()) {
+        Box(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp)) {
+                TabHeader(stringResource(R.string.tab_more), listSpacing = 8.dp)
+            
+        }
         LazyColumn(
-            Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
+            Modifier.weight(1f).fillMaxWidth(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            item(key = "title") {
-                TabHeader(stringResource(R.string.tab_more), listSpacing = 8.dp)
-            }
 
             item(key = "backup") {
                 SectionLabel(stringResource(R.string.backup_restore))
@@ -183,11 +187,16 @@ fun MoreScreen(
                     if (settings.sampleHabitIds.isNotEmpty()) {
                         val removed = stringResource(R.string.sample_removed)
                         CardDivider()
-                        SettingsRow(stringResource(R.string.sample_remove), stringResource(R.string.sample_remove_subtitle), onClick = {
+                        val remove = {
                             onRemoveSampleData()
                             scope.launch { snackbar.showSnackbar(removed) }
-                        }) {
-                            Icon(painterResource(R.drawable.ic_delete), contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+                            Unit
+                        }
+                        SettingsRow(stringResource(R.string.sample_remove), stringResource(R.string.sample_remove_subtitle), onClick = remove) {
+                            // The same round delete button as on the Today banner and in the headers.
+                            Box(Modifier.padding(start = 12.dp)) {
+                                HeaderIconButton(R.drawable.ic_delete, stringResource(R.string.sample_remove), danger = true, onClick = remove)
+                            }
                         }
                     }
                 }
@@ -209,6 +218,7 @@ fun MoreScreen(
                     }
                 }
             }
+        }
         }
         UndoSnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }

@@ -46,6 +46,12 @@ import app.sprout.habits.R
 import app.sprout.habits.ui.components.TabHeader
 import app.sprout.habits.ui.components.DateRangeSheet
 import app.sprout.habits.ui.components.HabitFilterChip
+import app.sprout.habits.ui.components.DateFilterChip
+import app.sprout.habits.ui.components.FilterChipRow
+import app.sprout.habits.ui.components.groupedShape
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import app.sprout.habits.ui.components.HabitFilterSheet
 import app.sprout.habits.ui.components.HeaderIconButton
 import app.sprout.habits.ui.components.BarSegment
@@ -62,37 +68,46 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek)
     var pickingRange by remember { mutableStateOf(false) }
     var filtering by remember { mutableStateOf(false) }
     val res = LocalContext.current.resources
+    // The header stays put while the list scrolls under it, so its buttons are always in reach.
+    Column(Modifier.fillMaxSize()) {
+    Box(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp)) {
+            Column {
+                TabHeader(stringResource(R.string.insights_title), listSpacing = 16.dp) {
+                    HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.change_date_range), active = ui.customRange) { pickingRange = true }
+                    HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty()) { filtering = true }
+                }
+                // Insights always has a range, so the date chip is always there.
+                FilterChipRow(Modifier.padding(top = 12.dp)) {
+                    DateFilterChip(
+                        label = ui.rangeLabel,
+                        openLabel = stringResource(R.string.change_date_range),
+                        clearLabel = stringResource(R.string.clear_date_filter),
+                        onOpen = { pickingRange = true },
+                        // ✕ goes back to this week.
+                        onClear = if (ui.customRange) ({ viewModel.setRange(null, null) }) else null,
+                    )
+                    if (ui.filter.isNotEmpty()) {
+                        HabitFilterChip(
+                            selected = ui.options.filter { it.habitId in ui.filter },
+                            label = pluralStringResource(R.plurals.habit_count, ui.filter.size, ui.filter.size),
+                            removeLabel = stringResource(R.string.remove_habit_filter),
+                            onOpen = { filtering = true },
+                            onClear = { viewModel.setFilter(emptySet()) },
+                        )
+                    }
+                }
+            }
+        
+    }
     LazyColumn(
-        Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
+        Modifier.weight(1f).fillMaxWidth(),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item(key = "header") {
-            TabHeader(
-                stringResource(R.string.insights_title),
-                subtitle = ui.rangeLabel,
-                listSpacing = 16.dp,
-                clearLabel = stringResource(R.string.clear_date_filter),
-                // ✕ goes back to this week.
-                onClearSubtitle = if (ui.customRange) ({ viewModel.setRange(null, null) }) else null,
-            ) {
-                HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.change_date_range), active = ui.customRange) { pickingRange = true }
-                HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty(), badge = ui.filter.size) { filtering = true }
-            }
-        }
-        if (ui.filter.isNotEmpty()) {
-            item(key = "chip") {
-                HabitFilterChip(
-                    selected = ui.options.filter { it.habitId in ui.filter },
-                    removeLabel = stringResource(R.string.remove_habit_filter),
-                    onOpen = { filtering = true },
-                    onClear = { viewModel.setFilter(emptySet()) },
-                )
-            }
-        }
         item(key = "score") { ScoreCard(ui) }
         item(key = "bars") { DayBars(ui) }
         if (ui.rates.isNotEmpty()) item(key = "rates") { ByHabit(ui.rates) }
+    }
     }
 
     if (pickingRange) {
@@ -233,35 +248,72 @@ private fun LegendDot(label: String, color: Color) {
     }
 }
 
-/** One card, a row per habit: tile, name and score, with a thin bar in the habit's color. */
+/**
+ * A grouped list, one row per habit: the habit tile, name, "6 of 7 days" and the streak, a
+ * progress bar in the habit's color, and the score as plain text on the right.
+ */
 @Composable
 private fun ByHabit(rates: List<HabitRateUi>) {
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
-    val track = colors.surfaceContainerHigh
-    Column(
-        Modifier.fillMaxWidth().background(colors.surfaceContainerLowest, RoundedCornerShape(24.dp)).padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
-    ) {
-        Text(stringResource(R.string.insights_by_habit), style = type.titleMedium, color = colors.onSurface, modifier = Modifier.padding(bottom = 4.dp))
-        rates.forEach { r ->
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(stringResource(R.string.insights_by_habit), style = type.titleMedium, color = colors.onBackground, modifier = Modifier.padding(start = 4.dp, top = 8.dp, end = 4.dp, bottom = 8.dp))
+        rates.forEachIndexed { index, r ->
             val hc = habitColors(r.hue)
-            // The same 44 dp tile and 22 dp icon as the Today and Journal cards.
-            Row(Modifier.padding(vertical = 8.dp).semantics(mergeDescendants = true) {}, verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .background(colors.surfaceContainerLowest, groupedShape(index, rates.size))
+                    .padding(start = 14.dp, top = 14.dp, end = 16.dp, bottom = 14.dp)
+                    .semantics(mergeDescendants = true) {},
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Box(Modifier.size(44.dp).background(hc.soft, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
                     Icon(painterResource(r.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(22.dp))
                 }
-                Column(Modifier.weight(1f).padding(start = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(r.name, style = type.titleSmall, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).padding(end = 8.dp))
-                        Text(stringResource(R.string.percent, r.percent), style = type.bodyMedium, color = colors.onSurfaceVariant, softWrap = false)
-                    }
-                    Canvas(Modifier.fillMaxWidth().height(6.dp)) {
+                Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
+                    Text(r.name, style = type.titleMedium, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    // One plain muted line: "6 of 7 days · 5-day streak" (the streak only when over 1).
+                    Text(
+                        listOfNotNull(
+                            pluralStringResource(R.plurals.days_kept, r.scheduledDays, r.keptDays, r.scheduledDays),
+                            if (r.streak > 1) pluralStringResource(R.plurals.streak_days, r.streak, r.streak) else null,
+                        ).joinToString(" · "),
+                        style = type.labelMedium.copy(fontWeight = FontWeight.Normal),
+                        color = colors.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                    // The M3 linear indicator: the bar, a 4 dp gap, the rest of the track and a stop
+                    // dot at its end. At 100% the bar fills it all.
+                    Canvas(Modifier.padding(top = 8.dp).fillMaxWidth().height(6.dp)) {
                         val radius = CornerRadius(size.height / 2)
-                        drawRoundRect(track, cornerRadius = radius)
-                        val w = size.width * r.percent / 100f
-                        if (w > 0f) drawRoundRect(hc.solid, size = Size(w, size.height), cornerRadius = radius)
+                        val gap = 4.dp.toPx()
+                        val fraction = r.percent.coerceIn(0, 100) / 100f
+                        if (fraction >= 1f) {
+                            drawRoundRect(hc.solid, cornerRadius = radius)
+                        } else {
+                            // The bar is at least a dot, and leaves room for a piece of track.
+                            val bar = if (fraction > 0f) (size.width * fraction).coerceIn(size.height, size.width - gap - 2 * size.height) else 0f
+                            val start = if (bar > 0f) bar + gap else 0f
+                            val rtl = layoutDirection == LayoutDirection.Rtl
+                            fun x(left: Float, width: Float) = if (rtl) size.width - left - width else left
+                            if (bar > 0f) drawRoundRect(hc.solid, Offset(x(0f, bar), 0f), Size(bar, size.height), radius)
+                            drawRoundRect(hc.soft, Offset(x(start, size.width - start), 0f), Size(size.width - start, size.height), radius)
+                            val dot = 4.dp.toPx()
+                            val inset = (size.height - dot) / 2
+                            drawCircle(hc.solid, dot / 2, Offset(x(size.width - inset - dot, dot) + dot / 2, size.height / 2))
+                        }
                     }
                 }
+                // The row's main value: plain text, right-aligned in a slot wide enough for "100%".
+                Text(
+                    stringResource(R.string.percent, r.percent),
+                    style = type.titleSmall,
+                    color = colors.onSurface,
+                    textAlign = TextAlign.End,
+                    softWrap = false,
+                    modifier = Modifier.defaultMinSize(minWidth = 48.dp),
+                )
             }
         }
     }

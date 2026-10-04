@@ -145,7 +145,7 @@
     <string name="text_largest">Sehr groß</string>
     <string name="font_system">Systemschrift</string>
     <string name="font_system_desc">Die Schrift deines Telefons</string>
-    <string name="font_figtree_desc">Freundlich und klar</string>
+    <string name="font_space_grotesk_desc">Markant und modern</string>
     <string name="font_outfit_desc">Rund, geometrisch</string>
     <string name="font_lexend_desc">Standard · für leichtes Lesen gemacht</string>
     <string name="font_atkinson_desc">Für Menschen mit Sehschwäche gestaltet</string>
@@ -375,10 +375,6 @@
         <item quantity="one">Letzte %1$d Woche</item>
         <item quantity="other">Letzte %1$d Wochen</item>
     </plurals>
-    <plurals name="streak_best">
-        <item quantity="one">%1$d Tag Serie · Bestwert %2$d</item>
-        <item quantity="other">%1$d Tage Serie · Bestwert %2$d</item>
-    </plurals>
     <plurals name="heatmap_description">
         <item quantity="one">%1$s: %2$d Tag Serie, Bestwert %3$d, letzte %4$d Wochen</item>
         <item quantity="other">%1$s: %2$d Tage Serie, Bestwert %3$d, letzte %4$d Wochen</item>
@@ -423,4 +419,16 @@
     <string name="sample_remove">Beispieldaten entfernen</string>
     <string name="sample_removed">Beispieldaten entfernt</string>
     <string name="sample_remove_subtitle">Löscht die Beispiel-Gewohnheiten, ihren Verlauf und ihre Notizen</string>
+    <plurals name="days_kept">
+        <item quantity="one">%1$d von %2$d Tag</item>
+        <item quantity="other">%1$d von %2$d Tagen</item>
+    </plurals>
+    <plurals name="streak_days">
+        <item quantity="one">%1$d Tag Serie</item>
+        <item quantity="other">%1$d Tage Serie</item>
+    </plurals>
+    <plurals name="best_streak_days">
+        <item quantity="one">Beste Serie · %1$d Tag</item>
+        <item quantity="other">Beste Serie · %1$d Tage</item>
+    </plurals>
 </resources>

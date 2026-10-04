@@ -145,7 +145,7 @@
     <string name="text_largest">Muito grande</string>
     <string name="font_system">Padrão do sistema</string>
     <string name="font_system_desc">A fonte do seu celular</string>
-    <string name="font_figtree_desc">Amigável e clara</string>
+    <string name="font_space_grotesk_desc">Nítida e moderna</string>
     <string name="font_outfit_desc">Arredondada, geométrica</string>
     <string name="font_lexend_desc">Padrão · feita para facilitar a leitura</string>
     <string name="font_atkinson_desc">Criada para baixa visão</string>
@@ -383,11 +383,6 @@
         <item quantity="other">Últimas %1$d semanas</item>
         <item quantity="many">Últimas %1$d semanas</item>
     </plurals>
-    <plurals name="streak_best">
-        <item quantity="one">Sequência de %1$d dia · melhor %2$d</item>
-        <item quantity="other">Sequência de %1$d dias · melhor %2$d</item>
-        <item quantity="many">Sequência de %1$d dias · melhor %2$d</item>
-    </plurals>
     <plurals name="heatmap_description">
         <item quantity="one">%1$s: sequência de %2$d dia, melhor %3$d, últimas %4$d semanas</item>
         <item quantity="other">%1$s: sequência de %2$d dias, melhor %3$d, últimas %4$d semanas</item>
@@ -437,4 +432,19 @@
     <string name="sample_remove">Remover dados de exemplo</string>
     <string name="sample_removed">Dados de exemplo removidos</string>
     <string name="sample_remove_subtitle">Apaga os hábitos de exemplo, o histórico e as notas</string>
+    <plurals name="days_kept">
+        <item quantity="one">%1$d de %2$d dia</item>
+        <item quantity="other">%1$d de %2$d dias</item>
+        <item quantity="many">%1$d de %2$d dias</item>
+    </plurals>
+    <plurals name="streak_days">
+        <item quantity="one">Sequência de %1$d dia</item>
+        <item quantity="other">Sequência de %1$d dias</item>
+        <item quantity="many">Sequência de %1$d dias</item>
+    </plurals>
+    <plurals name="best_streak_days">
+        <item quantity="one">Melhor sequência · %1$d dia</item>
+        <item quantity="other">Melhor sequência · %1$d dias</item>
+        <item quantity="many">Melhor sequência · %1$d dias</item>
+    </plurals>
 </resources>

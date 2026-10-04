@@ -32,9 +32,7 @@ import androidx.compose.material3.Text
 /**
  * The header of every tab (Today, Habits, Journal, Insights, More), so the title sits at the same
  * place on each: the 28sp title centred on the 48 dp round [actions] ([HeaderIconButton]), and an
- * optional [subtitle] (date, date range) on the line below it.
- *
- * [onClearSubtitle] puts a small ✕ after the subtitle while a date filter is on.
+ * optional [subtitle] (the date on Today) on the line below it.
  *
  * Tabs space their lists differently, so [listSpacing] is the list's own gap; the header adds the
  * rest so there are always 16 dp between the header and the first card.
@@ -44,8 +42,6 @@ fun TabHeader(
     title: String,
     subtitle: String? = null,
     listSpacing: Dp = 0.dp,
-    clearLabel: String? = null,
-    onClearSubtitle: (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     val colors = MaterialTheme.colorScheme
@@ -58,12 +54,7 @@ fun TabHeader(
                 Text(title, style = MaterialTheme.typography.headlineMedium, color = colors.onBackground)
             }
             if (subtitle != null) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(subtitle, style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant)
-                    if (onClearSubtitle != null && clearLabel != null) {
-                        SmallClearButton(clearLabel, 22.dp, colors.surfaceContainerHigh, colors.onSurfaceVariant, onClearSubtitle)
-                    }
-                }
+                Text(subtitle, style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), content = actions)

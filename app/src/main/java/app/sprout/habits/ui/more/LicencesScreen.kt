@@ -22,7 +22,7 @@ private val LICENCES = listOf(
     "Kotlin standard library and kotlinx.coroutines" to "Apache License 2.0",
     "kotlinx.serialization" to "Apache License 2.0",
     "Material Symbols (habit icons)" to "Apache License 2.0",
-    "Figtree font" to "SIL Open Font License 1.1",
+    "Space Grotesk font" to "SIL Open Font License 1.1",
     "Outfit font" to "SIL Open Font License 1.1",
     "Lexend font" to "SIL Open Font License 1.1",
     "Atkinson Hyperlegible Next font" to "SIL Open Font License 1.1",

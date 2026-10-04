@@ -22,13 +22,13 @@ private fun variableFamily(@FontRes res: Int) = FontFamily(
 )
 
 val OutfitFamily = variableFamily(R.font.outfit)
-private val FigtreeFamily = variableFamily(R.font.figtree)
+private val SpaceGroteskFamily = variableFamily(R.font.space_grotesk)
 private val LexendFamily = variableFamily(R.font.lexend)
 private val AtkinsonFamily = variableFamily(R.font.atkinson_hyperlegible)
 
 fun BodyFont.family(): FontFamily = when (this) {
     BodyFont.SYSTEM -> FontFamily.Default
-    BodyFont.FIGTREE -> FigtreeFamily
+    BodyFont.SPACE_GROTESK -> SpaceGroteskFamily
     BodyFont.OUTFIT -> OutfitFamily
     BodyFont.LEXEND -> LexendFamily
     BodyFont.ATKINSON -> AtkinsonFamily

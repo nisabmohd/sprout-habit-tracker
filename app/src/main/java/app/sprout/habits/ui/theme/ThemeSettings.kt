@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
-enum class BodyFont { SYSTEM, FIGTREE, OUTFIT, LEXEND, ATKINSON }
+enum class BodyFont { SYSTEM, SPACE_GROTESK, OUTFIT, LEXEND, ATKINSON }
 
 /** Everything the theme needs from user settings. */
 @Immutable

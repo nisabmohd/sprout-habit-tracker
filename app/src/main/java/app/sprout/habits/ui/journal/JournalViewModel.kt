@@ -8,6 +8,8 @@ import app.sprout.habits.Strings
 import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.data.Note
+import app.sprout.habits.data.SettingsRepository
+import app.sprout.habits.domain.weekOf
 import app.sprout.habits.ui.components.HabitFilterOption
 import app.sprout.habits.ui.components.NoteCardUi
 import app.sprout.habits.ui.datePattern
@@ -29,6 +31,13 @@ import kotlinx.coroutines.launch
 @Immutable
 data class JournalDayUi(val day: Long, val label: String, val notes: List<NoteCardUi>)
 
+/** Which dates the Journal shows. It opens on this week. */
+private sealed interface DateFilter {
+    data object ThisWeek : DateFilter
+    data object AllDates : DateFilter
+    data class Range(val from: LocalDate, val to: LocalDate) : DateFilter
+}
+
 @Immutable
 data class JournalUi(
     /** Newest day first, already filtered. */
@@ -39,18 +48,26 @@ data class JournalUi(
     /** Null = all dates. */
     val from: LocalDate?,
     val to: LocalDate?,
-    /** "21 – 27 Sep 2026" when a range is set. */
-    val rangeLabel: String?,
+    /** "This week", "All dates" or "21 – 27 Sep". */
+    val dateLabel: String,
+    /** True while the dates are the default, this week. */
+    val thisWeek: Boolean,
+    /** False when the journal has no notes at all, whatever the filters. */
+    val hasNotes: Boolean,
 )
 
-class JournalViewModel(private val repository: HabitRepository, private val strings: Strings) : ViewModel() {
+class JournalViewModel(
+    private val repository: HabitRepository,
+    private val settings: SettingsRepository,
+    private val strings: Strings,
+) : ViewModel() {
     private val _deleted = Channel<Note>(Channel.CONFLATED)
 
     /** Each note deleted from the long-press sheet, for the Undo snackbar. */
     val deleted = _deleted.receiveAsFlow()
 
     private val filterIds = MutableStateFlow<Set<Long>>(emptySet())
-    private val range = MutableStateFlow<Pair<LocalDate, LocalDate>?>(null)
+    private val dates = MutableStateFlow<DateFilter>(DateFilter.ThisWeek)
 
     /** Null while loading. */
     val state: StateFlow<JournalUi?> =
@@ -59,12 +76,18 @@ class JournalViewModel(private val repository: HabitRepository, private val stri
             repository.observeAllHabits(),
             repository.observeEntries(0, Long.MAX_VALUE),
             filterIds,
-            range,
-        ) { notes, habits, entries, filter, r ->
+            combine(dates, settings.settings) { d, s -> d to s.weekStart },
+        ) { notes, habits, entries, filter, (date, weekStart) ->
             val byId = habits.associateBy { it.id }
             val entryOf = entries.associateBy { it.habitId to it.date }
             val withNotes = notes.mapTo(HashSet()) { it.habitId }
             val today = LocalDate.now()
+            val r = when (date) {
+                // Start of this week through today, like Insights.
+                DateFilter.ThisWeek -> weekOf(today, weekStart).first() to today
+                DateFilter.AllDates -> null
+                is DateFilter.Range -> date.from to date.to
+            }
             val cards = notes
                 .filter { filter.isEmpty() || it.habitId in filter }
                 .filter { r == null || it.date in r.first.toEpochDay()..r.second.toEpochDay() }
@@ -81,15 +104,29 @@ class JournalViewModel(private val repository: HabitRepository, private val stri
                     .map { HabitFilterOption(it.id, it.name, HabitIcon.fromKey(it.icon).drawable, it.colorHue.toFloat()) },
                 from = r?.first,
                 to = r?.second,
-                rangeLabel = r?.let { InsightsViewModel.rangeLabel(it.first, it.second) },
+                dateLabel = when (date) {
+                    DateFilter.ThisWeek -> strings(R.string.this_week)
+                    DateFilter.AllDates -> strings(R.string.all_dates)
+                    is DateFilter.Range -> InsightsViewModel.chipRangeLabel(date.from, date.to, today)
+                },
+                thisWeek = date == DateFilter.ThisWeek,
+                hasNotes = notes.isNotEmpty(),
             )
         }
             .flowOn(Dispatchers.Default)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    /** Nulls show notes from every date. */
-    fun setRange(from: LocalDate?, to: LocalDate?) {
-        range.value = if (from == null || to == null) null else minOf(from, to) to maxOf(from, to)
+    fun setRange(from: LocalDate, to: LocalDate) {
+        dates.value = DateFilter.Range(minOf(from, to), maxOf(from, to))
+    }
+
+    /** Back to the default. */
+    fun showThisWeek() {
+        dates.value = DateFilter.ThisWeek
+    }
+
+    fun showAllDates() {
+        dates.value = DateFilter.AllDates
     }
 
     fun setFilter(habitIds: Set<Long>) {

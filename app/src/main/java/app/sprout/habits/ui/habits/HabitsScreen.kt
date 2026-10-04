@@ -78,17 +78,20 @@ fun HabitsScreen(
     DayLogHost(viewModel.logger, snackbar)
 
     Box(Modifier.fillMaxSize()) {
-    LazyColumn(
-        Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        item(key = "header") {
+    // The header stays put while the list scrolls under it, so its buttons are always in reach.
+    Column(Modifier.fillMaxSize()) {
+    Box(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp)) {
             TabHeader(stringResource(R.string.tab_habits), listSpacing = 12.dp) {
                 HeaderIconButton(R.drawable.ic_drag, stringResource(R.string.manage_habits), onClick = onManage)
                 HeaderIconButton(R.drawable.ic_plus, stringResource(R.string.new_habit), onClick = onAddHabit)
             }
-        }
+        
+    }
+    LazyColumn(
+        Modifier.weight(1f).fillMaxWidth(),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
         item(key = "mode") {
             // Each segment is a fixed share of the row, so labels stop scaling at 1.3x.
             CappedFontScale {
@@ -115,6 +118,7 @@ fun HabitsScreen(
             }
         }
     }
+    }
     UndoSnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(horizontal = 8.dp))
     }
 }
@@ -140,10 +144,11 @@ private fun WeekNavigator(week: WeekUi, onPrevious: () -> Unit, onNext: () -> Un
 private fun CardHeader(icon: Int, hue: Float, title: String, subtitle: String?, trailing: @Composable () -> Unit) {
     val hc = habitColors(hue)
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(32.dp).background(hc.soft, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
-            Icon(painterResource(icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(18.dp))
+        // The same 44 dp tile and 22 dp icon as a Today habit card.
+        Box(Modifier.size(44.dp).background(hc.soft, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
+            Icon(painterResource(icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(22.dp))
         }
-        Column(Modifier.weight(1f).padding(start = 12.dp)) {
+        Column(Modifier.weight(1f).padding(start = 12.dp, end = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
             subtitle?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
@@ -171,7 +176,7 @@ private fun WeekCard(habit: HabitWeekUi, week: WeekUi, onOpen: (Long) -> Unit, o
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         CardHeader(habit.icon, habit.hue, habit.name, null) {
-            Text(habit.goal, style = MaterialTheme.typography.bodyLarge, color = colors.onSurfaceVariant)
+            Text(habit.goal, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
         }
         // Seven equal columns that share the card's width, so they fit narrow phones; the day
         // labels stop scaling at 1.3x so they never wrap.
@@ -233,11 +238,9 @@ private fun Legend() {
         Text(pluralStringResource(R.plurals.last_weeks, OVERALL_WEEKS, OVERALL_WEEKS), style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant, modifier = Modifier.padding(end = 12.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
         LegendItem(stringResource(R.string.outcome_done)) { drawRoundRect(colors.onSurfaceVariant, cornerRadius = CornerRadius(size.width * 0.3f)) }
-        LegendItem(stringResource(R.string.outcome_partial)) { drawRoundRect(colors.outlineVariant, cornerRadius = CornerRadius(size.width * 0.3f)) }
-        LegendItem(stringResource(R.string.outcome_skipped)) {
-            val w = 1.dp.toPx()
-            drawRoundRect(colors.outlineVariant, Offset(w / 2, w / 2), Size(size.width - w, size.height - w), CornerRadius(size.width * 0.3f), style = Stroke(w))
-        }
+        // Neutral greys: the cells themselves are in each habit's own color.
+        LegendItem(stringResource(R.string.outcome_partial)) { drawRoundRect(colors.onSurfaceVariant.copy(alpha = 0.45f), cornerRadius = CornerRadius(size.width * 0.3f)) }
+        LegendItem(stringResource(R.string.outcome_skipped)) { drawRoundRect(colors.outlineVariant, cornerRadius = CornerRadius(size.width * 0.3f)) }
         }
     }
 }
@@ -262,7 +265,13 @@ private fun OverallCard(habit: HabitOverallUi, overall: OverallUi, onOpen: (Long
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        CardHeader(habit.icon, habit.hue, habit.name, pluralStringResource(R.plurals.streak_best, habit.currentStreak, habit.currentStreak, habit.bestStreak)) {}
+        CardHeader(habit.icon, habit.hue, habit.name, pluralStringResource(R.plurals.best_streak_days, habit.bestStreak, habit.bestStreak)) {
+            Text(
+                pluralStringResource(R.plurals.streak_days, habit.currentStreak, habit.currentStreak),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant,
+            )
+        }
         // Labels sit over fixed heatmap columns, so they stop scaling at 1.3x.
         CappedFontScale {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
@@ -310,7 +319,8 @@ private fun Heatmap(habit: HabitOverallUi) {
             when (mark.kind) {
                 MarkKind.DONE -> drawRoundRect(hc.solid, topLeft, s, radius)
                 MarkKind.PARTIAL -> drawRoundRect(hc.mid, topLeft, s, radius)
-                MarkKind.SKIP -> drawRoundRect(outline, topLeft + Offset(stroke / 2, stroke / 2), Size(cell - stroke, cell - stroke), radius, style = Stroke(stroke))
+                // Filled grey, no border.
+                MarkKind.SKIP -> drawRoundRect(outline, topLeft, s, radius)
                 MarkKind.OPEN_TODAY -> drawRoundRect(hc.solid, topLeft + Offset(stroke, stroke), Size(cell - 2 * stroke, cell - 2 * stroke), radius, style = Stroke(stroke * 1.5f))
                 MarkKind.NOT_SCHEDULED -> drawRoundRect(faint, topLeft, s, radius)
                 MarkKind.FUTURE -> Unit

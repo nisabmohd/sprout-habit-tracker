@@ -312,12 +312,16 @@ private fun EditHabitContent(
             Section(stringResource(R.string.reminder)) {
                 Card {
                     Row(
-                        Modifier.fillMaxWidth().clickable { endTyping(); pickingTime = true }.padding(horizontal = 16.dp, vertical = 12.dp),
+                        Modifier.fillMaxWidth().clickable { endTyping(); pickingTime = true }.padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(painterResource(R.drawable.ic_bell), contentDescription = null, tint = colors.onSurface, modifier = Modifier.size(22.dp))
-                        Column(Modifier.weight(1f).padding(start = 14.dp)) {
-                            Text(TodayViewModel.formatTime(form.reminderMinutes), style = type.titleLarge, color = colors.onSurface)
+                        // A round tile in the habit's color, like the icon tiles elsewhere.
+                        Box(Modifier.size(44.dp).background(hc.soft, CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(painterResource(R.drawable.ic_bell_filled), contentDescription = null, tint = hc.ink, modifier = Modifier.size(22.dp))
+                        }
+                        Column(Modifier.weight(1f).padding(start = 14.dp, end = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            // 16sp like the titles in the card below; 22sp looked too big next to them.
+                            Text(TodayViewModel.formatTime(form.reminderMinutes), style = type.titleMedium, color = colors.onSurface)
                             Text(stringResource(R.string.reminder_hint), style = type.bodyMedium, color = colors.onSurfaceVariant)
                         }
                         Switch(checked = form.reminderOn, onCheckedChange = { v -> needsNotifications(v); edit { it.copy(reminderOn = v) } })
@@ -406,7 +410,7 @@ private fun ToggleRow(title: String, subtitle: String, checked: Boolean, onChang
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(Modifier.weight(1f).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
             Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }

@@ -145,7 +145,7 @@
     <string name="text_largest">特大</string>
     <string name="font_system">システムのフォント</string>
     <string name="font_system_desc">スマートフォンのフォント</string>
-    <string name="font_figtree_desc">親しみやすく読みやすい</string>
+    <string name="font_space_grotesk_desc">シャープでモダン</string>
     <string name="font_outfit_desc">丸みのある幾何学的な書体</string>
     <string name="font_lexend_desc">標準・読みやすさを重視</string>
     <string name="font_atkinson_desc">弱視の方のためにデザイン</string>
@@ -367,9 +367,6 @@
     <plurals name="last_weeks">
         <item quantity="other">過去 %1$d 週間</item>
     </plurals>
-    <plurals name="streak_best">
-        <item quantity="other">%1$d 日連続・最長 %2$d</item>
-    </plurals>
     <plurals name="heatmap_description">
         <item quantity="other">%1$s：%2$d 日連続、最長 %3$d、過去 %4$d 週間</item>
     </plurals>
@@ -409,4 +406,13 @@
     <string name="sample_remove">サンプルデータを削除</string>
     <string name="sample_removed">サンプルデータを削除しました</string>
     <string name="sample_remove_subtitle">サンプルの習慣と記録、ノートを削除します</string>
+    <plurals name="days_kept">
+        <item quantity="other">%2$d 日中 %1$d 日</item>
+    </plurals>
+    <plurals name="streak_days">
+        <item quantity="other">%1$d 日連続</item>
+    </plurals>
+    <plurals name="best_streak_days">
+        <item quantity="other">最長 · %1$d 日連続</item>
+    </plurals>
 </resources>

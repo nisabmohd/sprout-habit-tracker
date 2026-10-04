@@ -28,13 +28,13 @@ Code: `ui/edit/`, `ui/manage/`, `ui/habits/`, `ui/detail/`, statistics in `domai
 
 ## Journal and notes
 
-A note belongs to one habit and one day. The Journal tab lists every note, newest first, under date headers; each card shows the habit, that day's outcome and when the note was written. The two buttons at the top open bottom sheets to filter by date range and by one or more habits. While a filter is on, its button is tinted, the filter button shows how many habits are picked, the date range under the title has a ✕ to clear it, and a chip lists the picked habits (tap it to change them, ✕ to clear). Notes can be added from Today, the Journal, a habit's detail screen or the press-and-hold sheet, and edited or deleted later. Press and hold a note card in the Journal for a sheet with Edit note, Share and Delete note; deleting shows an Undo snackbar.
+A note belongs to one habit and one day. The Journal tab lists notes newest first, grouped by day; each note shows the habit, that day's outcome, when it was written, and the text. It opens on this week. The two buttons at the top open bottom sheets to pick other dates (or "All dates") and one or more habits. Chips under the title show what is applied: the dates, then the habits. Tap a chip to change it; ✕ on the date chip goes back to this week and ✕ on the habit chip clears the habits. A button whose filter is on is tinted and gets a small dot. When you write a new note for a habit and day that already have one, that note opens so you add to it. Notes can be added from Today, the Journal, a habit's detail screen or the press-and-hold sheet, and edited or deleted later. Press and hold a note card in the Journal for a sheet with Edit note, Share and Delete note; deleting shows an Undo snackbar.
 
 Code: `ui/journal/`, `ui/note/`.
 
 ## Insights
 
-A summary for any date range (this week by default), for all habits or the ones you pick. The range and habits are chosen in bottom sheets from the buttons at the top. It shows the average score, how many days were done or partial, the best weekday, habits completed per day, and each habit's score. Active filters look the same as in the Journal. A range of 8 to 14 days shows each weekday's average, and a longer one shows one column per week. A past day with no entry counts as 0 in the score; only a day marked Skip is left out.
+A summary for any date range (this week by default), for all habits or the ones you pick. The range and habits are chosen in bottom sheets from the buttons at the top. It shows the average score, how many days were done or partial, the best weekday, habits completed per day, and for each habit the days kept, the current streak and the score. Active filters look the same as in the Journal. A range of 8 to 14 days shows each weekday's average, and a longer one shows one column per week. A past day with no entry counts as 0 in the score; only a day marked Skip is left out.
 
 Code: `ui/insights/`.
 
@@ -62,7 +62,7 @@ Code: `data/backup/`, `ui/more/BackupSection.kt`.
 
 ## Settings
 
-The More tab covers backup, the app language (English, Hindi, Spanish, German, French, Portuguese (Brazil), Japanese or the phone's language, applied at once), theme (system, light, dark), dynamic color or an accent color, font (system, Figtree, Outfit, Lexend, Atkinson Hyperlegible), text size, the first day of the week, the default reminder time, notification settings and About.
+The More tab covers backup, the app language (English, Hindi, Spanish, German, French, Portuguese (Brazil), Japanese or the phone's language, applied at once), theme (system, light, dark), dynamic color or an accent color, font (system, Space Grotesk, Outfit, Lexend, Atkinson Hyperlegible), text size, the first day of the week, the default reminder time, notification settings and About.
 
 Code: `ui/more/`, `data/SettingsRepository.kt`, `ui/theme/`, `AppLanguage.kt`; text in `res/values*/strings.xml`.
 

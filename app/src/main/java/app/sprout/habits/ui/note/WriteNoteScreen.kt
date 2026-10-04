@@ -179,8 +179,9 @@ fun WriteNoteScreen(viewModel: WriteNoteViewModel, weekStart: DayOfWeek, onClose
                         }
                     },
                 )
-                // A new note opens ready to type; the field only exists once the habit is known.
-                LaunchedEffect(Unit) { if (form.isNew) focus.requestFocus() }
+                // Add note opens ready to type, also when that day's note is already there; the
+                // field only exists once the habit is known.
+                LaunchedEffect(Unit) { if (viewModel.opensTyping) focus.requestFocus() }
             }
         }
     }

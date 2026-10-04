@@ -46,8 +46,6 @@ import androidx.compose.runtime.getValue
 import app.sprout.habits.R
 import app.sprout.habits.ui.components.BarSegment
 import app.sprout.habits.ui.components.SegmentBar
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material3.TextButton
 import app.sprout.habits.ui.components.HeaderIconButton
 import app.sprout.habits.ui.components.TabHeader
 import app.sprout.habits.support.SupportPromptDialog
@@ -141,12 +139,16 @@ private fun TodayContent(
     onOpen: (Long) -> Unit,
     sampleCard: (@Composable () -> Unit)?,
 ) {
+    // The header stays put while the list scrolls under it, so its buttons are always in reach.
+    Column(Modifier.fillMaxSize()) {
+    Box(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp)) {
+ Header(state, onAddHabit) 
+    }
     LazyColumn(
-        Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 96.dp),
+        Modifier.weight(1f).fillMaxWidth(),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        item(key = "header") { Header(state, onAddHabit) }
         if (sampleCard != null) item(key = "sample") { sampleCard() }
         item(key = "score") { ScoreCard(state) }
         if (!state.loading && state.habits.isEmpty()) {
@@ -163,6 +165,7 @@ private fun TodayContent(
                 onClick = { onOpen(habit.id) },
             )
         }
+    }
     }
 }
 
@@ -254,21 +257,23 @@ private fun EmptyState() {
 private fun SampleDataCard(onRemove: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val type = MaterialTheme.typography
-    Column(
+    Row(
         Modifier
             .fillMaxWidth()
             .background(colors.primaryContainer, RoundedCornerShape(24.dp))
-            .padding(start = 16.dp, end = 8.dp, top = 14.dp, bottom = 6.dp),
+            .padding(start = 16.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(stringResource(R.string.sample_card_title), style = type.titleSmall, color = colors.onPrimaryContainer)
-        Text(
-            stringResource(R.string.sample_card_body),
-            style = type.bodyMedium,
-            color = colors.onPrimaryContainer,
-            modifier = Modifier.padding(top = 2.dp, end = 8.dp),
-        )
-        TextButton(onClick = onRemove, modifier = Modifier.align(Alignment.End).heightIn(min = 48.dp)) {
-            Text(stringResource(R.string.sample_remove), style = type.labelLarge, color = colors.onPrimaryContainer)
+        Column(Modifier.weight(1f).padding(end = 12.dp)) {
+            Text(stringResource(R.string.sample_card_title), style = type.titleSmall, color = colors.onPrimaryContainer)
+            Text(
+                stringResource(R.string.sample_card_body),
+                style = type.bodyMedium,
+                color = colors.onPrimaryContainer,
+                modifier = Modifier.padding(top = 2.dp),
+            )
         }
+        // The same round delete button as in the screen headers.
+        HeaderIconButton(R.drawable.ic_delete, stringResource(R.string.sample_remove), danger = true, onClick = onRemove)
     }
 }

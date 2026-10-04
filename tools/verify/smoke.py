@@ -122,6 +122,7 @@ def today_opposite_swipe_undoes():
 @check
 def today_long_press_sheet():
     d.nav("Today")
+    d.scroll_to_top()  # the swipe checks before this one leave a short screen scrolled past Read
     d.long_press("Read")
     assert d.exists("Goal 20 pages", contains=True), "amount sheet missing its goal"
     assert d.exists("Partial"), "outcome buttons missing"
@@ -181,7 +182,9 @@ def today_done_shows_time():
     d.scroll_to_top()
     # Earlier checks toggle Wake up at 7, so its time is whenever that ran.
     assert d.exists("Done at ", contains=True), "done card doesn't say when it was logged"
-    d.tap("Mark Workout done")
+    n = d.scroll_to("Mark Workout done")  # below the fold on a small screen
+    assert n, "Workout not on Today"
+    d.tap_xy(*n.center)
     assert d.exists("45 / 45 min"), "Workout not done"
     d.tap("Mark Workout not done")
 
@@ -267,7 +270,8 @@ def habits_week_and_overall():
     assert d.exists("complete this week", contains=True), "week view missing"
     d.tap("Overall")
     assert d.exists("Last 26 weeks"), "overall heatmap missing"
-    assert d.exists("-day streak · best", contains=True), "overall card missing its streak line"
+    assert d.exists("Best streak · ", contains=True), "overall card missing its best streak line"
+    assert d.exists("-day streak", contains=True), "overall card missing its current streak"
     assert not any(n.label.endswith("%") for n in d.dump()), "overall still shows a percentage"
     d.tap("Week")
 
@@ -298,7 +302,8 @@ def journal_cards_and_new_note():
     assert d.exists("Today"), "no date header over today's notes"
     assert d.exists("Skipped"), "note card doesn't show the day's outcome"
     d.tap("Add note")
-    assert d.exists("How did it go today?"), "new note placeholder missing"
+    # The check before this one wrote today's note for the first habit, so Add note shows it.
+    assert d.exists("Smoke test note"), "today's saved note isn't shown when adding a note for the same habit and day"
     time.sleep(1)
     assert "mInputShown=true" in d.shell("dumpsys input_method"), "new note didn't open with the keyboard"
     d.back()
@@ -358,7 +363,10 @@ def journal_filter_by_habit():
     assert not d.exists("Smoke test note", timeout=1), "another habit's note shown under the filter"
     d.tap("Filter by habit")
     d.tap("Clear")
-    d.tap("Deep work")  # made by measure_with_step; no sample note and no check writes one
+    # Made by measure_with_step; no sample note and no check writes one. Last in the sheet's list.
+    n = d.scroll_to("Deep work")
+    assert n, "Deep work not in the filter sheet"
+    d.tap_xy(*n.center)
     d.tap("Show notes for 1 habit")
     time.sleep(1)
     assert d.exists("No notes for these filters"), "empty filter message missing"
@@ -377,10 +385,14 @@ def journal_filter_by_date():
     d.tap("Show", contains=True)
     time.sleep(1)
     assert d.exists("Rough morning", contains=True), "today's note missing under a today-only range"
-    assert d.exists(f"{today.day} ", contains=True), "range label missing under the title"
+    assert d.exists(f"{today.day} ", contains=True), "date chip doesn't show the range"
+    d.tap("Clear date filter")
+    assert d.exists("This week"), "the chip's ✕ didn't go back to this week"
     d.tap("Filter by date")
     d.tap("All dates")
-    assert d.exists("Journal"), "Journal missing after clearing dates"
+    assert d.exists("Clear date filter"), "All dates chip has no ✕"
+    d.tap("Clear date filter")
+    assert d.exists("This week"), "Journal didn't go back to this week"
 
 
 @check
@@ -405,6 +417,22 @@ def note_date_in_a_sheet():
 
 
 @check
+def note_shows_the_saved_one_for_that_day():
+    # The sample data has a Stay calm note for today.
+    d.nav("Journal")
+    d.tap("Add note")
+    time.sleep(1)
+    if "mInputShown=true" in d.shell("dumpsys input_method"):
+        d.back()
+    d.tap("Choose habit")
+    time.sleep(1)
+    d.tap("Stay calm")
+    assert d.exists("Rough morning", contains=True), "the day's saved note isn't shown in the form"
+    assert d.exists("Edit note"), "the form didn't switch to editing the saved note"
+    d.tap("Close")
+
+
+@check
 def insights_render():
     d.nav("Insights")
     assert d.exists("average"), "score card missing"
@@ -421,7 +449,7 @@ def insights_render():
     assert d.exists("Remove habit filter"), "habit filter chip missing"
     d.tap("Remove habit filter")
     assert not d.exists("Remove habit filter", timeout=1.0), "chip's ✕ didn't clear the habit filter"
-    assert d.exists("Clear date filter"), "date line has no ✕ for a custom range"
+    assert d.exists("Clear date filter"), "date chip has no ✕ for a custom range"
     d.tap("Change date range")
     d.tap("This week")
 

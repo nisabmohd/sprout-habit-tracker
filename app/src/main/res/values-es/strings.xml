@@ -145,7 +145,7 @@
     <string name="text_largest">Muy grande</string>
     <string name="font_system">Predeterminada del sistema</string>
     <string name="font_system_desc">La fuente de tu teléfono</string>
-    <string name="font_figtree_desc">Cercana y clara</string>
+    <string name="font_space_grotesk_desc">Nítida y moderna</string>
     <string name="font_outfit_desc">Redondeada, geométrica</string>
     <string name="font_lexend_desc">Predeterminada · pensada para leer con facilidad</string>
     <string name="font_atkinson_desc">Diseñada para baja visión</string>
@@ -383,11 +383,6 @@
         <item quantity="other">Últimas %1$d semanas</item>
         <item quantity="many">Últimas %1$d semanas</item>
     </plurals>
-    <plurals name="streak_best">
-        <item quantity="one">Racha de %1$d día · mejor %2$d</item>
-        <item quantity="other">Racha de %1$d días · mejor %2$d</item>
-        <item quantity="many">Racha de %1$d días · mejor %2$d</item>
-    </plurals>
     <plurals name="heatmap_description">
         <item quantity="one">%1$s: racha de %2$d día, mejor %3$d, últimas %4$d semanas</item>
         <item quantity="other">%1$s: racha de %2$d días, mejor %3$d, últimas %4$d semanas</item>
@@ -437,4 +432,19 @@
     <string name="sample_remove">Quitar datos de ejemplo</string>
     <string name="sample_removed">Datos de ejemplo quitados</string>
     <string name="sample_remove_subtitle">Borra los hábitos de ejemplo, su historial y sus notas</string>
+    <plurals name="days_kept">
+        <item quantity="one">%1$d de %2$d día</item>
+        <item quantity="other">%1$d de %2$d días</item>
+        <item quantity="many">%1$d de %2$d días</item>
+    </plurals>
+    <plurals name="streak_days">
+        <item quantity="one">Racha de %1$d día</item>
+        <item quantity="other">Racha de %1$d días</item>
+        <item quantity="many">Racha de %1$d días</item>
+    </plurals>
+    <plurals name="best_streak_days">
+        <item quantity="one">Mejor racha · %1$d día</item>
+        <item quantity="other">Mejor racha · %1$d días</item>
+        <item quantity="many">Mejor racha · %1$d días</item>
+    </plurals>
 </resources>

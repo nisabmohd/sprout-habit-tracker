@@ -5,6 +5,8 @@ import app.sprout.habits.ui.datePattern
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.sprout.habits.R
+import app.sprout.habits.Strings
 import app.sprout.habits.data.Entry
 import app.sprout.habits.data.Habit
 import app.sprout.habits.data.HabitRepository
@@ -12,6 +14,7 @@ import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.SettingsRepository
 import app.sprout.habits.ui.components.HabitFilterOption
 import app.sprout.habits.domain.DayOutcome
+import app.sprout.habits.domain.currentStreak
 import app.sprout.habits.domain.dayCredit
 import app.sprout.habits.domain.history
 import app.sprout.habits.domain.outcomeOf
@@ -37,11 +40,22 @@ import kotlinx.coroutines.flow.stateIn
 data class DayBarUi(val label: String, val name: String, val done: Float, val partial: Float, val isBest: Boolean)
 
 @Immutable
-data class HabitRateUi(val id: Long, val name: String, val icon: Int, val hue: Float, val percent: Int)
+data class HabitRateUi(
+    val id: Long,
+    val name: String,
+    val icon: Int,
+    val hue: Float,
+    val percent: Int,
+    /** Done or partial days, out of [scheduledDays] in the range. */
+    val keptDays: Int,
+    val scheduledDays: Int,
+    /** The habit's streak as of today, whatever the range. */
+    val streak: Int,
+)
 
 @Immutable
 data class InsightsUi(
-    /** "21 – 27 Sep 2026" */
+    /** "This week" or "21 – 27 Sep". */
     val rangeLabel: String,
     val from: LocalDate,
     val to: LocalDate,
@@ -66,6 +80,7 @@ data class InsightsUi(
 class InsightsViewModel(
     private val repository: HabitRepository,
     private val settings: SettingsRepository,
+    private val strings: Strings,
 ) : ViewModel() {
     /** Null = this week up to today (follows the week-start setting and rolls over with the calendar). */
     private val range = MutableStateFlow<Pair<LocalDate, LocalDate>?>(null)
@@ -79,7 +94,9 @@ class InsightsViewModel(
                 repository.observeHabits(),
                 repository.observeEntries(from.toEpochDay(), to.toEpochDay()),
                 filter,
-            ) { habits, entries, f -> build(today, from, to, r != null, weekStart, habits, entries, f) }
+                // Streaks reach back past the range, so they need every entry.
+                repository.observeEntries(0, Long.MAX_VALUE),
+            ) { habits, entries, f, all -> build(today, from, to, r != null, weekStart, habits, entries, f, all) }
         }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -105,9 +122,11 @@ class InsightsViewModel(
         allHabits: List<Habit>,
         entries: List<Entry>,
         filterIds: Set<Long>,
+        allEntries: List<Entry>,
     ): InsightsUi {
         val habits = allHabits.filter { filterIds.isEmpty() || it.id in filterIds }
         val byHabit = entries.groupBy { it.habitId }.mapValues { (_, l) -> l.associateBy { it.date } }
+        val allByHabit = allEntries.groupBy { it.habitId }.mapValues { (_, l) -> l.associateBy { it.date } }
         val todayDay = today.toEpochDay()
         val first = from.toEpochDay()
         val last = minOf(to.toEpochDay(), todayDay)
@@ -132,13 +151,16 @@ class InsightsViewModel(
         val rates = habits.map { habit ->
             val history = habit.history(byHabit[habit.id].orEmpty())
             val habitCredits = mutableListOf<Double?>()
+            var kept = 0
+            var scheduled = 0
             for (day in first..last) {
                 if (!history.isScheduled(day)) continue
                 val entry = history.entries[day]
                 val c = columnOf(day)
+                scheduled++
                 when (outcomeOf(entry, day, todayDay)) {
-                    DayOutcome.DONE -> done[c]++
-                    DayOutcome.PARTIAL -> partial[c]++
+                    DayOutcome.DONE -> { done[c]++; kept++ }
+                    DayOutcome.PARTIAL -> { partial[c]++; kept++ }
                     else -> Unit
                 }
                 val credit = dayCredit(entry, habit.target, day, todayDay)
@@ -146,7 +168,16 @@ class InsightsViewModel(
                 credits[c] += credit
             }
             allCredits += habitCredits
-            HabitRateUi(habit.id, habit.name, HabitIcon.fromKey(habit.icon).drawable, habit.colorHue.toFloat(), (score(habitCredits) * 100).roundToInt())
+            HabitRateUi(
+                id = habit.id,
+                name = habit.name,
+                icon = HabitIcon.fromKey(habit.icon).drawable,
+                hue = habit.colorHue.toFloat(),
+                percent = (score(habitCredits) * 100).roundToInt(),
+                keptDays = kept,
+                scheduledDays = scheduled,
+                streak = habit.history(allByHabit[habit.id].orEmpty()).currentStreak(todayDay),
+            )
         }.sortedByDescending { it.percent }
 
         val bestIndex = credits.withIndex()
@@ -177,7 +208,7 @@ class InsightsViewModel(
         }
 
         return InsightsUi(
-            rangeLabel = rangeLabel(from, to),
+            rangeLabel = if (customRange) chipRangeLabel(from, to, today) else strings(R.string.this_week),
             from = from,
             to = to,
             filter = filterIds,
@@ -195,6 +226,17 @@ class InsightsViewModel(
     }
 
     companion object {
+        /** The range as a filter chip shows it: without the year while it is this year's. */
+        fun chipRangeLabel(from: LocalDate, to: LocalDate, today: LocalDate): String {
+            if (from.year != today.year || to.year != today.year) return rangeLabel(from, to)
+            val dm = datePattern("d MMM")
+            return when {
+                from == to -> from.format(dm)
+                englishDates() && from.month == to.month -> "${from.dayOfMonth} – ${to.format(dm)}"
+                else -> "${from.format(dm)} – ${to.format(dm)}"
+            }
+        }
+
         /** "28 Sep 2026", "21 – 27 Sep 2026", "28 Sep – 4 Oct 2026", "29 Dec 2025 – 4 Jan 2026". */
         fun rangeLabel(from: LocalDate, to: LocalDate): String {
             val dm = datePattern("d MMM")

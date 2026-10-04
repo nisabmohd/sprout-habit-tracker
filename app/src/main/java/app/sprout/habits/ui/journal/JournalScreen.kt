@@ -52,6 +52,12 @@ import androidx.compose.runtime.LaunchedEffect
 import android.content.Intent
 import app.sprout.habits.ui.components.DateRangeSheet
 import app.sprout.habits.ui.components.HabitFilterChip
+import app.sprout.habits.ui.components.DateFilterChip
+import app.sprout.habits.ui.components.FilterChipRow
+import app.sprout.habits.ui.components.groupedShape
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.text.font.FontWeight
 import app.sprout.habits.ui.components.HabitFilterSheet
 import app.sprout.habits.ui.components.HeaderIconButton
 
@@ -81,46 +87,56 @@ fun JournalScreen(
     val res = LocalContext.current.resources
     val addNote = stringResource(R.string.add_note)
     Box(Modifier.fillMaxSize()) {
-        LazyColumn(
-            Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 104.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            item(key = "title") {
-                // Every filter lives in a sheet: dates here, habits next to it.
-                TabHeader(
-                    stringResource(R.string.journal_title),
-                    subtitle = state?.rangeLabel,
-                    listSpacing = 8.dp,
-                    clearLabel = stringResource(R.string.clear_date_filter),
-                    onClearSubtitle = { viewModel.setRange(null, null) },
-                ) {
+        // The header stays put while the list scrolls under it, so its buttons are always in reach.
+        Column(Modifier.fillMaxSize()) {
+        Box(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 2.dp)) {
+                // Every filter lives in a sheet; the chips under the title show what is applied.
+                Column(Modifier.padding(bottom = 14.dp)) {
+                    TabHeader(stringResource(R.string.journal_title), listSpacing = 16.dp) {
+                        state?.let { ui ->
+                            HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.filter_by_date), active = !ui.thisWeek) { pickingRange = true }
+                            if (ui.options.isNotEmpty()) {
+                                HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty()) { choosing = true }
+                            }
+                        }
+                    }
                     state?.let { ui ->
-                        HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.filter_by_date), active = ui.from != null) { pickingRange = true }
-                        if (ui.options.isNotEmpty()) {
-                            HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty(), badge = ui.filter.size) { choosing = true }
+                        FilterChipRow(Modifier.padding(top = 12.dp)) {
+                            DateFilterChip(
+                                label = ui.dateLabel,
+                                openLabel = stringResource(R.string.filter_by_date),
+                                clearLabel = stringResource(R.string.clear_date_filter),
+                                onOpen = { pickingRange = true },
+                                // ✕ goes back to this week.
+                                onClear = if (ui.thisWeek) null else viewModel::showThisWeek,
+                            )
+                            if (ui.filter.isNotEmpty()) {
+                                val picked = ui.options.filter { it.habitId in ui.filter }
+                                HabitFilterChip(
+                                    selected = picked,
+                                    // Names while there is room for them; a count next to a picked range.
+                                    label = if (ui.thisWeek) picked.joinToString(", ") { it.name } else pluralStringResource(R.plurals.habit_count, picked.size, picked.size),
+                                    removeLabel = stringResource(R.string.remove_habit_filter),
+                                    onOpen = { choosing = true },
+                                    onClear = { viewModel.setFilter(emptySet()) },
+                                )
+                            }
                         }
                     }
                 }
-            }
-            state?.takeIf { it.filter.isNotEmpty() }?.let { ui ->
-                item(key = "chip") {
-                    HabitFilterChip(
-                        selected = ui.options.filter { it.habitId in ui.filter },
-                        removeLabel = stringResource(R.string.remove_habit_filter),
-                        onOpen = { choosing = true },
-                        onClear = { viewModel.setFilter(emptySet()) },
-                    )
-                }
-            }
+            
+        }
+        LazyColumn(
+            Modifier.weight(1f).fillMaxWidth(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 104.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
             val list = state?.days
-            val filter = state?.filter.orEmpty()
-            val dated = state?.from != null
-            if (list != null && list.isEmpty() && (filter.isNotEmpty() || dated)) {
+            if (list != null && list.isEmpty() && state?.hasNotes == true) {
                 item(key = "empty-filter") {
                     Column(Modifier.fillMaxWidth().padding(vertical = 48.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(stringResource(R.string.journal_empty_filters), style = type.titleMedium, color = colors.onSurface)
-                        TextButton(onClick = { viewModel.setFilter(emptySet()); viewModel.setRange(null, null) }) { Text(stringResource(R.string.clear_filters)) }
+                        TextButton(onClick = { viewModel.setFilter(emptySet()); viewModel.showAllDates() }) { Text(stringResource(R.string.clear_filters)) }
                     }
                 }
             } else if (list != null && list.isEmpty()) {
@@ -131,17 +147,27 @@ fun JournalScreen(
                     }
                 }
             }
-            list.orEmpty().forEach { day ->
+            list.orEmpty().forEachIndexed { index, day ->
                 item(key = "d${day.day}") {
-                    Text(
-                        day.label,
-                        style = type.titleSmall,
-                        color = colors.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 4.dp, top = 8.dp),
-                    )
+                    // The day on the left, how many notes it has on the right.
+                    Row(
+                        Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = if (index == 0) 0.dp else 16.dp, bottom = 8.dp),
+                        verticalAlignment = Alignment.Bottom,
+                    ) {
+                        Text(day.label, style = type.titleSmall, color = colors.onBackground, modifier = Modifier.weight(1f))
+                        Text(
+                            pluralStringResource(R.plurals.note_count, day.notes.size, day.notes.size),
+                            style = type.labelMedium.copy(fontWeight = FontWeight.Normal),
+                            color = colors.onSurfaceVariant,
+                        )
+                    }
                 }
-                items(day.notes, key = { it.id }) { note -> NoteCard(note, onOpenNote, onLongPress = { actionsFor = it }) }
+                // One group per day: 2 dp between its notes, big corners only on the outside.
+                itemsIndexed(day.notes, key = { _, note -> note.id }) { i, note ->
+                    NoteCard(note, onOpenNote, shape = groupedShape(i, day.notes.size), onLongPress = { actionsFor = it })
+                }
             }
+        }
         }
         // Hidden during a long screenshot, or it would be stamped into every captured frame.
         if (onAddNote != null && !LocalScrollCaptureInProgress.current) {
@@ -170,7 +196,7 @@ fun JournalScreen(
             weekStart = weekStart,
             shortcutLabel = stringResource(R.string.all_dates),
             onApply = { a, b -> viewModel.setRange(a, b); pickingRange = false },
-            onShortcut = { viewModel.setRange(null, null); pickingRange = false },
+            onShortcut = { viewModel.showAllDates(); pickingRange = false },
             onDismiss = { pickingRange = false },
         )
     }

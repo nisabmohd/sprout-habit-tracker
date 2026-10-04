@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.2.1
+
+New:
+
+- The Journal opens on this week's notes. The date chip under the title shows what you're looking at; tap it or the calendar button to pick other dates or "All dates".
+- Journal notes are grouped by day, with the number of notes next to each date.
+- Insights lists each habit with how many days you kept it, its current streak and its score.
+- Habits → Overall shows each habit's best streak under its name and the current streak on the right.
+
+Changed:
+
+- Active filters show as chips under the title on Journal and Insights: the dates first, then the habits. The calendar and filter buttons get a small dot while their filter is on.
+- The sample habits banner has a round delete button, like the buttons in the headers.
+- Habit cards look the same on every screen: the same icon tile as on Today, and plain text on the right.
+- The reminder card in New habit has a bell in the habit's color.
+- The Figtree font is replaced by Space Grotesk. If you had picked Figtree, the app goes back to Lexend; choose Space Grotesk in More → Appearance.
+
+Fixed:
+
+- The title, its buttons and the filter chips stay at the top of every tab while you scroll. Before, you had to scroll back to the top to change or clear a filter.
+- In New note, picking a day that already has a note for that habit now shows that note instead of an empty page. Anything you had typed is added under it.
+
 ## 1.2.0
 
 New:

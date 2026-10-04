@@ -68,4 +68,4 @@ Sprout is free and has no ads. I build it because I enjoy it. If it helps you, y
 
 ## License
 
-Sprout is licensed under the [GNU General Public License v3.0](LICENSE). The bundled fonts (Figtree, Outfit, Lexend and Atkinson Hyperlegible Next) use the SIL Open Font License 1.1; see [`licenses/fonts`](licenses/fonts).
+Sprout is licensed under the [GNU General Public License v3.0](LICENSE). The bundled fonts (Space Grotesk, Outfit, Lexend and Atkinson Hyperlegible Next) use the SIL Open Font License 1.1; see [`licenses/fonts`](licenses/fonts).
