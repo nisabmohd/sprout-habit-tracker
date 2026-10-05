@@ -1,5 +1,9 @@
 package app.sprout.habits.ui.components
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
@@ -135,41 +139,69 @@ fun HeaderIconButton(
     ) {
         Icon(painterResource(icon), contentDescription = label, modifier = Modifier.size(22.dp))
     }
-    // 10 dp across with its 2 dp ring in the page color, 6 dp in from the top right. No number:
-    // the chip under the header says what is applied.
+    // A plain 8 dp dot, 8 dp in from the top right, with no ring. No number: the chip under the
+    // header says what is applied.
     if (active) {
-        Box(Modifier.align(Alignment.TopEnd).padding(6.dp).size(10.dp).background(colors.background, CircleShape).padding(2.dp).background(colors.primary, CircleShape))
+        Box(Modifier.align(Alignment.TopEnd).padding(8.dp).size(8.dp).background(colors.primary, CircleShape))
     }
     }
-}
-
-/** The applied filters under a tab header: the date chip first, then the habit chip. */
-@Composable
-fun FilterChipRow(modifier: Modifier = Modifier, content: @Composable RowScope.() -> Unit) {
-    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically, content = content)
 }
 
 /**
- * The date range in use. With [onClear] it is a range the user picked: filled primaryContainer
- * with a ✕ that goes back to the default. Without it, it is the default ("This week").
- * Tapping the chip opens the date range sheet.
+ * The chips under a tab header: the range chips first ([RangeChip], or [CustomRangeChip] in the
+ * default's place), then the habit chip. The row scrolls sideways when it doesn't fit.
  */
 @Composable
-fun DateFilterChip(label: String, openLabel: String, clearLabel: String, onOpen: () -> Unit, onClear: (() -> Unit)?) {
+fun FilterChipRow(modifier: Modifier = Modifier, content: @Composable RowScope.() -> Unit) {
+    Row(
+        modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        content = content,
+    )
+}
+
+/**
+ * One choice in the single-select range row ("This week", "7 days", "30 days", "All"). The
+ * selected one is filled and gets a check; the others are outlined.
+ */
+@Composable
+fun RangeChip(label: String, selected: Boolean, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val content = if (onClear != null) colors.onPrimaryContainer else colors.onSurface
+    val content = if (selected) colors.onSecondaryContainer else colors.onSurface
     Row(
         Modifier
             .heightIn(min = 32.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(if (onClear != null) colors.primaryContainer else colors.surfaceContainerHigh)
-            .clickable(onClickLabel = openLabel, role = Role.Button, onClick = onOpen)
-            .padding(start = 8.dp, end = if (onClear != null) 4.dp else 12.dp),
+            .background(if (selected) colors.secondaryContainer else Color.Transparent)
+            .border(1.dp, if (selected) colors.secondaryContainer else colors.outlineVariant, RoundedCornerShape(8.dp))
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .padding(start = if (selected) 8.dp else 12.dp, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(painterResource(R.drawable.ic_calendar), contentDescription = null, tint = content, modifier = Modifier.size(18.dp))
-        Text(label, style = SproutType.label, color = content, maxLines = 1, modifier = Modifier.padding(start = 6.dp, end = if (onClear != null) 6.dp else 0.dp))
-        if (onClear != null) SmallClearButton(clearLabel, 24.dp, Color.Transparent, content, onClear)
+        if (selected) Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = content, modifier = Modifier.padding(end = 6.dp).size(18.dp))
+        Text(label, style = SproutType.label, color = content, maxLines = 1)
+    }
+}
+
+/**
+ * A range picked in the date sheet ("21 – 24 Sep"): filled like a selected [RangeChip], with a ✕
+ * that goes back to the default. Tapping the chip opens the date range sheet again.
+ */
+@Composable
+fun CustomRangeChip(label: String, openLabel: String, clearLabel: String, onOpen: () -> Unit, onClear: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        Modifier
+            .heightIn(min = 32.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(colors.secondaryContainer)
+            .clickable(onClickLabel = openLabel, role = Role.Button, onClick = onOpen)
+            .padding(start = 12.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, style = SproutType.label, color = colors.onSecondaryContainer, maxLines = 1, modifier = Modifier.padding(end = 6.dp))
+        SmallClearButton(clearLabel, 24.dp, Color.Transparent, colors.onSecondaryContainer, onClear)
     }
 }
 
@@ -178,31 +210,29 @@ fun DateFilterChip(label: String, openLabel: String, clearLabel: String, onOpen:
  * their names) and a ✕ that clears it. Tapping the chip opens the filter sheet again.
  */
 @Composable
-fun RowScope.HabitFilterChip(selected: List<HabitFilterOption>, label: String, removeLabel: String, onOpen: () -> Unit, onClear: () -> Unit) {
+fun HabitFilterChip(selected: List<HabitFilterOption>, label: String, removeLabel: String, onOpen: () -> Unit, onClear: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     Row(
         Modifier
-            .weight(1f, fill = false)
             .heightIn(min = 32.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(colors.primaryContainer)
+            .background(colors.secondaryContainer)
             .clickable(role = Role.Button, onClick = onOpen)
             .padding(start = 6.dp, end = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy((-5).dp)) {
             selected.take(5).forEach { option ->
-                Box(Modifier.size(18.dp).background(colors.primaryContainer, CircleShape).padding(2.dp).background(habitColors(option.hue).solid, CircleShape))
+                Box(Modifier.size(18.dp).background(colors.secondaryContainer, CircleShape).padding(2.dp).background(habitColors(option.hue).solid, CircleShape))
             }
         }
         Text(
             label,
             style = SproutType.label,
-            color = colors.onPrimaryContainer,
+            color = colors.onSecondaryContainer,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false).padding(horizontal = 6.dp),
+            modifier = Modifier.padding(horizontal = 6.dp),
         )
-        SmallClearButton(removeLabel, 24.dp, Color.Transparent, colors.onPrimaryContainer, onClear)
+        SmallClearButton(removeLabel, 24.dp, Color.Transparent, colors.onSecondaryContainer, onClear)
     }
 }

@@ -32,7 +32,6 @@ So a section label always has **16dp above it and 8dp below it**. Where the list
 | --- | --- |
 | Habit tile | 44dp, 14dp corners, 22dp icon. Everywhere a habit is listed: Today, Week, Overall, Journal, Insights, the filter sheet and the habit picker |
 | Habit tile in the habit detail header | 56dp, 18dp corners |
-| Small chart tile in a card title | 32dp, 10dp corners, 18dp icon ("Habits per day") |
 | Header icon button | 48dp circle, 22dp icon |
 | Touch target | at least 48dp |
 | Card corners | 24dp (habit cards on Today 22dp); grouped rows 24dp outside, 6dp between |
@@ -42,7 +41,6 @@ So a section label always has **16dp above it and 8dp below it**. Where the list
 | Progress bar and score segments | 6dp tall |
 
 ## Exceptions (only these)
-- The "Habits per day" card has 12dp side padding so seven columns fit; its top and bottom stay 16dp.
 - The month calendar cards (habit detail, date sheets) use 12dp side padding for the same reason.
 - Today's habit cards use 12dp horizontal and 8dp vertical padding with a 68dp minimum height, because the fill and the ring reach the card's edge.
 - The three stat cards in habit detail use 12dp vertical padding.

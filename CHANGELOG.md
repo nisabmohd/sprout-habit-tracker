@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.3.0
+
+Fixed:
+
+- The Journal opened on "This week" and hid older notes. It now opens on all notes.
+- The app no longer opens on an empty "0% of today" card before the habits appear.
+
+Changed:
+
+- Journal and Insights have range chips under the title: All, 7 days and 30 days on the Journal; This week, 7 days and 30 days on Insights. A range picked from the calendar shows as its own chip.
+- When no notes match, the Journal says which filter is hiding them and has a "Show all notes" button.
+- Insights has a new layout. The summary card adds your longest streak and the habit having its best week. A "Patterns" card shows your best weekday and the habit that needs focus. "Weekly rhythm" is a row of rounded bars, one per weekday (one per week for ranges over two weeks). "Habit breakdown" lists each habit with its score, its streak and a colour ribbon that is wider and stronger the more consistent the habit was. Tap a bar to see its numbers, and tap a habit to open it.
+- Today: the ring on a partly done habit is slimmer, with rounded ends.
+- The dot on the calendar and filter buttons is smaller and has no ring.
+
 ## 1.2.2
 
 Changed:

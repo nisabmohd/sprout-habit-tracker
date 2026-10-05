@@ -150,9 +150,12 @@ private fun TodayContent(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        // Nothing until the first data is in, or the app opens on a "0% of today" card that
+        // is replaced a moment later.
+        if (state.loading) return@LazyColumn
         if (sampleCard != null) item(key = "sample") { sampleCard() }
         item(key = "score") { ScoreCard(state) }
-        if (!state.loading && state.habits.isEmpty()) {
+        if (state.habits.isEmpty()) {
             item(key = "empty") { EmptyState() }
         }
         items(state.habits, key = { it.id }) { habit ->

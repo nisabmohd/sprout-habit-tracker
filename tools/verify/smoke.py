@@ -369,8 +369,8 @@ def journal_filter_by_habit():
     d.tap_xy(*n.center)
     d.tap("Show notes for 1 habit")
     time.sleep(1)
-    assert d.exists("No notes for these filters"), "empty filter message missing"
-    d.tap("Clear filters")
+    assert d.exists("No notes for these habits"), "empty filter message missing"
+    d.tap("Show all notes")
     assert d.exists("Rough morning", contains=True), "filter didn't reset"
 
 
@@ -387,12 +387,12 @@ def journal_filter_by_date():
     assert d.exists("Rough morning", contains=True), "today's note missing under a today-only range"
     assert d.exists(f"{today.day} ", contains=True), "date chip doesn't show the range"
     d.tap("Clear date filter")
-    assert d.exists("This week"), "the chip's ✕ didn't go back to this week"
+    assert d.exists("All"), "the chip's ✕ didn't go back to All"
+    d.tap("7 days")
+    assert d.exists("Rough morning", contains=True), "today's note missing under 7 days"
     d.tap("Filter by date")
     d.tap("All dates")
-    assert d.exists("Clear date filter"), "All dates chip has no ✕"
-    d.tap("Clear date filter")
-    assert d.exists("This week"), "Journal didn't go back to this week"
+    assert not d.exists("Clear date filter", timeout=1.0), "All dates left a custom range chip"
 
 
 @check
@@ -436,7 +436,8 @@ def note_shows_the_saved_one_for_that_day():
 def insights_render():
     d.nav("Insights")
     assert d.exists("average"), "score card missing"
-    assert d.exists("Habits per day", contains=True), "bar chart missing"
+    assert d.exists("Weekly rhythm"), "bar chart missing"
+    assert d.exists("30 days"), "range chips missing"
     d.tap("Change date range")
     assert d.exists("Date range"), "date range sheet didn't open"
     d.tap("1")  # the 1st of this month starts a new range

@@ -2,7 +2,6 @@
 <resources>
     <string name="app_name" translatable="false">Sprout</string>
     <!-- For small fixed-size rings, where "75 %" would not fit. -->
-    <string name="percent_compact" translatable="false">%1$d%%</string>
     <string name="widget_week_description">Every habit and its week</string>
     <string name="widget_today_description">Today\'s progress and what\'s next</string>
     <string name="widget_strip_description">A slim progress strip for today</string>
@@ -39,21 +38,37 @@
     <string name="filter_by_date">Filter by date</string>
     <string name="journal_show_all">Show all notes</string>
     <string name="journal_empty">No notes yet</string>
-    <string name="journal_empty_hint">Add a note to remember how a day went.</string>
     <string name="all_dates">All dates</string>
     <string name="insights_title">Insights</string>
     <string name="change_date_range">Change date range</string>
     <string name="show_all_habits">Show all habits</string>
     <string name="insights_average">average</string>
+    <string name="range_all">All</string>
+    <string name="range_7_days">7 days</string>
+    <string name="range_30_days">30 days</string>
+    <string name="insights_patterns">Patterns</string>
+    <string name="insights_prime_time">Prime time</string>
+    <string name="insights_needs_focus">Needs focus</string>
+    <string name="insights_completion">%1$d%% completion</string>
+    <string name="insights_down">Down %1$d%%</string>
+    <string name="insights_lowest">Lowest score</string>
+    <string name="insights_weekly_rhythm">Weekly rhythm</string>
+    <string name="insights_breakdown">Habit breakdown</string>
+    <string name="insights_best_week_for">Best week for %1$s</string>
+    <string name="insights_best_stretch_for">Best stretch for %1$s</string>
+    <string name="journal_empty_7">No notes in the last 7 days</string>
+    <string name="journal_empty_30">No notes in the last 30 days</string>
+    <string name="journal_empty_range">No notes for %1$s</string>
+    <string name="journal_empty_habits">No notes for these habits</string>
+    <string name="journal_empty_earlier">Your notes from earlier are still here.</string>
+    <string name="journal_empty_hint">Add a note from any habit, or tap Add note.</string>
+    <!-- A streak in days, as short as it gets: "5d". It follows a flame icon. -->
+    <string name="insights_streak_short">%1$dd</string>
     <string name="insights_best_day">Best: %1$s</string>
-    <string name="insights_per_day">Habits per day</string>
-    <string name="insights_per_day_avg">Habits per day (average)</string>
     <string name="insights_per_week">Habits per week</string>
     <string name="insights_week_of">Week of %1$s</string>
     <string name="clear_date_filter">Clear date filter</string>
     <string name="remove_habit_filter">Remove habit filter</string>
-    <string name="journal_empty_filters">No notes for these filters</string>
-    <string name="clear_filters">Clear filters</string>
     <string name="insights_bar_description">%1$s: %2$s done, %3$s partial</string>
     <string name="insights_by_habit">By habit</string>
     <string name="outcome_done_amount">Done · %1$s</string>

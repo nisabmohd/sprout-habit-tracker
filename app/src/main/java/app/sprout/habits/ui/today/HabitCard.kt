@@ -1,6 +1,7 @@
 package app.sprout.habits.ui.today
 
 import app.sprout.habits.ui.theme.SproutType
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -37,9 +38,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import app.sprout.habits.R
+import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.domain.DayOutcome
-import app.sprout.habits.ui.components.ProgressRing
 import app.sprout.habits.ui.theme.HabitColors
 import app.sprout.habits.ui.theme.habitColors
 import kotlin.math.roundToInt
@@ -156,14 +161,28 @@ private fun TrailingControl(habit: HabitRowUi, hc: HabitColors, onToggle: () -> 
             }
         }
 
+        // A 44 dp ring (4 dp stroke, round cap) in the habit's solid colour on its mid tone, which
+        // stays visible on the card's soft fill, with the % inside. It toggles Done like the circles.
         DayOutcome.PARTIAL -> CircleButton(label, onToggle) {
             Box(Modifier.size(44.dp), contentAlignment = Alignment.Center) {
-                ProgressRing(habit.progress, hc.solid, hc.mid, 4.dp, Modifier.fillMaxSize())
-                Text(
-                    stringResource(R.string.percent_compact, (habit.progress * 100).roundToInt()),
-                    style = SproutType.captionStrong,
-                    color = hc.ink,
-                )
+                Canvas(Modifier.fillMaxSize()) {
+                    val stroke = 4.dp.toPx()
+                    val radius = (size.minDimension - stroke) / 2
+                    drawCircle(hc.mid, radius, style = Stroke(stroke))
+                    drawArc(
+                        hc.solid,
+                        -90f,
+                        360f * habit.progress.coerceIn(0f, 1f),
+                        false,
+                        Offset(center.x - radius, center.y - radius),
+                        Size(radius * 2, radius * 2),
+                        style = Stroke(stroke, cap = StrokeCap.Round),
+                    )
+                }
+                // Fixed-size ring, so the text inside stops scaling at 1.3x.
+                CappedFontScale {
+                    Text(stringResource(R.string.percent, (habit.progress * 100).roundToInt()), style = SproutType.tiny, color = colors.onSurface, softWrap = false)
+                }
             }
         }
 

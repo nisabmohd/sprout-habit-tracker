@@ -9,7 +9,6 @@ import app.sprout.habits.data.HabitIcon
 import app.sprout.habits.data.HabitRepository
 import app.sprout.habits.data.Note
 import app.sprout.habits.data.SettingsRepository
-import app.sprout.habits.domain.weekOf
 import app.sprout.habits.ui.components.HabitFilterOption
 import app.sprout.habits.ui.components.NoteCardUi
 import app.sprout.habits.ui.datePattern
@@ -31,10 +30,12 @@ import kotlinx.coroutines.launch
 @Immutable
 data class JournalDayUi(val day: Long, val label: String, val notes: List<NoteCardUi>)
 
-/** Which dates the Journal shows. It opens on this week. */
+/** The range chips under the title. The Journal opens on [ALL]: no date filter the user didn't pick. */
+enum class JournalRange { ALL, DAYS_7, DAYS_30 }
+
+/** Which dates the Journal shows: one of the chips, or a range from the date sheet. */
 private sealed interface DateFilter {
-    data object ThisWeek : DateFilter
-    data object AllDates : DateFilter
+    data class Preset(val range: JournalRange) : DateFilter
     data class Range(val from: LocalDate, val to: LocalDate) : DateFilter
 }
 
@@ -48,10 +49,10 @@ data class JournalUi(
     /** Null = all dates. */
     val from: LocalDate?,
     val to: LocalDate?,
-    /** "This week", "All dates" or "21 – 27 Sep". */
+    /** The selected range chip, or null while a range from the date sheet is on. */
+    val preset: JournalRange?,
+    /** That range as its chip shows it, "21 – 27 Sep"; empty for a preset. */
     val dateLabel: String,
-    /** True while the dates are the default, this week. */
-    val thisWeek: Boolean,
     /** False when the journal has no notes at all, whatever the filters. */
     val hasNotes: Boolean,
 )
@@ -67,7 +68,7 @@ class JournalViewModel(
     val deleted = _deleted.receiveAsFlow()
 
     private val filterIds = MutableStateFlow<Set<Long>>(emptySet())
-    private val dates = MutableStateFlow<DateFilter>(DateFilter.ThisWeek)
+    private val dates = MutableStateFlow<DateFilter>(DateFilter.Preset(JournalRange.ALL))
 
     /** Null while loading. */
     val state: StateFlow<JournalUi?> =
@@ -76,16 +77,19 @@ class JournalViewModel(
             repository.observeAllHabits(),
             repository.observeEntries(0, Long.MAX_VALUE),
             filterIds,
-            combine(dates, settings.settings) { d, s -> d to s.weekStart },
-        ) { notes, habits, entries, filter, (date, weekStart) ->
+            dates,
+        ) { notes, habits, entries, filter, date ->
             val byId = habits.associateBy { it.id }
             val entryOf = entries.associateBy { it.habitId to it.date }
             val withNotes = notes.mapTo(HashSet()) { it.habitId }
             val today = LocalDate.now()
             val r = when (date) {
-                // Start of this week through today, like Insights.
-                DateFilter.ThisWeek -> weekOf(today, weekStart).first() to today
-                DateFilter.AllDates -> null
+                is DateFilter.Preset -> when (date.range) {
+                    JournalRange.ALL -> null
+                    // Today and the days before it.
+                    JournalRange.DAYS_7 -> today.minusDays(6) to today
+                    JournalRange.DAYS_30 -> today.minusDays(29) to today
+                }
                 is DateFilter.Range -> date.from to date.to
             }
             val cards = notes
@@ -104,12 +108,8 @@ class JournalViewModel(
                     .map { HabitFilterOption(it.id, it.name, HabitIcon.fromKey(it.icon).drawable, it.colorHue.toFloat()) },
                 from = r?.first,
                 to = r?.second,
-                dateLabel = when (date) {
-                    DateFilter.ThisWeek -> strings(R.string.this_week)
-                    DateFilter.AllDates -> strings(R.string.all_dates)
-                    is DateFilter.Range -> InsightsViewModel.chipRangeLabel(date.from, date.to, today)
-                },
-                thisWeek = date == DateFilter.ThisWeek,
+                preset = (date as? DateFilter.Preset)?.range,
+                dateLabel = (date as? DateFilter.Range)?.let { InsightsViewModel.chipRangeLabel(it.from, it.to, today) }.orEmpty(),
                 hasNotes = notes.isNotEmpty(),
             )
         }
@@ -120,13 +120,14 @@ class JournalViewModel(
         dates.value = DateFilter.Range(minOf(from, to), maxOf(from, to))
     }
 
-    /** Back to the default. */
-    fun showThisWeek() {
-        dates.value = DateFilter.ThisWeek
+    fun setPreset(range: JournalRange) {
+        dates.value = DateFilter.Preset(range)
     }
 
-    fun showAllDates() {
-        dates.value = DateFilter.AllDates
+    /** Every note again: all dates and every habit. */
+    fun showAllNotes() {
+        dates.value = DateFilter.Preset(JournalRange.ALL)
+        filterIds.value = emptySet()
     }
 
     fun setFilter(habitIds: Set<Long>) {

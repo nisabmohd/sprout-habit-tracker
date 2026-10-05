@@ -8,7 +8,12 @@ import androidx.compose.ui.semantics.semantics
 import app.sprout.habits.ui.components.NoteCard
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.foundation.background
+import androidx.compose.ui.text.style.TextAlign
+import app.sprout.habits.ui.components.CustomRangeChip
+import app.sprout.habits.ui.components.RangeChip
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.clickable
@@ -53,7 +58,6 @@ import androidx.compose.runtime.LaunchedEffect
 import android.content.Intent
 import app.sprout.habits.ui.components.DateRangeSheet
 import app.sprout.habits.ui.components.HabitFilterChip
-import app.sprout.habits.ui.components.DateFilterChip
 import app.sprout.habits.ui.components.FilterChipRow
 import app.sprout.habits.ui.components.groupedShape
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -94,7 +98,7 @@ fun JournalScreen(
                 Column(Modifier.padding(bottom = 14.dp)) {
                     TabHeader(stringResource(R.string.journal_title), listSpacing = 16.dp) {
                         state?.let { ui ->
-                            HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.filter_by_date), active = !ui.thisWeek) { pickingRange = true }
+                            HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.filter_by_date), active = ui.preset == null) { pickingRange = true }
                             if (ui.options.isNotEmpty()) {
                                 HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty()) { choosing = true }
                             }
@@ -102,20 +106,26 @@ fun JournalScreen(
                     }
                     state?.let { ui ->
                         FilterChipRow(Modifier.padding(top = 12.dp)) {
-                            DateFilterChip(
-                                label = ui.dateLabel,
-                                openLabel = stringResource(R.string.filter_by_date),
-                                clearLabel = stringResource(R.string.clear_date_filter),
-                                onOpen = { pickingRange = true },
-                                // ✕ goes back to this week.
-                                onClear = if (ui.thisWeek) null else viewModel::showThisWeek,
-                            )
+                            // A picked range takes the place of "All"; its ✕ goes back to it.
+                            if (ui.preset == null) {
+                                CustomRangeChip(
+                                    label = ui.dateLabel,
+                                    openLabel = stringResource(R.string.filter_by_date),
+                                    clearLabel = stringResource(R.string.clear_date_filter),
+                                    onOpen = { pickingRange = true },
+                                    onClear = { viewModel.setPreset(JournalRange.ALL) },
+                                )
+                            } else {
+                                RangeChip(stringResource(R.string.range_all), ui.preset == JournalRange.ALL) { viewModel.setPreset(JournalRange.ALL) }
+                            }
+                            RangeChip(stringResource(R.string.range_7_days), ui.preset == JournalRange.DAYS_7) { viewModel.setPreset(JournalRange.DAYS_7) }
+                            RangeChip(stringResource(R.string.range_30_days), ui.preset == JournalRange.DAYS_30) { viewModel.setPreset(JournalRange.DAYS_30) }
                             if (ui.filter.isNotEmpty()) {
                                 val picked = ui.options.filter { it.habitId in ui.filter }
                                 HabitFilterChip(
                                     selected = picked,
                                     // Names while there is room for them; a count next to a picked range.
-                                    label = if (ui.thisWeek) picked.joinToString(", ") { it.name } else pluralStringResource(R.plurals.habit_count, picked.size, picked.size),
+                                    label = if (ui.preset == JournalRange.ALL) picked.joinToString(", ") { it.name } else pluralStringResource(R.plurals.habit_count, picked.size, picked.size),
                                     removeLabel = stringResource(R.string.remove_habit_filter),
                                     onOpen = { choosing = true },
                                     onClear = { viewModel.setFilter(emptySet()) },
@@ -132,19 +142,25 @@ fun JournalScreen(
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             val list = state?.days
-            if (list != null && list.isEmpty() && state?.hasNotes == true) {
+            val shown = state
+            if (shown != null && shown.days.isEmpty() && shown.hasNotes) {
+                // The filters hide every note: say which ones, and offer the way back.
                 item(key = "empty-filter") {
-                    Column(Modifier.fillMaxWidth().padding(vertical = 48.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(stringResource(R.string.journal_empty_filters), style = SproutType.cardTitle, color = colors.onSurface)
-                        TextButton(onClick = { viewModel.setFilter(emptySet()); viewModel.showAllDates() }) { Text(stringResource(R.string.clear_filters)) }
-                    }
+                    EmptyJournal(
+                        title = when (shown.preset) {
+                            JournalRange.DAYS_7 -> stringResource(R.string.journal_empty_7)
+                            JournalRange.DAYS_30 -> stringResource(R.string.journal_empty_30)
+                            JournalRange.ALL -> stringResource(R.string.journal_empty_habits)
+                            null -> stringResource(R.string.journal_empty_range, shown.dateLabel)
+                        },
+                        text = stringResource(R.string.journal_empty_earlier),
+                        action = stringResource(R.string.journal_show_all),
+                        onAction = viewModel::showAllNotes,
+                    )
                 }
-            } else if (list != null && list.isEmpty()) {
+            } else if (shown != null && shown.days.isEmpty()) {
                 item(key = "empty") {
-                    Column(Modifier.fillMaxWidth().padding(vertical = 48.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(stringResource(R.string.journal_empty), style = SproutType.cardTitle, color = colors.onSurface)
-                        Text(stringResource(R.string.journal_empty_hint), style = SproutType.supporting, color = colors.onSurfaceVariant)
-                    }
+                    EmptyJournal(stringResource(R.string.journal_empty), stringResource(R.string.journal_empty_hint), action = null, onAction = {})
                 }
             }
             list.orEmpty().forEachIndexed { index, day ->
@@ -197,7 +213,7 @@ fun JournalScreen(
             weekStart = weekStart,
             shortcutLabel = stringResource(R.string.all_dates),
             onApply = { a, b -> viewModel.setRange(a, b); pickingRange = false },
-            onShortcut = { viewModel.showAllDates(); pickingRange = false },
+            onShortcut = { viewModel.setPreset(JournalRange.ALL); pickingRange = false },
             onDismiss = { pickingRange = false },
         )
     }
@@ -217,6 +233,31 @@ fun JournalScreen(
             onApply = { ids -> viewModel.setFilter(ids); choosing = false },
             onDismiss = { choosing = false },
         )
+    }
+}
+
+/**
+ * Nothing to list: a note tile, what is missing and why, and with [action] a tonal button that
+ * brings every note back.
+ */
+@Composable
+private fun EmptyJournal(title: String, text: String, action: String?, onAction: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Column(Modifier.fillMaxWidth().padding(top = 72.dp, start = 16.dp, end = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(Modifier.size(72.dp).background(colors.surfaceContainerHigh, RoundedCornerShape(24.dp)), contentAlignment = Alignment.Center) {
+            Icon(painterResource(R.drawable.ic_note), contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(32.dp))
+        }
+        Text(title, style = SproutType.title, color = colors.onSurface, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 20.dp))
+        Text(text, style = SproutType.supporting, color = colors.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
+        if (action != null) {
+            FilledTonalButton(
+                onClick = onAction,
+                colors = ButtonDefaults.filledTonalButtonColors(containerColor = colors.secondaryContainer, contentColor = colors.onSecondaryContainer),
+                modifier = Modifier.padding(top = 20.dp).heightIn(min = 40.dp),
+            ) {
+                Text(action, style = SproutType.label)
+            }
+        }
     }
 }
 

@@ -13,7 +13,7 @@ Weights are only **Regular (400)** and **SemiBold (600)**. Line height: about 1.
 | `supporting` | Lexend* | 14sp | Regular | muted | The line under a cardTitle ("15 / 20 pages", "7 of 7 days · 2-day streak", "Best streak · 6 days"), **all trailing text on cards** ("Every day", "4-day streak", note time "9:12 AM", "2 notes", "Best: Tuesday"), descriptions |
 | `label` | Lexend* | 14sp | SemiBold | depends | Buttons, chips, segmented buttons, **section labels above a group** (muted: "Today", "Yesterday", "By habit", "Notes", "Backup & restore", "Icon", "Days"), the date line under a tab title (muted), summary values ("31 done · 5 partial", muted), **main trailing value** ("100%", text colour), calendar day numbers |
 | `caption` | Lexend* | 12sp | Regular / SemiBold | muted | Helper text under fields, legends, field labels ("Name", "Target"; SemiBold), nav bar labels, font descriptions, small labels inside rings ("75%"; SemiBold), "today" under "1/7" |
-| `tiny` | Lexend* | 11sp | SemiBold | muted | Weekday names (Mon…Sun, M…S), heatmap month labels |
+| `tiny` | Lexend* | 11sp | SemiBold | muted | Weekday names (Mon…Sun, M…S), heatmap month labels, the % inside the Today partial ring (text colour) |
 
 \* The body font is the user's choice (Lexend by default). Outfit is only for `display`, `screenTitle` and `title`.
 
