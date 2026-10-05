@@ -12,6 +12,7 @@ When in doubt, copy the same element on the **Today** screen.
 | Header to content | 8dp under the fixed tab header, then the list starts | All five tabs |
 | Title to filter chips | 12dp | Journal, Insights |
 | Between cards | 8dp | Habit cards on Today, Week, Overall; settings cards in More |
+| Card title to its paragraph | 8dp | Sample habits banner, About → Free and open source |
 | Between rows of a grouped list | 2dp | Journal notes of one day, Insights → By habit |
 | Between sections | 16dp | Score card → habit cards, card → next section label, Insights cards |
 | Between sections on a form | 20dp | New habit |

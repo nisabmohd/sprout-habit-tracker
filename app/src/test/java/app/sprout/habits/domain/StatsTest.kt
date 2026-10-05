@@ -95,6 +95,12 @@ class StatsTest {
         assertEquals(2, h.currentStreak(today = mon + 1))
     }
 
+    @Test fun streakStopsAtRangeStart() {
+        // Insights: a 7-day streak counted inside a range that starts on Thursday is 4 days.
+        val h = history(*(0..6).map { mon + it to DONE }.toTypedArray(), firstDay = mon)
+        assertEquals(4, h.currentStreak(today = mon + 6, from = mon + 3))
+    }
+
     @Test fun noEntriesMeansNoStreak() = assertEquals(0, history(firstDay = mon).currentStreak(today = mon + 3))
 
     // Best streak and counts

@@ -8,7 +8,7 @@ Weights are only **Regular (400)** and **SemiBold (600)**. Line height: about 1.
 | `display` | Outfit | 40sp | SemiBold | text | Big input numbers: amount stepper "15", reminder time "09 : 00", the widget streak "11", the Welcome headline |
 | `screenTitle` | Outfit | 28sp | SemiBold | text | Tab titles (Today, Habits, Journal, Insights, More), the habit name in habit detail, hero numbers "40%" / "87%" |
 | `title` | Outfit | 22sp | SemiBold | text | Top-bar titles (New habit, New note, About), sheet and dialog titles, stat values ("13 days"), the reminder time "9:00 AM" |
-| `cardTitle` | Lexend* | 16sp | SemiBold | text | Habit names in every card and row, card titles ("Habits per day", "Theme"), list row titles, the week range "21 – 27 Sep" |
+| `cardTitle` | Lexend* | 16sp | SemiBold | text | Habit names in every card and row, card titles ("Habits per day", "Theme", the sample banner's "These are sample habits", About's "Free and open source"), list row titles, the week range "21 – 27 Sep" |
 | `body` | Lexend* | 16sp | Regular | text | Note text, paragraphs, text fields |
 | `supporting` | Lexend* | 14sp | Regular | muted | The line under a cardTitle ("15 / 20 pages", "7 of 7 days · 2-day streak", "Best streak · 6 days"), **all trailing text on cards** ("Every day", "4-day streak", note time "9:12 AM", "2 notes", "Best: Tuesday"), descriptions |
 | `label` | Lexend* | 14sp | SemiBold | depends | Buttons, chips, segmented buttons, **section labels above a group** (muted: "Today", "Yesterday", "By habit", "Notes", "Backup & restore", "Icon", "Days"), the date line under a tab title (muted), summary values ("31 done · 5 partial", muted), **main trailing value** ("100%", text colour), calendar day numbers |

@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.3.1
+
+Changed:
+
+- Insights, Habit breakdown: each habit's score is a ring on the right, like a partly done habit on Today, in place of the colour ribbon. The habits sit together in one group.
+- Insights, Habit breakdown: a Score | Streak switch sorts the habits by score or by current streak. Sorted by streak, the ring shows each habit's streak within the chosen dates (a 7-day range shows at most 7 days).
+- Insights, Patterns: "Prime time" and "Needs focus" are labels with an icon at the top of each card, and the text below matches the habit rows.
+- Insights: the summary card shows just your score and the done and partial counts. The streak and best-week line is gone; each habit's streak is in Habit breakdown.
+- Insights, Patterns: Prime time shows just the score ("92% completion") on one line.
+- Today: the sample habits banner has a proper card title ("These are sample habits").
+
 ## 1.3.0
 
 Fixed:

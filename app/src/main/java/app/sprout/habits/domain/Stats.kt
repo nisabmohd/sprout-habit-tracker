@@ -37,12 +37,13 @@ fun HabitHistory.score(from: Long, to: Long, today: Long): Double {
  * Consecutive scheduled days, ending today, that are DONE or PARTIAL. A SKIP (including a past
  * scheduled day with no entry) ends the streak; non-scheduled days are ignored. Today not yet
  * logged does not break it — the streak then counts back from the last scheduled day before today.
+ * It counts no further back than [from] (Insights keeps the streak inside its range).
  */
-fun HabitHistory.currentStreak(today: Long): Int {
+fun HabitHistory.currentStreak(today: Long, from: Long = firstDay): Int {
     var day = today
     var streak = 0
     if (isScheduled(day) && outcomeOf(entries[day], day, today) == DayOutcome.OPEN) day--
-    while (day >= firstDay) {
+    while (day >= maxOf(firstDay, from)) {
         if (isScheduled(day)) {
             if (!isKept(day, today)) break
             streak++

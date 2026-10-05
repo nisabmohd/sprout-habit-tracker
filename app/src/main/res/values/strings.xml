@@ -54,8 +54,6 @@
     <string name="insights_lowest">Lowest score</string>
     <string name="insights_weekly_rhythm">Weekly rhythm</string>
     <string name="insights_breakdown">Habit breakdown</string>
-    <string name="insights_best_week_for">Best week for %1$s</string>
-    <string name="insights_best_stretch_for">Best stretch for %1$s</string>
     <string name="journal_empty_7">No notes in the last 7 days</string>
     <string name="journal_empty_30">No notes in the last 30 days</string>
     <string name="journal_empty_range">No notes for %1$s</string>
@@ -450,4 +448,8 @@
         <item quantity="one">Best streak · %1$d day</item>
         <item quantity="other">Best streak · %1$d days</item>
     </plurals>
+    <string name="insights_sort_score">Score</string>
+    <string name="insights_sort_streak">Streak</string>
+    <string name="insights_sort_by_score">Sort by score</string>
+    <string name="insights_sort_by_streak">Sort by streak</string>
 </resources>

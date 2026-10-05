@@ -52,8 +52,6 @@
     <string name="insights_lowest">Puntuación más baja</string>
     <string name="insights_weekly_rhythm">Ritmo semanal</string>
     <string name="insights_breakdown">Por hábito</string>
-    <string name="insights_best_week_for">Mejor semana de %1$s</string>
-    <string name="insights_best_stretch_for">Mejor racha de %1$s</string>
     <string name="journal_empty_7">Sin notas en los últimos 7 días</string>
     <string name="journal_empty_30">Sin notas en los últimos 30 días</string>
     <string name="journal_empty_range">Sin notas para %1$s</string>
@@ -462,4 +460,8 @@
         <item quantity="other">Mejor racha · %1$d días</item>
         <item quantity="many">Mejor racha · %1$d días</item>
     </plurals>
+    <string name="insights_sort_score">Puntos</string>
+    <string name="insights_sort_streak">Racha</string>
+    <string name="insights_sort_by_score">Ordenar por puntuación</string>
+    <string name="insights_sort_by_streak">Ordenar por racha</string>
 </resources>

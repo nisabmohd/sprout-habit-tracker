@@ -52,8 +52,6 @@
     <string name="insights_lowest">सबसे कम स्कोर</string>
     <string name="insights_weekly_rhythm">हफ़्ते की लय</string>
     <string name="insights_breakdown">आदत के अनुसार</string>
-    <string name="insights_best_week_for">%1$s का सबसे अच्छा हफ़्ता</string>
-    <string name="insights_best_stretch_for">%1$s का सबसे अच्छा दौर</string>
     <string name="journal_empty_7">पिछले 7 दिनों में कोई नोट नहीं</string>
     <string name="journal_empty_30">पिछले 30 दिनों में कोई नोट नहीं</string>
     <string name="journal_empty_range">%1$s के लिए कोई नोट नहीं</string>
@@ -446,4 +444,8 @@
         <item quantity="one">सबसे लंबा सिलसिला · %1$d दिन</item>
         <item quantity="other">सबसे लंबा सिलसिला · %1$d दिन</item>
     </plurals>
+    <string name="insights_sort_score">स्कोर</string>
+    <string name="insights_sort_streak">लगातार</string>
+    <string name="insights_sort_by_score">स्कोर के अनुसार क्रम</string>
+    <string name="insights_sort_by_streak">लगातार दिनों के अनुसार क्रम</string>
 </resources>

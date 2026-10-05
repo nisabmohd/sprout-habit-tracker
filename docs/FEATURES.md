@@ -34,7 +34,7 @@ Code: `ui/journal/`, `ui/note/`.
 
 ## Insights
 
-A summary for a range of dates: this week by default, the last 7 or 30 days from the chips under the title, or any range from the calendar button, for all habits or the ones you pick. It shows the average score with a bar per habit, your longest streak and the habit having its best week; a Patterns card with the weekday that goes best and the habit that dropped most against the range before; a bar per weekday (one per week for ranges over two weeks); and a card per habit with its days kept, streak, score and a colour ribbon that grows with consistency. Tapping a bar shows its numbers, and tapping a habit opens it. A past day with no entry counts as 0 in the score; only a day marked Skip is left out.
+A summary for a range of dates: this week by default, the last 7 or 30 days from the chips under the title, or any range from the calendar button, for all habits or the ones you pick. It shows the average score with a bar per habit and the done and partial counts; a Patterns card with the weekday that goes best and the habit that dropped most against the range before; a bar per weekday (one per week for ranges over two weeks); and a row per habit with its days kept and a score ring, sorted by score or by streak (the ring then shows the streak within the chosen dates). Tapping a bar shows its numbers, and tapping a habit opens it. A past day with no entry counts as 0 in the score; only a day marked Skip is left out.
 
 Code: `ui/insights/`.
 

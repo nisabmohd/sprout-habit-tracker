@@ -267,12 +267,13 @@ private fun SampleDataCard(onRemove: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f).padding(end = 12.dp)) {
-            Text(stringResource(R.string.sample_card_title), style = SproutType.label, color = colors.onPrimaryContainer)
+            Text(stringResource(R.string.sample_card_title), style = SproutType.cardTitle, color = colors.onPrimaryContainer)
             Text(
                 stringResource(R.string.sample_card_body),
                 style = SproutType.supporting,
                 color = colors.onPrimaryContainer,
-                modifier = Modifier.padding(top = 2.dp),
+                // The same gap as under the title of About's "Free and open source" card.
+                modifier = Modifier.padding(top = 8.dp),
             )
         }
         // The same round delete button as in the screen headers.

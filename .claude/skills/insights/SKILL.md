@@ -6,11 +6,11 @@ description: The Insights tab (summary card, Patterns, weekly rhythm bars, habit
 # Insights
 
 **Code:** `ui/insights/InsightsViewModel.kt` (range: `InsightsRange` preset or a custom range; optional habit filter; computed off the main thread from every entry, because the streak and the comparison with earlier ranges reach back past the range) and `InsightsScreen.kt` (charts drawn with Compose `Canvas`, no chart library; design in `design/insights.png`). Top to bottom:
-- `SummaryCard`: Today's segment bar from `ui/components/SegmentBar.kt`, then a divider and one highlights line (longest current streak; the habit for which none of the eight ranges before was better).
-- `Section` puts each section's header on the page background; there is never a card inside a card.
-- `Patterns`: two white cards joined as a pair. Prime time is the weekday with the highest score; Needs focus is the habit that dropped most against the range before, or else the lowest one.
+- `SummaryCard`: Today's segment bar from `ui/components/SegmentBar.kt` under the average and the done / partial counts. No highlights line.
+- `Section` puts each section's header (and an optional `trailingContent`, like the sort toggle) on the page background; there is never a card inside a card.
+- `Patterns`: two white cards joined as a pair, straight on the page, each led by a label pill; value and detail use the habit-row sizes (cardTitle, supporting). Prime time is the weekday with the highest score; Needs focus is the habit that dropped most against the range before, or else the lowest one.
 - `WeeklyRhythm`: one pill bar per `DayColumnUi` with no track; the full height is the largest column total. Done from the bottom, a 4 dp gap, partial on top (at least 16 dp). `ChartTooltip` is a `Popup` above the tapped bar that closes itself after 2.5 s.
-- `HabitBreakdown`: one card per habit with `groupedShape` corners. The accent ribbon at the start is the visual (4 dp up to 60%, 8 dp at 100%, solid colour from 85%); the summary line ends with the streak at the end of the range ("5d" with a flame). No bar or ring.
+- `HabitBreakdown`: one group of rows (28 dp outer, 4 dp inner corners), tile on the left, Today's partial ring on the right. `SortToggle` (Score | Streak) sets `InsightsViewModel.breakdownByStreak`, which lives in the ViewModel so it survives scrolling and tab switches; sorted by streak, the ring shows the streak ("5d"). The streak is counted inside the range only (`currentStreak(last, from = first)`), so it never runs past the range. The summary line never shows the streak.
 
 **Verify:** `python3 tools/verify/smoke.py insights`.
 

@@ -1,6 +1,5 @@
 package app.sprout.habits.ui.insights
 
-import app.sprout.habits.ui.components.groupedShape
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -53,6 +52,13 @@ import app.sprout.habits.ui.components.DateRangeSheet
 import app.sprout.habits.ui.components.HabitFilterChip
 import app.sprout.habits.ui.components.FilterChipRow
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.key
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.ColorUtils
@@ -123,7 +129,7 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek,
             item(key = "score") { SummaryCard(ui) }
             if (ui.primeDay != null || ui.focusName != null) item(key = "patterns") { Patterns(ui) }
             item(key = "bars") { WeeklyRhythm(ui) }
-            if (ui.rates.isNotEmpty()) item(key = "rates") { HabitBreakdown(ui.rates, onOpenHabit) }
+            if (ui.rates.isNotEmpty()) item(key = "rates") { HabitBreakdown(ui.rates, viewModel.breakdownByStreak, { viewModel.breakdownByStreak = it }, onOpenHabit) }
         }
     }
 
@@ -149,7 +155,7 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek,
     }
 }
 
-/** Today's score card for the range, with one line of highlights under a divider. */
+/** Today's score card for the range. */
 @Composable
 private fun SummaryCard(ui: InsightsUi) {
     val colors = MaterialTheme.colorScheme
@@ -157,11 +163,6 @@ private fun SummaryCard(ui: InsightsUi) {
         add(pluralStringResource(R.plurals.count_done, ui.doneCount, ui.doneCount))
         add(pluralStringResource(R.plurals.count_partial, ui.partialCount, ui.partialCount))
     }.joinToString(" · ")
-    // "12-day streak · Best week for Drink water", whichever of the two there is.
-    val highlights = listOfNotNull(
-        if (ui.streak > 1) pluralStringResource(R.plurals.streak_days, ui.streak, ui.streak) else null,
-        ui.bestHabit?.let { stringResource(if (ui.weekLong) R.string.insights_best_week_for else R.string.insights_best_stretch_for, it) },
-    ).joinToString(" · ")
     Column(
         Modifier.fillMaxWidth().background(colors.surfaceContainerLowest, RoundedCornerShape(24.dp)).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -176,13 +177,6 @@ private fun SummaryCard(ui: InsightsUi) {
         }
         // One segment per habit, filled up to that habit's score for the range.
         SegmentBar(ui.rates.map { BarSegment(it.hue, it.percent / 100f) }, Modifier.clearAndSetSemantics {})
-        if (highlights.isNotEmpty()) {
-            Box(Modifier.fillMaxWidth().height(1.dp).background(colors.surfaceContainerHigh))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(painterResource(R.drawable.ic_flame), contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(16.dp))
-                Text(highlights, style = SproutType.supporting, color = colors.onSurfaceVariant, modifier = Modifier.padding(start = 8.dp))
-            }
-        }
     }
 }
 
@@ -191,12 +185,19 @@ private fun SummaryCard(ui: InsightsUi) {
  * section's own card or cards. No card inside a card. With [card], the content is one white card.
  */
 @Composable
-private fun Section(title: String, trailing: String?, card: Boolean = false, content: @Composable () -> Unit) {
+private fun Section(
+    title: String,
+    trailing: String?,
+    card: Boolean = false,
+    trailingContent: (@Composable () -> Unit)? = null,
+    content: @Composable () -> Unit,
+) {
     val colors = MaterialTheme.colorScheme
     Column(Modifier.fillMaxWidth()) {
         Row(Modifier.padding(start = 4.dp, end = 4.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(title, style = SproutType.cardTitle, color = colors.onSurface, modifier = Modifier.weight(1f).padding(end = 12.dp))
-            if (trailing != null) Text(trailing, style = SproutType.supporting, color = colors.onSurfaceVariant)
+            if (trailingContent != null) trailingContent()
+            else if (trailing != null) Text(trailing, style = SproutType.supporting, color = colors.onSurfaceVariant)
         }
         if (card) {
             Column(
@@ -210,8 +211,9 @@ private fun Section(title: String, trailing: String?, card: Boolean = false, con
 }
 
 /**
- * Two white cards joined as a pair: the weekday that goes best, and the habit that dropped most against the
- * range before this one (or else the lowest one).
+ * Two white cards joined as a pair: the weekday that goes best, and the habit that
+ * dropped most against the range before this one (or else the lowest one). Each card leads with a
+ * labelled pill.
  */
 @Composable
 private fun Patterns(ui: InsightsUi) {
@@ -224,8 +226,8 @@ private fun Patterns(ui: InsightsUi) {
                 PatternTile(
                     shape = if (both) RoundedCornerShape(topStart = 24.dp, topEnd = 6.dp, bottomEnd = 6.dp, bottomStart = 24.dp) else RoundedCornerShape(24.dp),
                     icon = R.drawable.ic_trophy,
-                    iconContainer = colors.secondaryContainer,
-                    iconTint = colors.onSecondaryContainer,
+                    pill = colors.secondaryContainer,
+                    pillContent = colors.onSecondaryContainer,
                     label = stringResource(R.string.insights_prime_time),
                     value = ui.primeDay,
                     detail = stringResource(R.string.insights_completion, ui.primePercent),
@@ -235,8 +237,8 @@ private fun Patterns(ui: InsightsUi) {
                 PatternTile(
                     shape = if (both) RoundedCornerShape(topStart = 6.dp, topEnd = 24.dp, bottomEnd = 24.dp, bottomStart = 6.dp) else RoundedCornerShape(24.dp),
                     icon = R.drawable.ic_trending_down,
-                    iconContainer = colors.surfaceContainerHigh,
-                    iconTint = colors.onSurface,
+                    pill = colors.surfaceContainerHigh,
+                    pillContent = colors.onSurface,
                     label = stringResource(R.string.insights_needs_focus),
                     value = ui.focusName,
                     detail = ui.focusDrop?.let { stringResource(R.string.insights_down, it) } ?: stringResource(R.string.insights_lowest),
@@ -247,17 +249,22 @@ private fun Patterns(ui: InsightsUi) {
 }
 
 @Composable
-private fun RowScope.PatternTile(shape: RoundedCornerShape, icon: Int, iconContainer: Color, iconTint: Color, label: String, value: String, detail: String) {
+private fun RowScope.PatternTile(shape: RoundedCornerShape, icon: Int, pill: Color, pillContent: Color, label: String, value: String, detail: String) {
     val colors = MaterialTheme.colorScheme
     Column(
         Modifier.weight(1f).fillMaxHeight().background(colors.surfaceContainerLowest, shape).padding(16.dp).semantics(mergeDescendants = true) {},
     ) {
-        Box(Modifier.size(36.dp).background(iconContainer, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
-            Icon(painterResource(icon), contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
+        // The label as a pill: icon + "Prime time".
+        Row(
+            Modifier.background(pill, RoundedCornerShape(12.dp)).padding(start = 10.dp, top = 6.dp, end = 12.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(painterResource(icon), contentDescription = null, tint = pillContent, modifier = Modifier.size(18.dp))
+            Text(label, style = SproutType.label, color = pillContent, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 6.dp))
         }
-        Text(label, style = SproutType.caption, color = colors.onSurfaceVariant, modifier = Modifier.padding(top = 10.dp))
-        Text(value, style = SproutType.cardTitle, color = colors.onSurface, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        Text(detail, style = SproutType.supporting, color = colors.onSurfaceVariant)
+        Text(value, style = SproutType.cardTitle, color = colors.onSurface, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 12.dp))
+        // Always one line, so the two cards stay even.
+        Text(detail, style = SproutType.supporting, color = colors.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 2.dp))
     }
 }
 
@@ -386,71 +393,125 @@ private fun LegendSquare(label: String, color: Color) {
 }
 
 /**
- * Grouped like a Journal day: one white card per habit, sorted by score. An accent ribbon at the
- * start shows how consistent the habit was: wider toward 100%, and in the solid colour from 85%.
- * Then the habit tile, the name, a summary line with the streak, and the score. Tapping a card
- * opens the habit.
+ * One group of white rows, 28 dp at the outer corners and 4 dp between rows, sorted by score or by
+ * streak (the toggle in the header). Each row: the habit tile, the name, a done / partial summary
+ * line, and the score as Today's partial ring on the right. Tapping a row opens the habit.
  */
 @Composable
-private fun HabitBreakdown(rates: List<HabitRateUi>, onOpenHabit: (Long) -> Unit) {
+private fun HabitBreakdown(rates: List<HabitRateUi>, byStreak: Boolean, onSort: (Boolean) -> Unit, onOpenHabit: (Long) -> Unit) {
     val colors = MaterialTheme.colorScheme
-    Section(stringResource(R.string.insights_breakdown), pluralStringResource(R.plurals.habit_count, rates.size, rates.size)) {
+    val sorted = remember(rates, byStreak) {
+        if (byStreak) rates.sortedWith(compareByDescending<HabitRateUi> { it.streak }.thenByDescending { it.percent }) else rates
+    }
+    Section(stringResource(R.string.insights_breakdown), null, trailingContent = { SortToggle(byStreak, onSort) }) {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            rates.forEachIndexed { index, r ->
+            sorted.forEachIndexed { index, r ->
+                key(r.id) {
                 val hc = habitColors(r.hue)
+                val top = if (index == 0) 28.dp else 4.dp
+                val bottom = if (index == sorted.size - 1) 28.dp else 4.dp
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .height(IntrinsicSize.Min)
-                        .clip(groupedShape(index, rates.size))
+                        .clip(RoundedCornerShape(top, top, bottom, bottom))
                         .background(colors.surfaceContainerLowest)
                         .clickable(onClickLabel = stringResource(R.string.open_habit, r.name)) { onOpenHabit(r.id) }
-                        .padding(start = 12.dp, top = 14.dp, end = 16.dp, bottom = 14.dp)
+                        .padding(start = 12.dp, top = 12.dp, end = 16.dp, bottom = 12.dp)
                         .semantics(mergeDescendants = true) {},
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    // 4 dp wide up to 60%, growing to 8 dp at 100%, in an 8 dp slot.
-                    val ribbon = (4f + 4f * (r.percent - 60) / 40f).coerceIn(4f, 8f)
-                    Box(Modifier.width(8.dp).fillMaxHeight()) {
-                        Box(Modifier.width(ribbon.dp).fillMaxHeight().background(if (r.percent >= 85) hc.solid else hc.mid, RoundedCornerShape(4.dp)))
-                    }
                     Box(Modifier.size(44.dp).background(hc.soft, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
                         Icon(painterResource(r.icon), contentDescription = null, tint = hc.ink, modifier = Modifier.size(22.dp))
                     }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(r.name, style = SproutType.cardTitle, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            // "5 done · 1 partial", or "7 of 7 days" when nothing was partial.
-                            Text(
-                                (if (r.partialDays > 0) {
-                                    pluralStringResource(R.plurals.count_done, r.doneDays, r.doneDays) + " · " +
-                                        pluralStringResource(R.plurals.count_partial, r.partialDays, r.partialDays)
-                                } else {
-                                    pluralStringResource(R.plurals.days_kept, r.scheduledDays, r.doneDays, r.scheduledDays)
-                                }) + if (r.streak > 1) " · " else "",
-                                style = SproutType.supporting,
-                                color = colors.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f, fill = false),
+                        // "5 done · 1 partial", or "7 of 7 days" when nothing was partial. The streak has its own toggle.
+                        Text(
+                            if (r.partialDays > 0) {
+                                pluralStringResource(R.plurals.count_done, r.doneDays, r.doneDays) + " · " +
+                                    pluralStringResource(R.plurals.count_partial, r.partialDays, r.partialDays)
+                            } else {
+                                pluralStringResource(R.plurals.days_kept, r.scheduledDays, r.doneDays, r.scheduledDays)
+                            },
+                            style = SproutType.supporting,
+                            color = colors.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    // Today's partial ring: 44 dp, 4 dp stroke, round cap, from 12 o'clock, in the habit's
+                    // solid colour on its mid tone. It shows the score, or sorted by streak the streak
+                    // ("5d", filled to the streak's share of the range's scheduled days).
+                    val progress = if (byStreak) r.streak.toFloat() / r.scheduledDays.coerceAtLeast(1) else r.percent / 100f
+                    val ringText = if (byStreak) stringResource(R.string.insights_streak_short, r.streak) else stringResource(R.string.percent, r.percent)
+                    val ringDescription = if (byStreak) pluralStringResource(R.plurals.streak_days, r.streak, r.streak) else ringText
+                    Box(Modifier.size(44.dp).semantics { contentDescription = ringDescription }, contentAlignment = Alignment.Center) {
+                        Canvas(Modifier.fillMaxSize()) {
+                            val stroke = 4.dp.toPx()
+                            val radius = (size.minDimension - stroke) / 2
+                            drawCircle(hc.mid, radius, style = Stroke(stroke))
+                            if (progress > 0f) drawArc(
+                                hc.solid,
+                                -90f,
+                                360f * progress.coerceAtMost(1f),
+                                false,
+                                Offset(center.x - radius, center.y - radius),
+                                Size(radius * 2, radius * 2),
+                                style = Stroke(stroke, cap = StrokeCap.Round),
                             )
-                            // The streak, with a muted flame: "5d".
-                            if (r.streak > 1) {
-                                val streak = pluralStringResource(R.plurals.streak_days, r.streak, r.streak)
-                                Icon(painterResource(R.drawable.ic_flame), contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.padding(end = 2.dp).size(14.dp))
-                                Text(
-                                    stringResource(R.string.insights_streak_short, r.streak),
-                                    style = SproutType.supporting,
-                                    color = colors.onSurfaceVariant,
-                                    softWrap = false,
-                                    modifier = Modifier.semantics { contentDescription = streak },
-                                )
-                            }
+                        }
+                        // Fixed-size ring, so the text inside stops scaling at 1.3x.
+                        CappedFontScale {
+                            Text(ringText, style = SproutType.tiny, color = colors.onSurface, softWrap = false, modifier = Modifier.clearAndSetSemantics {})
                         }
                     }
-                    // The row's main value: plain text.
-                    Text(stringResource(R.string.percent, r.percent), style = SproutType.label, color = colors.onSurface, softWrap = false)
+                }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * "Score | Streak": a small two-way toggle for the breakdown's order. A soft pill track with the
+ * chosen half as a rounded thumb; both halves are as wide as the wider label.
+ */
+@Composable
+private fun SortToggle(byStreak: Boolean, onChange: (Boolean) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    CappedFontScale {
+        Row(
+            Modifier
+                .height(36.dp)
+                .width(IntrinsicSize.Max)
+                .background(colors.surfaceContainerHigh, CircleShape)
+                .padding(3.dp)
+                .selectableGroup(),
+        ) {
+            listOf(
+                false to stringResource(R.string.insights_sort_score),
+                true to stringResource(R.string.insights_sort_streak),
+            ).forEach { (value, label) ->
+                val selected = byStreak == value
+                val description = stringResource(if (value) R.string.insights_sort_by_streak else R.string.insights_sort_by_score)
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(CircleShape)
+                        .background(if (selected) colors.surfaceContainerLowest else Color.Transparent)
+                        .selectable(selected = selected, role = Role.RadioButton) { onChange(value) }
+                        .semantics { contentDescription = description }
+                        .padding(horizontal = 14.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        label,
+                        style = SproutType.label,
+                        color = if (selected) colors.onSurface else colors.onSurfaceVariant,
+                        softWrap = false,
+                    )
                 }
             }
         }

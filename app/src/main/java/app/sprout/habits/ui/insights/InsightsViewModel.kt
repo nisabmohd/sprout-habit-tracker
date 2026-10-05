@@ -3,6 +3,9 @@ package app.sprout.habits.ui.insights
 import app.sprout.habits.ui.englishDates
 import app.sprout.habits.ui.datePattern
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.sprout.habits.R
@@ -65,7 +68,7 @@ data class HabitRateUi(
     /** The part of the score that comes from done days, 0..1; the rest of it is partial days. */
     val doneShare: Float,
     val scheduledDays: Int,
-    /** The habit's streak at the end of the range. */
+    /** The habit's streak at the end of the range, counted inside the range only. */
     val streak: Int,
 )
 
@@ -83,12 +86,6 @@ data class InsightsUi(
     val scorePercent: Int,
     val doneCount: Int,
     val partialCount: Int,
-    /** The longest streak any of the habits has as of today. */
-    val streak: Int,
-    /** The habit for which this range is at least as good as the eight ranges before it, if any. */
-    val bestHabit: String?,
-    /** True when the range is a week or shorter, so it can be called a week. */
-    val weekLong: Boolean,
     /** The weekday with the highest score in the range, "Tuesday", and that score. */
     val primeDay: String?,
     val primePercent: Int,
@@ -150,6 +147,9 @@ class InsightsViewModel(
         filter.value = habitIds
     }
 
+    /** Habit breakdown order: by streak instead of by score. Kept while the app is open, like the filters. */
+    var breakdownByStreak by mutableStateOf(false)
+
     private fun build(
         today: LocalDate,
         from: LocalDate,
@@ -183,11 +183,8 @@ class InsightsViewModel(
         val weekdayCredits = List(7) { mutableListOf<Double?>() }
 
         val allCredits = mutableListOf<Double?>()
-        var streak = 0
         // The habit that fell most against the range before this one, and by how many points.
         var dropped: Pair<String, Int>? = null
-        // The best-scoring habit for which no earlier range was better.
-        var best: Pair<String, Double>? = null
         val rates = habits.map { habit ->
             val history = habit.history(byHabit[habit.id].orEmpty())
             val habitCredits = mutableListOf<Double?>()
@@ -213,14 +210,12 @@ class InsightsViewModel(
             allCredits += habitCredits
             val current = score(habitCredits)
             val percent = (current * 100).roundToInt()
-            streak = maxOf(streak, history.currentStreak(todayDay))
             // Only a habit that already existed before the range has something to compare with.
             if (length > 0 && history.firstDay < first) {
                 val before = (1..8).map { k -> first - k * length }.filter { it + length - 1 >= history.firstDay }
                     .map { start -> history.score(start, start + length - 1, todayDay) }
                 val fall = (before.first() * 100).roundToInt() - percent
                 if (fall > 0 && fall > (dropped?.second ?: 0)) dropped = habit.name to fall
-                if (current > 0.0 && before.all { it <= current } && current > (best?.second ?: 0.0)) best = habit.name to current
             }
             HabitRateUi(
                 id = habit.id,
@@ -233,7 +228,7 @@ class InsightsViewModel(
                 // Days that count toward the score: a logged Skip is left out.
                 doneShare = habitCredits.count { it != null }.let { if (it == 0) 0f else habitDone.toFloat() / it },
                 scheduledDays = scheduled,
-                streak = history.currentStreak(last),
+                streak = history.currentStreak(last, from = first),
             )
         }.sortedByDescending { it.percent }
 
@@ -275,9 +270,6 @@ class InsightsViewModel(
             scorePercent = (score(allCredits) * 100).roundToInt(),
             doneCount = done.sum(),
             partialCount = partial.sum(),
-            streak = streak,
-            bestHabit = best?.first,
-            weekLong = to.toEpochDay() - first <= 6,
             primeDay = primeIndex?.let { weekdays[it].getDisplayName(TextStyle.FULL, Locale.getDefault()) },
             primePercent = primeIndex?.let { (score(weekdayCredits[it]) * 100).roundToInt() } ?: 0,
             // With nothing down, the lowest habit, as long as there is more than one to pick from.

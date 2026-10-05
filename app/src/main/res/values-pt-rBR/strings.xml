@@ -52,8 +52,6 @@
     <string name="insights_lowest">Menor pontuação</string>
     <string name="insights_weekly_rhythm">Ritmo semanal</string>
     <string name="insights_breakdown">Por hábito</string>
-    <string name="insights_best_week_for">Melhor semana de %1$s</string>
-    <string name="insights_best_stretch_for">Melhor fase de %1$s</string>
     <string name="journal_empty_7">Nenhuma nota nos últimos 7 dias</string>
     <string name="journal_empty_30">Nenhuma nota nos últimos 30 dias</string>
     <string name="journal_empty_range">Nenhuma nota para %1$s</string>
@@ -462,4 +460,8 @@
         <item quantity="other">Melhor sequência · %1$d dias</item>
         <item quantity="many">Melhor sequência · %1$d dias</item>
     </plurals>
+    <string name="insights_sort_score">Pontos</string>
+    <string name="insights_sort_streak">Sequência</string>
+    <string name="insights_sort_by_score">Ordenar por pontuação</string>
+    <string name="insights_sort_by_streak">Ordenar por sequência</string>
 </resources>

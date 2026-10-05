@@ -52,8 +52,6 @@
     <string name="insights_lowest">最も低いスコア</string>
     <string name="insights_weekly_rhythm">週のリズム</string>
     <string name="insights_breakdown">習慣ごと</string>
-    <string name="insights_best_week_for">%1$sのベスト週</string>
-    <string name="insights_best_stretch_for">%1$sのベスト期間</string>
     <string name="journal_empty_7">過去7日間のメモはありません</string>
     <string name="journal_empty_30">過去30日間のメモはありません</string>
     <string name="journal_empty_range">%1$sのメモはありません</string>
@@ -430,4 +428,8 @@
     <plurals name="best_streak_days">
         <item quantity="other">最長 · %1$d 日連続</item>
     </plurals>
+    <string name="insights_sort_score">スコア</string>
+    <string name="insights_sort_streak">連続</string>
+    <string name="insights_sort_by_score">スコア順</string>
+    <string name="insights_sort_by_streak">連続日数順</string>
 </resources>

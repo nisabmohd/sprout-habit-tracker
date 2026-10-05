@@ -24,7 +24,7 @@ You can also:
 
 - see each week at a glance, or the last 26 weeks as a heatmap, with scores and streaks
 - keep a Journal of short notes tied to a habit and a day, filtered by habit or by dates
-- look back at any date range in Insights, for all habits or a few
+- look back at any date range in Insights, for all habits or a few, with each habit ranked by score or by streak
 - get a reminder at the time you pick, and a nudge in the evening to add a note when you skip a habit that asks for one
 - add four home-screen widgets that stay in sync with the app; the Today widget marks habits done from the home screen
 - export everything, including your settings, to a JSON file and import it again, or export a CSV for spreadsheets

@@ -52,8 +52,6 @@
     <string name="insights_lowest">Niedrigster Wert</string>
     <string name="insights_weekly_rhythm">Wochenrhythmus</string>
     <string name="insights_breakdown">Nach Gewohnheit</string>
-    <string name="insights_best_week_for">Beste Woche für %1$s</string>
-    <string name="insights_best_stretch_for">Beste Phase für %1$s</string>
     <string name="journal_empty_7">Keine Notizen in den letzten 7 Tagen</string>
     <string name="journal_empty_30">Keine Notizen in den letzten 30 Tagen</string>
     <string name="journal_empty_range">Keine Notizen für %1$s</string>
@@ -446,4 +444,8 @@
         <item quantity="one">Beste Serie · %1$d Tag</item>
         <item quantity="other">Beste Serie · %1$d Tage</item>
     </plurals>
+    <string name="insights_sort_score">Wert</string>
+    <string name="insights_sort_streak">Serie</string>
+    <string name="insights_sort_by_score">Nach Wert sortieren</string>
+    <string name="insights_sort_by_streak">Nach Serie sortieren</string>
 </resources>
