@@ -196,7 +196,7 @@ private fun ScoreCard(state: TodayUiState) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(stringResource(R.string.percent, state.scorePercent), style = SproutType.screenTitle, color = colors.onSurface)
+            Text(stringResource(R.string.percent, state.scorePercent), style = SproutType.screenTitleNumber, color = colors.onSurface)
             Spacer(Modifier.width(8.dp))
             Text(
                 stringResource(if (state.isToday) R.string.of_today else R.string.of_the_day),

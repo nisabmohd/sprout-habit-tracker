@@ -91,7 +91,7 @@ fun TimePickerSheet(title: String, initialMinutes: Int, onApply: (Int) -> Unit, 
                         hour = if (is24Hour) (hour + delta).mod(24) else (hour - hour % 12) + (hour % 12 + delta).mod(12)
                     },
                 )
-                Text(":", style = SproutType.display, color = MaterialTheme.colorScheme.onSurface)
+                Text(":", style = SproutType.displayNumber, color = MaterialTheme.colorScheme.onSurface)
                 TimeField(
                     value = String.format(locale, "%02d", minute),
                     label = stringResource(R.string.time_minute),
@@ -146,7 +146,7 @@ private fun TimeField(value: String, label: String, selected: Boolean, onSelect:
         ) {
             Text(
                 value,
-                style = SproutType.display,
+                style = SproutType.displayNumber,
                 color = if (selected) colors.onPrimaryContainer else colors.onSurface,
             )
         }

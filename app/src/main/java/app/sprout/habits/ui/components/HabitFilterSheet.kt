@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.components
 
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -68,6 +69,7 @@ fun HabitFilterSheet(
 ) {
     val colors = MaterialTheme.colorScheme
     var picked by remember { mutableStateOf(selected) }
+    val haptics = LocalHapticFeedback.current
     SproutSheet(onDismissRequest = onDismiss) {
         Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.filter_by_habit), style = SproutType.title, color = colors.onSurface, modifier = Modifier.weight(1f))
@@ -81,7 +83,7 @@ fun HabitFilterSheet(
                     Modifier
                         .fillMaxWidth()
                         .heightIn(min = 60.dp)
-                        .toggleable(checked, role = Role.Checkbox) { on -> picked = if (on) picked + o.habitId else picked - o.habitId }
+                        .toggleable(checked, role = Role.Checkbox) { on -> haptics.toggle(on); picked = if (on) picked + o.habitId else picked - o.habitId }
                         .padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -167,6 +169,7 @@ fun FilterChipRow(modifier: Modifier = Modifier, content: @Composable RowScope.(
  */
 @Composable
 fun RangeChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    val haptics = LocalHapticFeedback.current
     val colors = MaterialTheme.colorScheme
     val content = if (selected) colors.onSecondaryContainer else colors.onSurface
     Row(
@@ -175,7 +178,7 @@ fun RangeChip(label: String, selected: Boolean, onClick: () -> Unit) {
             .clip(RoundedCornerShape(8.dp))
             .background(if (selected) colors.secondaryContainer else Color.Transparent)
             .border(1.dp, if (selected) colors.secondaryContainer else colors.outlineVariant, RoundedCornerShape(8.dp))
-            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .selectable(selected = selected, role = Role.RadioButton) { if (!selected) haptics.tick(); onClick() }
             .padding(start = if (selected) 8.dp else 12.dp, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.more
 
+import app.sprout.habits.ui.components.toggle
+import androidx.compose.ui.platform.LocalHapticFeedback
 import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -91,11 +93,12 @@ fun SettingsRow(
 /** A row that toggles as a whole and reads as a switch to TalkBack. */
 @Composable
 fun SwitchRow(title: String, subtitle: String?, checked: Boolean, onChange: (Boolean) -> Unit) {
+    val haptics = LocalHapticFeedback.current
     Row(
         Modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
-            .toggleable(value = checked, role = Role.Switch, onValueChange = onChange)
+            .toggleable(value = checked, role = Role.Switch) { haptics.toggle(it); onChange(it) }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

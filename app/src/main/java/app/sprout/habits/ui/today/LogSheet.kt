@@ -1,5 +1,9 @@
 package app.sprout.habits.ui.today
 
+import app.sprout.habits.ui.components.confirm
+import app.sprout.habits.ui.components.stepTick
+import app.sprout.habits.ui.components.tick
+import androidx.compose.ui.platform.LocalHapticFeedback
 import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.ui.res.stringResource
 import app.sprout.habits.ui.components.SproutSheet
@@ -91,8 +95,13 @@ fun LogSheet(
         }
     }
 
-    fun setAmount(value: Double) {
-        amount = value.coerceIn(0.0, sheet.target)
+    val haptics = LocalHapticFeedback.current
+
+    fun setAmount(value: Double, slider: Boolean = false) {
+        val next = value.coerceIn(0.0, sheet.target)
+        // One tick per step the amount actually moves; none at either end.
+        if (next != amount) { if (slider) haptics.stepTick() else haptics.tick() }
+        amount = next
         status = if (amount >= sheet.target) EntryStatus.DONE else EntryStatus.PARTIAL
     }
 
@@ -143,6 +152,7 @@ fun LogSheet(
                     SegmentedButton(
                         selected = status == value,
                         onClick = {
+                            if (status != value) haptics.tick()
                             status = value
                             if (value == EntryStatus.DONE) amount = sheet.target
                             if (value == EntryStatus.PARTIAL && amount >= sheet.target) amount = (sheet.target - step).coerceAtLeast(0.0)
@@ -171,7 +181,7 @@ fun LogSheet(
                                         append(" / ${TodayViewModel.formatNumber(sheet.target)}")
                                     }
                                 },
-                                style = SproutType.display,
+                                style = SproutType.displayNumber,
                                 color = colors.onSurface,
                             )
                             val pct = if (sheet.target > 0) (amount / sheet.target * 100).roundToInt() else 0
@@ -182,7 +192,7 @@ fun LogSheet(
                     val sliderSteps = (sheet.target / step).roundToInt() - 1
                     Slider(
                         value = amount.toFloat(),
-                        onValueChange = { setAmount((it / step).roundToInt() * step) },
+                        onValueChange = { setAmount((it / step).roundToInt() * step, slider = true) },
                         valueRange = 0f..sheet.target.toFloat(),
                         steps = if (sliderSteps in 1..100) sliderSteps else 0,
                         colors = SliderDefaults.colors(
@@ -217,7 +227,10 @@ fun LogSheet(
                 }
                 Spacer(Modifier.width(12.dp))
                 Button(
-                    onClick = { onSave(status, amount, note) },
+                    onClick = {
+                        haptics.confirm()
+                        onSave(status, amount, note)
+                    },
                     modifier = Modifier.height(44.dp),
                     contentPadding = ButtonDefaults.ContentPadding,
                 ) {

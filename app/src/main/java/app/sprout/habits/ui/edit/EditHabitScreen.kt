@@ -1,5 +1,8 @@
 package app.sprout.habits.ui.edit
 
+import app.sprout.habits.ui.components.toggle
+import app.sprout.habits.ui.components.tick
+import androidx.compose.ui.platform.LocalHapticFeedback
 import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -115,6 +118,7 @@ private fun EditHabitContent(
     onArchive: () -> Unit,
     onDelete: () -> Unit,
 ) {
+    val haptics = LocalHapticFeedback.current
     val colors = MaterialTheme.colorScheme
     val hc = habitColors(form.hue.toFloat())
     var pickingTime by rememberSaveable { mutableStateOf(false) }
@@ -235,7 +239,7 @@ private fun EditHabitContent(
                     options.forEachIndexed { index, (value, label) ->
                         SegmentedButton(
                             selected = form.trackType == value,
-                            onClick = { edit { it.copy(trackType = value) } },
+                            onClick = { if (form.trackType != value) haptics.tick(); edit { it.copy(trackType = value) } },
                             shape = SegmentedButtonDefaults.itemShape(index, options.size),
                             icon = {},
                         ) { Text(label, style = SproutType.label) }
@@ -279,7 +283,7 @@ private fun EditHabitContent(
                                 .height(48.dp)
                                 .clip(CircleShape)
                                 .semantics { contentDescription = day.getDisplayName(TextStyle.FULL, Locale.getDefault()) }
-                                .toggleable(value = on, role = Role.Checkbox) { endTyping(); onToggleDay(day) },
+                                .toggleable(value = on, role = Role.Checkbox) { haptics.toggle(!on); endTyping(); onToggleDay(day) },
                             contentAlignment = Alignment.Center,
                         ) {
                             Box(
@@ -322,7 +326,7 @@ private fun EditHabitContent(
                             Text(TodayViewModel.formatTime(form.reminderMinutes), style = SproutType.cardTitle, color = colors.onSurface)
                             Text(stringResource(R.string.reminder_hint), style = SproutType.supporting, color = colors.onSurfaceVariant)
                         }
-                        Switch(checked = form.reminderOn, onCheckedChange = { v -> needsNotifications(v); edit { it.copy(reminderOn = v) } })
+                        Switch(checked = form.reminderOn, onCheckedChange = { v -> haptics.toggle(v); needsNotifications(v); edit { it.copy(reminderOn = v) } })
                     }
                 }
             }
@@ -402,10 +406,11 @@ private fun Card(content: @Composable ColumnScope.() -> Unit) {
 
 @Composable
 private fun ToggleRow(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    val haptics = LocalHapticFeedback.current
     Row(
         Modifier
             .fillMaxWidth()
-            .toggleable(value = checked, role = Role.Switch, onValueChange = onChange)
+            .toggleable(value = checked, role = Role.Switch) { haptics.toggle(it); onChange(it) }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

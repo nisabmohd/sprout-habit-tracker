@@ -16,16 +16,21 @@ import app.sprout.habits.R
 
 private val weights = listOf(FontWeight.Normal, FontWeight.Medium, FontWeight.SemiBold, FontWeight.Bold)
 
-/** One bundled variable font, instanced at each weight the app uses. */
+/**
+ * One bundled variable font, instanced at each weight the app uses. [axis] maps a weight to the
+ * value set on the font's wght axis, for a font that draws lighter than the others at the same weight.
+ */
 @OptIn(ExperimentalTextApi::class)
-private fun variableFamily(@FontRes res: Int) = FontFamily(
+private fun variableFamily(@FontRes res: Int, axis: (Int) -> Int = { it }) = FontFamily(
     weights.map { w ->
-        Font(res, weight = w, variationSettings = FontVariation.Settings(FontVariation.weight(w.weight)))
+        Font(res, weight = w, variationSettings = FontVariation.Settings(FontVariation.weight(axis(w.weight))))
     },
 )
 
 val OutfitFamily = variableFamily(R.font.outfit)
-private val SpaceGroteskFamily = variableFamily(R.font.space_grotesk)
+// Space Grotesk's strokes are about 17% thinner than Lexend's and Outfit's at the same weight, so
+// Regular is drawn at 470 and SemiBold at its heaviest, 700, to look as heavy as the other fonts.
+private val SpaceGroteskFamily = variableFamily(R.font.space_grotesk) { w -> if (w <= 400) w + 70 else minOf(w + 100, 700) }
 private val LexendFamily = variableFamily(R.font.lexend)
 private val AtkinsonFamily = variableFamily(R.font.atkinson_hyperlegible)
 
@@ -114,6 +119,17 @@ object SproutType {
 
     /** 11 SemiBold: weekday names, heatmap month labels. */
     val tiny: TextStyle @Composable @ReadOnlyComposable get() = MaterialTheme.typography.labelSmall
+
+    /**
+     * [display], [screenTitle] and [title] in the chosen body font, for numbers ("40%", "15 / 20",
+     * "09 : 00", "13 days"), so they match the text around them. Words in those styles stay Outfit.
+     */
+    val displayNumber: TextStyle @Composable @ReadOnlyComposable get() = display.inBodyFont()
+    val screenTitleNumber: TextStyle @Composable @ReadOnlyComposable get() = screenTitle.inBodyFont()
+    val titleNumber: TextStyle @Composable @ReadOnlyComposable get() = title.inBodyFont()
+
+    @Composable @ReadOnlyComposable
+    private fun TextStyle.inBodyFont() = copy(fontFamily = body.fontFamily)
 
     /** Exception: the New note editor, 18 Regular at 1.55, for comfortable writing. */
     val noteEditor: TextStyle

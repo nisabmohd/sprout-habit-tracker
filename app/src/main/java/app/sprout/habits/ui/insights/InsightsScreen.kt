@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.insights
 
+import app.sprout.habits.ui.components.tick
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -168,7 +170,7 @@ private fun SummaryCard(ui: InsightsUi) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(stringResource(R.string.percent, ui.scorePercent), style = SproutType.screenTitle, color = colors.onSurface, softWrap = false)
+            Text(stringResource(R.string.percent, ui.scorePercent), style = SproutType.screenTitleNumber, color = colors.onSurface, softWrap = false)
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.insights_average), style = SproutType.supporting, color = colors.onSurfaceVariant, modifier = Modifier.padding(bottom = 4.dp))
             Spacer(Modifier.width(12.dp))
@@ -489,6 +491,7 @@ private fun SortToggle(byStreak: Boolean, onChange: (Boolean) -> Unit) {
                 .padding(3.dp)
                 .selectableGroup(),
         ) {
+            val haptics = LocalHapticFeedback.current
             listOf(
                 false to stringResource(R.string.insights_sort_score),
                 true to stringResource(R.string.insights_sort_streak),
@@ -501,7 +504,7 @@ private fun SortToggle(byStreak: Boolean, onChange: (Boolean) -> Unit) {
                         .fillMaxHeight()
                         .clip(CircleShape)
                         .background(if (selected) colors.surfaceContainerLowest else Color.Transparent)
-                        .selectable(selected = selected, role = Role.RadioButton) { onChange(value) }
+                        .selectable(selected = selected, role = Role.RadioButton) { if (!selected) haptics.tick(); onChange(value) }
                         .semantics { contentDescription = description }
                         .padding(horizontal = 14.dp),
                     contentAlignment = Alignment.Center,

@@ -165,7 +165,7 @@ private fun StatTile(value: String, label: String, hc: HabitColors, modifier: Mo
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Text(value, style = SproutType.title, color = hc.ink, maxLines = 1)
+        Text(value, style = SproutType.titleNumber, color = hc.ink, maxLines = 1)
         Text(label, style = SproutType.supporting, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
     }
 }

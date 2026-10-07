@@ -15,7 +15,11 @@ Weights are only **Regular (400)** and **SemiBold (600)**. Line height: about 1.
 | `caption` | Lexend* | 12sp | Regular / SemiBold | muted | Helper text under fields, legends, field labels ("Name", "Target"; SemiBold), nav bar labels, font descriptions, small labels inside rings ("75%"; SemiBold), "today" under "1/7" |
 | `tiny` | Lexend* | 11sp | SemiBold | muted | Weekday names (Mon…Sun, M…S), heatmap month labels, the % inside the Today partial ring (text colour) |
 
-\* The body font is the user's choice (Lexend by default). Outfit is only for `display`, `screenTitle` and `title`.
+\* The body font is the user's choice (Lexend by default). Outfit is only for words in `display`, `screenTitle` and `title`.
+
+**Numbers follow the body font.** A number drawn at `display`, `screenTitle` or `title` size (the amount "15 / 20", the time "09 : 00", the hero "40%" / "87%", stat values "13 days") uses `displayNumber`, `screenTitleNumber` or `titleNumber`: the same size and weight in the chosen font, so it matches the text around it (2026-10-07). The widget streak "11" stays in the system font, like all widget text.
+
+**Space Grotesk** draws about 17% thinner than Lexend and Outfit at the same weight, so `Type.kt` sets its weight axis to 470 for Regular and 700 for SemiBold. The weights in code stay 400 and 600.
 
 **Exceptions (only these):**
 - The New note editor uses 18sp Regular with 1.55 line height, for comfortable writing.

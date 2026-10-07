@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.today
 
+import app.sprout.habits.ui.components.toggle
 import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -121,7 +122,10 @@ fun HabitCard(
                 )
             }
             Spacer(Modifier.width(8.dp))
-            TrailingControl(habit, hc, onToggle)
+            TrailingControl(habit, hc) {
+                haptics.toggle(habit.outcome != DayOutcome.DONE)
+                onToggle()
+            }
         }
     }
 }

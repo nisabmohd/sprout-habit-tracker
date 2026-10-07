@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.habits
 
+import app.sprout.habits.ui.components.tick
+import androidx.compose.ui.platform.LocalHapticFeedback
 import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -97,11 +99,12 @@ fun HabitsScreen(
         item(key = "mode") {
             // Each segment is a fixed share of the row, so labels stop scaling at 1.3x.
             CappedFontScale {
+            val haptics = LocalHapticFeedback.current
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
                 HabitsMode.entries.forEachIndexed { index, m ->
                     SegmentedButton(
                         selected = mode == m,
-                        onClick = { viewModel.setMode(m) },
+                        onClick = { if (mode != m) haptics.tick(); viewModel.setMode(m) },
                         shape = SegmentedButtonDefaults.itemShape(index, HabitsMode.entries.size),
                         colors = SegmentedButtonDefaults.colors(activeContainerColor = colors.primaryContainer, activeContentColor = colors.onPrimaryContainer),
                     ) { Text(stringResource(if (m == HabitsMode.WEEK) R.string.week else R.string.overall), style = SproutType.label) }

@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.more
 
+import app.sprout.habits.ui.components.tick
+import androidx.compose.ui.platform.LocalHapticFeedback
 import app.sprout.habits.ui.theme.SproutType
 import app.sprout.habits.ui.today.UndoSnackbarHost
 import app.sprout.habits.ui.update.UpdateBadge
@@ -136,11 +138,12 @@ fun MoreScreen(
                         // Each segment is a fixed share of the row, so labels stop scaling at 1.3x.
                         CappedFontScale {
                         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                            val haptics = LocalHapticFeedback.current
                             val modes = listOf(ThemeMode.SYSTEM to stringResource(R.string.theme_system), ThemeMode.LIGHT to stringResource(R.string.theme_light), ThemeMode.DARK to stringResource(R.string.theme_dark))
                             modes.forEachIndexed { i, (mode, label) ->
                                 SegmentedButton(
                                     selected = theme.mode == mode,
-                                    onClick = { save { setThemeMode(mode) } },
+                                    onClick = { if (theme.mode != mode) haptics.tick(); save { setThemeMode(mode) } },
                                     shape = SegmentedButtonDefaults.itemShape(i, modes.size),
                                     icon = {},
                                     colors = SegmentedButtonDefaults.colors(

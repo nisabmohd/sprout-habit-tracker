@@ -1,5 +1,6 @@
 package app.sprout.habits.ui.components
 
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -33,6 +34,7 @@ data class Swatch(val color: Color, val onColor: Color, val label: String)
  */
 @Composable
 fun ColorSwatchRow(swatches: List<Swatch>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
+    val haptics = LocalHapticFeedback.current
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         swatches.forEachIndexed { i, swatch ->
             val isSelected = i == selected
@@ -42,7 +44,7 @@ fun ColorSwatchRow(swatches: List<Swatch>, selected: Int, onSelect: (Int) -> Uni
                     .weight(1f)
                     .height(48.dp)
                     .clip(CircleShape)
-                    .selectable(isSelected, role = Role.RadioButton) { onSelect(i) }
+                    .selectable(isSelected, role = Role.RadioButton) { if (!isSelected) haptics.tick(); onSelect(i) }
                     .semantics { contentDescription = swatch.label },
                 contentAlignment = Alignment.Center,
             ) {

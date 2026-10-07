@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+Changed:
+
+- Space Grotesk is no longer lighter than the other fonts.
+- Numbers (the score on Today and Insights, the amount and time pickers, the stats in habit detail) use the font you picked in More instead of always Outfit.
+- Haptics: tapping a habit's circle, a swipe crossing the point where it logs, each step of − / + and the slider, Save in the amount sheet, and every switch, chip, segmented button, day and checkbox now give a light tap.
+
 ## 1.3.1
 
 Changed:

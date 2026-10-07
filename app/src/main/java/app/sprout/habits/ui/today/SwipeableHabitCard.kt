@@ -1,5 +1,12 @@
 package app.sprout.habits.ui.today
 
+import app.sprout.habits.ui.components.confirm
+import app.sprout.habits.ui.components.tick
+import app.sprout.habits.ui.components.threshold
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.distinctUntilChanged
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.LaunchedEffect
 import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +31,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -72,11 +78,11 @@ fun SwipeableHabitCard(
             when (value) {
                 // The opposite swipe undoes: right on a skipped card, left on a done one.
                 SwipeToDismissBoxValue.StartToEnd -> {
-                    haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                    haptics.confirm()
                     if (outcome == DayOutcome.SKIP) currentOnUndo() else currentOnDone()
                 }
                 SwipeToDismissBoxValue.EndToStart -> {
-                    haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                    haptics.confirm()
                     if (outcome == DayOutcome.DONE) currentOnUndo() else currentOnSkip()
                 }
                 SwipeToDismissBoxValue.Settled -> Unit
@@ -87,6 +93,14 @@ fun SwipeableHabitCard(
         positionalThreshold = { distance -> distance * SWIPE_FRACTION },
     )
     stateRef[0] = state
+    // A tick as the drag crosses the point where letting go logs it, and again if it goes back.
+    LaunchedEffect(state, width) {
+        if (width == 0) return@LaunchedEffect
+        snapshotFlow { abs(runCatching { state.requireOffset() }.getOrDefault(0f)) >= width * SWIPE_FRACTION }
+            .distinctUntilChanged()
+            .drop(1)
+            .collect { past -> if (past) haptics.threshold() else haptics.tick() }
+    }
     val done = habit.outcome == DayOutcome.DONE
     val markDone = stringResource(R.string.action_mark_done)
     val skip = stringResource(R.string.outcome_skip)
