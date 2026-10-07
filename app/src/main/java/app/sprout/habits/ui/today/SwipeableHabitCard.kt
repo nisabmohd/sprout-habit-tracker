@@ -1,7 +1,6 @@
 package app.sprout.habits.ui.today
 
 import app.sprout.habits.ui.components.confirm
-import app.sprout.habits.ui.components.tick
 import app.sprout.habits.ui.components.threshold
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -93,13 +92,14 @@ fun SwipeableHabitCard(
         positionalThreshold = { distance -> distance * SWIPE_FRACTION },
     )
     stateRef[0] = state
-    // A tick as the drag crosses the point where letting go logs it, and again if it goes back.
+    // A tick as the drag crosses the point where letting go logs it. None on the way back: the card
+    // springs back over that point right after a release, and a tick then would cut off the confirm.
     LaunchedEffect(state, width) {
         if (width == 0) return@LaunchedEffect
         snapshotFlow { abs(runCatching { state.requireOffset() }.getOrDefault(0f)) >= width * SWIPE_FRACTION }
             .distinctUntilChanged()
             .drop(1)
-            .collect { past -> if (past) haptics.threshold() else haptics.tick() }
+            .collect { past -> if (past) haptics.threshold() }
     }
     val done = habit.outcome == DayOutcome.DONE
     val markDone = stringResource(R.string.action_mark_done)

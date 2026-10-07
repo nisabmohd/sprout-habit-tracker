@@ -68,7 +68,6 @@
     <string name="clear_date_filter">Clear date filter</string>
     <string name="remove_habit_filter">Remove habit filter</string>
     <string name="insights_bar_description">%1$s: %2$s done, %3$s partial</string>
-    <string name="insights_by_habit">By habit</string>
     <string name="outcome_done_amount">Done · %1$s</string>
     <string name="amount_of_goal">%1$s of %2$s</string>
     <string name="not_logged_yet">Not logged yet</string>

@@ -262,11 +262,12 @@ private fun RowScope.PatternTile(shape: RoundedCornerShape, icon: Int, pill: Col
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(painterResource(icon), contentDescription = null, tint = pillContent, modifier = Modifier.size(18.dp))
-            Text(label, style = SproutType.label, color = pillContent, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 6.dp))
+            Text(label, style = SproutType.label, color = pillContent, modifier = Modifier.padding(start = 6.dp))
         }
         Text(value, style = SproutType.cardTitle, color = colors.onSurface, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 12.dp))
-        // Always one line, so the two cards stay even.
-        Text(detail, style = SproutType.supporting, color = colors.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 2.dp))
+        // One line at normal text sizes; with large text the label and detail wrap rather than
+        // clip, and the row's IntrinsicSize.Min keeps both cards the same height.
+        Text(detail, style = SproutType.supporting, color = colors.onSurfaceVariant, modifier = Modifier.padding(top = 2.dp))
     }
 }
 

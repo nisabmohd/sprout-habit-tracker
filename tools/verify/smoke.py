@@ -46,7 +46,8 @@ def fresh_install():
 def welcome_shows_once():
     assert d.exists("Get started"), "welcome screen missing on first launch"
     d.tap("Get started")
-    assert d.exists("Today"), "Today not shown after Get started"
+    # The first launch after a fresh install is slow (no baseline profile compiled yet).
+    assert d.exists("Today", timeout=10), "Today not shown after Get started"
     d.shell(f"am force-stop {d.PACKAGE}")
     d.shell(f"am start -W -n {d.PACKAGE}/.MainActivity")
     time.sleep(2.5)

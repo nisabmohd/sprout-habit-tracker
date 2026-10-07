@@ -65,7 +65,6 @@
     <string name="clear_date_filter">Quitar filtro de fechas</string>
     <string name="remove_habit_filter">Quitar filtro de hábitos</string>
     <string name="insights_bar_description">%1$s: %2$s hechos, %3$s parciales</string>
-    <string name="insights_by_habit">Por hábito</string>
     <string name="outcome_done_amount">Hecho · %1$s</string>
     <string name="amount_of_goal">%1$s de %2$s</string>
     <string name="not_logged_yet">Sin registrar</string>

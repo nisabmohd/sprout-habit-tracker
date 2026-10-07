@@ -65,7 +65,6 @@
     <string name="clear_date_filter">日付フィルターを解除</string>
     <string name="remove_habit_filter">習慣フィルターを解除</string>
     <string name="insights_bar_description">%1$s：完了 %2$s、一部 %3$s</string>
-    <string name="insights_by_habit">習慣別</string>
     <string name="outcome_done_amount">完了・%1$s</string>
     <string name="amount_of_goal">%1$s / %2$s</string>
     <string name="not_logged_yet">未記録</string>

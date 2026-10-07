@@ -65,7 +65,6 @@
     <string name="clear_date_filter">Datumsfilter entfernen</string>
     <string name="remove_habit_filter">Gewohnheitsfilter entfernen</string>
     <string name="insights_bar_description">%1$s: %2$s erledigt, %3$s teilweise</string>
-    <string name="insights_by_habit">Nach Gewohnheit</string>
     <string name="outcome_done_amount">Erledigt · %1$s</string>
     <string name="amount_of_goal">%1$s von %2$s</string>
     <string name="not_logged_yet">Noch nicht eingetragen</string>
