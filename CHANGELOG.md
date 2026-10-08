@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.3
+
+Fixed:
+
+- Journal: a note written on a later day than the one it's about shows when it was written, "Today, 10:51 PM", instead of only the time, which read as written on the note's own day.
+
 ## 1.3.2
 
 Changed:
