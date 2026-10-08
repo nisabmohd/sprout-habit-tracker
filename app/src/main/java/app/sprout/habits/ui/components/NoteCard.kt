@@ -34,6 +34,7 @@ import app.sprout.habits.data.Note
 import app.sprout.habits.data.TrackType
 import app.sprout.habits.domain.formatNumber
 import app.sprout.habits.domain.measure
+import app.sprout.habits.ui.datePattern
 import app.sprout.habits.ui.theme.habitColors
 import java.time.Instant
 import java.time.LocalDate
@@ -54,7 +55,10 @@ data class NoteCardUi(
     val mark: DayMark,
     /** "Skipped", "8 of 20 pages", "Done · 45 min". */
     val outcome: String,
-    /** When the note was last written, "9:12 PM". */
+    /**
+     * When the note was last written: "9:12 PM", or "Today, 9:12 PM" when that wasn't the day
+     * the note is about, so a note written late doesn't read as written on its own day.
+     */
     val time: String,
     val text: String,
 ) {
@@ -72,9 +76,22 @@ data class NoteCardUi(
                 hue = habit.colorHue.toFloat(),
                 mark = mark,
                 outcome = outcome,
-                time = Instant.ofEpochMilli(note.updatedAt).atZone(ZoneId.systemDefault()).toLocalTime().format(TIME),
+                time = writtenAt(note, today, strings),
                 text = note.text,
             )
+        }
+
+        private fun writtenAt(note: Note, today: LocalDate, strings: Strings): String {
+            val at = Instant.ofEpochMilli(note.updatedAt).atZone(ZoneId.systemDefault())
+            val time = at.toLocalTime().format(TIME)
+            val day = at.toLocalDate()
+            if (day.toEpochDay() == note.date) return time
+            val dayLabel = when (day) {
+                today -> strings(R.string.today)
+                today.minusDays(1) -> strings(R.string.yesterday)
+                else -> day.format(datePattern(if (day.year == today.year) "d MMM" else "d MMM yyyy"))
+            }
+            return strings(R.string.note_written_at, dayLabel, time)
         }
 
         /** The day's mark and its words. A past day with nothing logged counts as skipped. */

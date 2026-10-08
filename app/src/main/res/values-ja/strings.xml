@@ -24,6 +24,7 @@
     <string name="this_week">今週</string>
     <string name="today">今日</string>
     <string name="yesterday">昨日</string>
+    <string name="note_written_at">%1$s %2$s</string>
     <string name="percent">%1$d%%</string>
     <string name="welcome_title">小さな習慣を、\n正直に続けよう。</string>
     <string name="welcome_body">スワイプで完了、できた分だけ記録、無理な日はスキップ。うまくいかなかった日のことも書き残せます。</string>

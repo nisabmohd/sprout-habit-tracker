@@ -24,6 +24,7 @@
     <string name="this_week">Diese Woche</string>
     <string name="today">Heute</string>
     <string name="yesterday">Gestern</string>
+    <string name="note_written_at">%1$s, %2$s</string>
     <string name="percent">%1$d %%</string>
     <string name="welcome_title">Kleine Gewohnheiten,\nehrlich geführt.</string>
     <string name="welcome_body">Wische zum Abhaken, trage einen Teil ein, lass aus, wenn das Leben dazwischenkommt, und schreib über die Tage, die anders liefen als geplant.</string>

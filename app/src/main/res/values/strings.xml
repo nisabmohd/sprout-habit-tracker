@@ -26,6 +26,8 @@
     <string name="this_week">This week</string>
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
+    <!-- When a note was written on another day than the one it is about: "Today, 9:12 PM". -->
+    <string name="note_written_at">%1$s, %2$s</string>
     <string name="percent">%1$d%%</string>
     <string name="welcome_title">Small habits,\nkept honestly.</string>
     <string name="welcome_body">Swipe to complete, log part of it, skip when life happens, and write about the days that didn\'t go to plan.</string>

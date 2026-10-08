@@ -24,6 +24,7 @@
     <string name="this_week">Cette semaine</string>
     <string name="today">Aujourd\'hui</string>
     <string name="yesterday">Hier</string>
+    <string name="note_written_at">%1$s, %2$s</string>
     <string name="percent">%1$d %%</string>
     <string name="welcome_title">De petites habitudes,\ntenues honnêtement.</string>
     <string name="welcome_body">Balayez pour valider, notez une partie, passez quand la vie s\'en mêle, et écrivez sur les jours qui ne se sont pas passés comme prévu.</string>

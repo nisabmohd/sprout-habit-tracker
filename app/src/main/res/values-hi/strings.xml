@@ -24,6 +24,7 @@
     <string name="this_week">यह हफ़्ता</string>
     <string name="today">आज</string>
     <string name="yesterday">कल</string>
+    <string name="note_written_at">%1$s, %2$s</string>
     <string name="percent">%1$d%%</string>
     <string name="welcome_title">छोटी आदतें,\nईमानदारी से निभाई गईं।</string>
     <string name="welcome_body">पूरा करने के लिए स्वाइप करें, थोड़ा हुआ हो तो उतना दर्ज करें, ज़रूरत हो तो छोड़ दें, और उन दिनों के बारे में लिखें जो योजना के मुताबिक नहीं गए।</string>
