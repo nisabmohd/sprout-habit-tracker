@@ -150,7 +150,7 @@ fun HeaderIconButton(
 }
 
 /**
- * The chips under a tab header, shown only while a filter is on: the picked range ([CustomRangeChip])
+ * The chips under a tab header: the range ([DefaultRangeChip] or a picked [CustomRangeChip]),
  * then the habit chip. The row scrolls sideways when it doesn't fit.
  */
 @Composable
@@ -161,6 +161,27 @@ fun FilterChipRow(modifier: Modifier = Modifier, content: @Composable RowScope.(
         verticalAlignment = Alignment.CenterVertically,
         content = content,
     )
+}
+
+/**
+ * The default range ("This week") shown as the selected chip: filled, with a check. Tapping it
+ * opens the date range sheet to pick another range.
+ */
+@Composable
+fun DefaultRangeChip(label: String, openLabel: String, onOpen: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        Modifier
+            .heightIn(min = 32.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(colors.secondaryContainer)
+            .clickable(onClickLabel = openLabel, role = Role.Button, onClick = onOpen)
+            .padding(start = 8.dp, end = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = colors.onSecondaryContainer, modifier = Modifier.padding(end = 6.dp).size(18.dp))
+        Text(label, style = SproutType.label, color = colors.onSecondaryContainer, maxLines = 1)
+    }
 }
 
 /**

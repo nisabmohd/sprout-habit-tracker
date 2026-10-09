@@ -160,8 +160,7 @@ fun NoteCard(
             }
             Column(Modifier.weight(1f).padding(start = if (showHabit) 12.dp else 0.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 if (showHabit) {
-                    // Long names wrap rather than lose their end.
-                    Text(note.habitName, style = SproutType.cardTitle, color = colors.onSurface)
+                    Text(note.habitName, style = SproutType.cardTitle, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     DayMarkView(note.mark, hc, marks, Modifier.size(16.dp))

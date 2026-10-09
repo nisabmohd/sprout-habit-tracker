@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.unit.LayoutDirection
 import app.sprout.habits.ui.components.CustomRangeChip
+import app.sprout.habits.ui.components.DefaultRangeChip
 import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -96,27 +97,27 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek,
                 HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.change_date_range), active = !ui.thisWeek) { pickingRange = true }
                 HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty()) { filtering = true }
             }
-            // No preset ranges: the row only shows the filters that are on, each with its ✕.
-            if (!ui.thisWeek || ui.filter.isNotEmpty()) {
-                FilterChipRow(Modifier.padding(top = 12.dp)) {
-                    if (!ui.thisWeek) {
-                        CustomRangeChip(
-                            label = ui.rangeLabel,
-                            openLabel = stringResource(R.string.change_date_range),
-                            clearLabel = stringResource(R.string.clear_date_filter),
-                            onOpen = { pickingRange = true },
-                            onClear = viewModel::clearRange,
-                        )
-                    }
-                    if (ui.filter.isNotEmpty()) {
-                        HabitFilterChip(
-                            selected = ui.options.filter { it.habitId in ui.filter },
-                            label = pluralStringResource(R.plurals.habit_count, ui.filter.size, ui.filter.size),
-                            removeLabel = stringResource(R.string.remove_habit_filter),
-                            onOpen = { filtering = true },
-                            onClear = { viewModel.setFilter(emptySet()) },
-                        )
-                    }
+            // The range is always shown: "✓ This week" by default, or the picked range with its ✕.
+            FilterChipRow(Modifier.padding(top = 12.dp)) {
+                if (ui.thisWeek) {
+                    DefaultRangeChip(ui.rangeLabel, stringResource(R.string.change_date_range)) { pickingRange = true }
+                } else {
+                    CustomRangeChip(
+                        label = ui.rangeLabel,
+                        openLabel = stringResource(R.string.change_date_range),
+                        clearLabel = stringResource(R.string.clear_date_filter),
+                        onOpen = { pickingRange = true },
+                        onClear = viewModel::clearRange,
+                    )
+                }
+                if (ui.filter.isNotEmpty()) {
+                    HabitFilterChip(
+                        selected = ui.options.filter { it.habitId in ui.filter },
+                        label = pluralStringResource(R.plurals.habit_count, ui.filter.size, ui.filter.size),
+                        removeLabel = stringResource(R.string.remove_habit_filter),
+                        onOpen = { filtering = true },
+                        onClear = { viewModel.setFilter(emptySet()) },
+                    )
                 }
             }
         }
