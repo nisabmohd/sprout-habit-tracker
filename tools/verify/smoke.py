@@ -79,6 +79,9 @@ def today_circle_toggles_done():
     assert d.exists("Mark Vitamins not done"), "circle did not mark done"
     d.tap("Mark Vitamins not done")
     assert d.exists("Mark Vitamins done"), "circle did not unmark"
+    # Logging a habit hides the sample banner for good; More has no sample row.
+    d.scroll_to_top()
+    assert not d.exists("These are sample habits", timeout=1.0), "sample banner still there after logging a habit"
 
 
 @check
@@ -301,7 +304,8 @@ def journal_lists_and_adds_notes():
 def journal_cards_and_new_note():
     d.nav("Journal")
     assert d.exists("Today"), "no date header over today's notes"
-    assert d.exists("Skipped"), "note card doesn't show the day's outcome"
+    # Outcome and time share one line: "Skipped · 9:12 AM".
+    assert d.exists("Skipped · ", contains=True), "note card doesn't show the day's outcome and time"
     d.tap("Add note")
     # The check before this one wrote today's note for the first habit, so Add note shows it.
     assert d.exists("Smoke test note"), "today's saved note isn't shown when adding a note for the same habit and day"
@@ -388,9 +392,11 @@ def journal_filter_by_date():
     assert d.exists("Rough morning", contains=True), "today's note missing under a today-only range"
     assert d.exists(f"{today.day} ", contains=True), "date chip doesn't show the range"
     d.tap("Clear date filter")
-    assert d.exists("All"), "the chip's ✕ didn't go back to All"
-    d.tap("7 days")
-    assert d.exists("Rough morning", contains=True), "today's note missing under 7 days"
+    assert not d.exists("Clear date filter", timeout=1.0), "the chip's ✕ didn't clear the range"
+    # No preset range chips: the Journal is back on every note.
+    assert not d.exists("7 days", timeout=1.0) and not d.exists("All", timeout=0.5), "preset range chips are back"
+    assert d.scroll_to("Yesterday"), "older notes hidden after clearing the range"
+    d.scroll_to_top()
     d.tap("Filter by date")
     d.tap("All dates")
     assert not d.exists("Clear date filter", timeout=1.0), "All dates left a custom range chip"
@@ -414,7 +420,12 @@ def note_date_in_a_sheet():
     d.tap("Use ", contains=True)
     yesterday = today - datetime.timedelta(days=1)
     assert d.exists(yesterday.strftime("%A, ") + str(yesterday.day), contains=True), "note date didn't change"
-    d.tap("Close")
+    # Saved today about yesterday: the Journal says when it was written.
+    w, h = d.screen_size()
+    d.tap_xy(w // 2, int(h * 0.55))
+    d.type_text("Late note")
+    d.tap("Save")
+    assert d.scroll_to("written ", contains=True), "a note written a day later doesn't say when it was written"
 
 
 @check
@@ -438,7 +449,8 @@ def insights_render():
     d.nav("Insights")
     assert d.exists("average"), "score card missing"
     assert d.exists("Weekly rhythm"), "bar chart missing"
-    assert d.exists("30 days"), "range chips missing"
+    # Opens on this week with no preset range chips and no chip row.
+    assert not d.exists("30 days", timeout=1.0) and not d.exists("Clear date filter", timeout=0.5), "preset range chips or a range chip on open"
     d.tap("Change date range")
     assert d.exists("Date range"), "date range sheet didn't open"
     d.tap("1")  # the 1st of this month starts a new range
@@ -454,6 +466,7 @@ def insights_render():
     assert d.exists("Clear date filter"), "date chip has no ✕ for a custom range"
     d.tap("Change date range")
     d.tap("This week")
+    assert not d.exists("Clear date filter", timeout=1.0), "This week left a range chip"
 
 
 @check
