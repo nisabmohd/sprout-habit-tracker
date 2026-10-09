@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.4
+
+Changed:
+
+- Insights and Journal: the 7 days / 30 days chips are gone; pick other dates with the calendar button. Insights opens on this week, shown as a selected "This week" chip; the Journal opens on all notes and shows a chip only while a range or habit filter is on. A picked range's ✕ goes back to the default.
+- Journal: the time a note was written sits in its status line ("Skipped · 9:12 AM", or "written Thu, 11:28 PM" for a note written on a later day), and the day headers are larger.
+- Sample habits: the Today card has a plain "Remove sample data" button and goes away once you log or change a habit. The "Remove sample data" row in More is gone.
+
 ## 1.3.3
 
 Fixed:
