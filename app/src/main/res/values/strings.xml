@@ -27,7 +27,7 @@
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
     <!-- When a note was written on another day than the one it is about: "Today, 9:12 PM". -->
-    <string name="note_written_at">%1$s, %2$s</string>
+    <string name="note_written_at">written %1$s, %2$s</string>
     <string name="percent">%1$d%%</string>
     <string name="welcome_title">Small habits,\nkept honestly.</string>
     <string name="welcome_body">Swipe to complete, log part of it, skip when life happens, and write about the days that didn\'t go to plan.</string>
@@ -45,9 +45,6 @@
     <string name="change_date_range">Change date range</string>
     <string name="show_all_habits">Show all habits</string>
     <string name="insights_average">average</string>
-    <string name="range_all">All</string>
-    <string name="range_7_days">7 days</string>
-    <string name="range_30_days">30 days</string>
     <string name="insights_patterns">Patterns</string>
     <string name="insights_prime_time">Prime time</string>
     <string name="insights_needs_focus">Needs focus</string>
@@ -56,8 +53,6 @@
     <string name="insights_lowest">Lowest score</string>
     <string name="insights_weekly_rhythm">Weekly rhythm</string>
     <string name="insights_breakdown">Habit breakdown</string>
-    <string name="journal_empty_7">No notes in the last 7 days</string>
-    <string name="journal_empty_30">No notes in the last 30 days</string>
     <string name="journal_empty_range">No notes for %1$s</string>
     <string name="journal_empty_habits">No notes for these habits</string>
     <string name="journal_empty_earlier">Your notes from earlier are still here.</string>
@@ -434,8 +429,6 @@
     <string name="sample_card_title">These are sample habits</string>
     <string name="sample_card_body">Try swiping, holding and adding notes. Remove them when you\'re ready to add your own.</string>
     <string name="sample_remove">Remove sample data</string>
-    <string name="sample_removed">Sample data removed</string>
-    <string name="sample_remove_subtitle">Deletes the sample habits, their history and notes</string>
     <!-- Insights, By habit: kept days out of the scheduled ones (the plural follows the second number), and the current streak. -->
     <plurals name="days_kept">
         <item quantity="one">%1$d of %2$d day</item>

@@ -4,7 +4,8 @@ import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 
 /** The single entry point to habits, entries and notes. */
-class HabitRepository(private val db: SproutDatabase) {
+/** [onUserChange] runs after each habit edit and each logged day (it hides the sample banner). */
+class HabitRepository(private val db: SproutDatabase, private val onUserChange: suspend () -> Unit = {}) {
     private val habits = db.habitDao()
     private val entries = db.entryDao()
     private val notes = db.noteDao()
@@ -20,22 +21,24 @@ class HabitRepository(private val db: SproutDatabase) {
     suspend fun getHabit(id: Long): Habit? = habits.get(id)
 
     /** Inserts a new habit at the end of the list, or updates an existing one. Returns its id. */
-    suspend fun saveHabit(habit: Habit): Long = if (habit.id == 0L) {
-        db.withTransaction { habits.insert(habit.copy(sortOrder = habits.nextSortOrder())) }
-    } else {
-        habits.update(habit)
-        habit.id
-    }
+    suspend fun saveHabit(habit: Habit): Long = (
+        if (habit.id == 0L) {
+            db.withTransaction { habits.insert(habit.copy(sortOrder = habits.nextSortOrder())) }
+        } else {
+            habits.update(habit)
+            habit.id
+        }
+    ).also { onUserChange() }
 
     /** Persists a new order; [orderedIds] is the full list of habit ids top to bottom. */
     suspend fun reorderHabits(orderedIds: List<Long>) = db.withTransaction {
         orderedIds.forEachIndexed { index, id -> habits.setSortOrder(id, index) }
-    }
+    }.also { onUserChange() }
 
-    suspend fun setArchived(id: Long, archived: Boolean) = habits.setArchived(id, archived)
+    suspend fun setArchived(id: Long, archived: Boolean) = habits.setArchived(id, archived).also { onUserChange() }
 
     /** Deletes the habit together with its entries and notes (cascade). */
-    suspend fun deleteHabit(habit: Habit) = habits.delete(habit)
+    suspend fun deleteHabit(habit: Habit) = habits.delete(habit).also { onUserChange() }
 
     // Entries
 
@@ -44,10 +47,10 @@ class HabitRepository(private val db: SproutDatabase) {
         entries.observeRange(habitId, fromDay, toDay)
     fun observeAllEntries(habitId: Long): Flow<List<Entry>> = entries.observeAll(habitId)
     suspend fun getEntry(habitId: Long, day: Long): Entry? = entries.get(habitId, day)
-    suspend fun setEntry(entry: Entry) = entries.upsert(entry)
+    suspend fun setEntry(entry: Entry) = entries.upsert(entry).also { onUserChange() }
 
     /** Clears the day back to "not logged". */
-    suspend fun clearEntry(habitId: Long, day: Long) = entries.delete(habitId, day)
+    suspend fun clearEntry(habitId: Long, day: Long) = entries.delete(habitId, day).also { onUserChange() }
 
     // Notes
 

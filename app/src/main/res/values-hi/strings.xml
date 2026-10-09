@@ -24,7 +24,7 @@
     <string name="this_week">यह हफ़्ता</string>
     <string name="today">आज</string>
     <string name="yesterday">कल</string>
-    <string name="note_written_at">%1$s, %2$s</string>
+    <string name="note_written_at">लिखा गया %1$s, %2$s</string>
     <string name="percent">%1$d%%</string>
     <string name="welcome_title">छोटी आदतें,\nईमानदारी से निभाई गईं।</string>
     <string name="welcome_body">पूरा करने के लिए स्वाइप करें, थोड़ा हुआ हो तो उतना दर्ज करें, ज़रूरत हो तो छोड़ दें, और उन दिनों के बारे में लिखें जो योजना के मुताबिक नहीं गए।</string>
@@ -42,9 +42,6 @@
     <string name="change_date_range">समय अवधि बदलें</string>
     <string name="show_all_habits">सभी आदतें दिखाएं</string>
     <string name="insights_average">औसत</string>
-    <string name="range_all">सभी</string>
-    <string name="range_7_days">7 दिन</string>
-    <string name="range_30_days">30 दिन</string>
     <string name="insights_patterns">पैटर्न</string>
     <string name="insights_prime_time">सबसे अच्छा समय</string>
     <string name="insights_needs_focus">ध्यान चाहिए</string>
@@ -53,8 +50,6 @@
     <string name="insights_lowest">सबसे कम स्कोर</string>
     <string name="insights_weekly_rhythm">हफ़्ते की लय</string>
     <string name="insights_breakdown">आदत के अनुसार</string>
-    <string name="journal_empty_7">पिछले 7 दिनों में कोई नोट नहीं</string>
-    <string name="journal_empty_30">पिछले 30 दिनों में कोई नोट नहीं</string>
     <string name="journal_empty_range">%1$s के लिए कोई नोट नहीं</string>
     <string name="journal_empty_habits">इन आदतों के लिए कोई नोट नहीं</string>
     <string name="journal_empty_earlier">आपके पहले के नोट अब भी यहीं हैं।</string>
@@ -431,8 +426,6 @@
     <string name="sample_card_title">ये उदाहरण वाली आदतें हैं</string>
     <string name="sample_card_body">स्वाइप करके, दबाकर रखकर और नोट जोड़कर देखें। अपनी आदतें जोड़ने से पहले इन्हें हटा दें।</string>
     <string name="sample_remove">उदाहरण डेटा हटाएं</string>
-    <string name="sample_removed">उदाहरण डेटा हटाया गया</string>
-    <string name="sample_remove_subtitle">उदाहरण वाली आदतें, उनका इतिहास और नोट मिटाता है</string>
     <plurals name="days_kept">
         <item quantity="one">%2$d में से %1$d दिन</item>
         <item quantity="other">%2$d में से %1$d दिन</item>

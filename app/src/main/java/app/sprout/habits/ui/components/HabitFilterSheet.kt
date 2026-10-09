@@ -150,8 +150,8 @@ fun HeaderIconButton(
 }
 
 /**
- * The chips under a tab header: the range chips first ([RangeChip], or [CustomRangeChip] in the
- * default's place), then the habit chip. The row scrolls sideways when it doesn't fit.
+ * The chips under a tab header, shown only while a filter is on: the picked range ([CustomRangeChip])
+ * then the habit chip. The row scrolls sideways when it doesn't fit.
  */
 @Composable
 fun FilterChipRow(modifier: Modifier = Modifier, content: @Composable RowScope.() -> Unit) {
@@ -164,31 +164,7 @@ fun FilterChipRow(modifier: Modifier = Modifier, content: @Composable RowScope.(
 }
 
 /**
- * One choice in the single-select range row ("This week", "7 days", "30 days", "All"). The
- * selected one is filled and gets a check; the others are outlined.
- */
-@Composable
-fun RangeChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    val haptics = LocalHapticFeedback.current
-    val colors = MaterialTheme.colorScheme
-    val content = if (selected) colors.onSecondaryContainer else colors.onSurface
-    Row(
-        Modifier
-            .heightIn(min = 32.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(if (selected) colors.secondaryContainer else Color.Transparent)
-            .border(1.dp, if (selected) colors.secondaryContainer else colors.outlineVariant, RoundedCornerShape(8.dp))
-            .selectable(selected = selected, role = Role.RadioButton) { if (!selected) haptics.tick(); onClick() }
-            .padding(start = if (selected) 8.dp else 12.dp, end = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (selected) Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = content, modifier = Modifier.padding(end = 6.dp).size(18.dp))
-        Text(label, style = SproutType.label, color = content, maxLines = 1)
-    }
-}
-
-/**
- * A range picked in the date sheet ("21 – 24 Sep"): filled like a selected [RangeChip], with a ✕
+ * A range picked in the date sheet ("21 – 24 Sep"): filled secondaryContainer, with a ✕
  * that goes back to the default. Tapping the chip opens the date range sheet again.
  */
 @Composable

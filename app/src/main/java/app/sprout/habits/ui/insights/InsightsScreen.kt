@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.unit.LayoutDirection
 import app.sprout.habits.ui.components.CustomRangeChip
-import app.sprout.habits.ui.components.RangeChip
 import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -94,32 +93,30 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek,
     Column(Modifier.fillMaxSize()) {
         Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp)) {
             TabHeader(stringResource(R.string.insights_title), listSpacing = 16.dp) {
-                HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.change_date_range), active = ui.preset == null) { pickingRange = true }
+                HeaderIconButton(R.drawable.ic_calendar, stringResource(R.string.change_date_range), active = !ui.thisWeek) { pickingRange = true }
                 HeaderIconButton(R.drawable.ic_filter, stringResource(R.string.filter_by_habit), active = ui.filter.isNotEmpty()) { filtering = true }
             }
-            FilterChipRow(Modifier.padding(top = 12.dp)) {
-                // A picked range takes the place of "This week"; its ✕ goes back to it.
-                if (ui.preset == null) {
-                    CustomRangeChip(
-                        label = ui.rangeLabel,
-                        openLabel = stringResource(R.string.change_date_range),
-                        clearLabel = stringResource(R.string.clear_date_filter),
-                        onOpen = { pickingRange = true },
-                        onClear = { viewModel.setPreset(InsightsRange.THIS_WEEK) },
-                    )
-                } else {
-                    RangeChip(stringResource(R.string.this_week), ui.preset == InsightsRange.THIS_WEEK) { viewModel.setPreset(InsightsRange.THIS_WEEK) }
-                }
-                RangeChip(stringResource(R.string.range_7_days), ui.preset == InsightsRange.DAYS_7) { viewModel.setPreset(InsightsRange.DAYS_7) }
-                RangeChip(stringResource(R.string.range_30_days), ui.preset == InsightsRange.DAYS_30) { viewModel.setPreset(InsightsRange.DAYS_30) }
-                if (ui.filter.isNotEmpty()) {
-                    HabitFilterChip(
-                        selected = ui.options.filter { it.habitId in ui.filter },
-                        label = pluralStringResource(R.plurals.habit_count, ui.filter.size, ui.filter.size),
-                        removeLabel = stringResource(R.string.remove_habit_filter),
-                        onOpen = { filtering = true },
-                        onClear = { viewModel.setFilter(emptySet()) },
-                    )
+            // No preset ranges: the row only shows the filters that are on, each with its ✕.
+            if (!ui.thisWeek || ui.filter.isNotEmpty()) {
+                FilterChipRow(Modifier.padding(top = 12.dp)) {
+                    if (!ui.thisWeek) {
+                        CustomRangeChip(
+                            label = ui.rangeLabel,
+                            openLabel = stringResource(R.string.change_date_range),
+                            clearLabel = stringResource(R.string.clear_date_filter),
+                            onOpen = { pickingRange = true },
+                            onClear = viewModel::clearRange,
+                        )
+                    }
+                    if (ui.filter.isNotEmpty()) {
+                        HabitFilterChip(
+                            selected = ui.options.filter { it.habitId in ui.filter },
+                            label = pluralStringResource(R.plurals.habit_count, ui.filter.size, ui.filter.size),
+                            removeLabel = stringResource(R.string.remove_habit_filter),
+                            onOpen = { filtering = true },
+                            onClear = { viewModel.setFilter(emptySet()) },
+                        )
+                    }
                 }
             }
         }
@@ -142,7 +139,7 @@ fun InsightsScreen(viewModel: InsightsViewModel, weekStart: java.time.DayOfWeek,
             weekStart = weekStart,
             shortcutLabel = stringResource(R.string.this_week),
             onApply = { a, b -> viewModel.setRange(a, b); pickingRange = false },
-            onShortcut = { viewModel.setPreset(InsightsRange.THIS_WEEK); pickingRange = false },
+            onShortcut = { viewModel.clearRange(); pickingRange = false },
             onDismiss = { pickingRange = false },
         )
     }

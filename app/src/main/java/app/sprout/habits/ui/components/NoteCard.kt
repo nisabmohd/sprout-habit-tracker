@@ -56,8 +56,9 @@ data class NoteCardUi(
     /** "Skipped", "8 of 20 pages", "Done · 45 min". */
     val outcome: String,
     /**
-     * When the note was last written: "9:12 PM", or "Today, 9:12 PM" when that wasn't the day
-     * the note is about, so a note written late doesn't read as written on its own day.
+     * When the note was last written: "9:12 PM", or "written Thu, 9:12 PM" ("written 2 Oct, …"
+     * after 6 days) when that wasn't the day the note is about, so a late note doesn't read as
+     * written on its own day.
      */
     val time: String,
     val text: String,
@@ -86,10 +87,10 @@ data class NoteCardUi(
             val time = at.toLocalTime().format(TIME)
             val day = at.toLocalDate()
             if (day.toEpochDay() == note.date) return time
-            val dayLabel = when (day) {
-                today -> strings(R.string.today)
-                today.minusDays(1) -> strings(R.string.yesterday)
-                else -> day.format(datePattern(if (day.year == today.year) "d MMM" else "d MMM yyyy"))
+            val dayLabel = when {
+                !day.isBefore(today.minusDays(6)) -> day.format(datePattern("EEE"))
+                day.year == today.year -> day.format(datePattern("d MMM"))
+                else -> day.format(datePattern("d MMM yyyy"))
             }
             return strings(R.string.note_written_at, dayLabel, time)
         }
@@ -115,9 +116,9 @@ fun groupedShape(index: Int, count: Int): RoundedCornerShape {
 
 /**
  * A note, built from the same pieces as a Today habit card: the habit tile, the name, the day's
- * mark and outcome under it, the time as plain text at the top right, then the note itself.
- * Without [showHabit] (on a habit's own page) the first line is the mark and
- * "[outcome] · [dateLabel]". [shape] rounds it as part of a day's group.
+ * mark, outcome and time under it ("Skipped · 9:12 AM"), then the note itself. Without
+ * [showHabit] (on a habit's own page) the first line is the mark and "[outcome] · [dateLabel]",
+ * with the time as plain text on the right. [shape] rounds it as part of a day's group.
  */
 @Composable
 fun NoteCard(
@@ -159,28 +160,25 @@ fun NoteCard(
             }
             Column(Modifier.weight(1f).padding(start = if (showHabit) 12.dp else 0.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 if (showHabit) {
-                    Text(note.habitName, style = SproutType.cardTitle, color = colors.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    // Long names wrap rather than lose their end.
+                    Text(note.habitName, style = SproutType.cardTitle, color = colors.onSurface)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     DayMarkView(note.mark, hc, marks, Modifier.size(16.dp))
                     Text(
-                        listOfNotNull(note.outcome, dateLabel).joinToString(" · "),
+                        if (showHabit) "${note.outcome} · ${note.time}" else listOfNotNull(note.outcome, dateLabel).joinToString(" · "),
                         style = SproutType.supporting,
                         color = colors.onSurfaceVariant,
-                        maxLines = 1,
+                        maxLines = if (showHabit) 2 else 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(start = 6.dp),
                     )
                 }
             }
             // Trailing text is always plain, never a pill.
-            Text(
-                note.time,
-                style = SproutType.supporting,
-                color = colors.onSurfaceVariant,
-                maxLines = 1,
-                modifier = Modifier.padding(start = 8.dp).align(if (showHabit) Alignment.Top else Alignment.CenterVertically),
-            )
+            if (!showHabit) {
+                Text(note.time, style = SproutType.supporting, color = colors.onSurfaceVariant, maxLines = 1, modifier = Modifier.padding(start = 8.dp))
+            }
         }
         Text(note.text, style = SproutType.body, color = colors.onSurface)
     }

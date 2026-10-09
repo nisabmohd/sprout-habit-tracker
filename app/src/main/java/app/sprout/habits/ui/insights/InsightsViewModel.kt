@@ -39,9 +39,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 
 
-/** The range chips under the title. Insights opens on [THIS_WEEK]. */
-enum class InsightsRange { THIS_WEEK, DAYS_7, DAYS_30 }
-
 @Immutable
 data class DayColumnUi(
     /** "Mon", or the day a week starts on: "1 Sep" ("1/9" once there are many weeks). */
@@ -74,9 +71,9 @@ data class HabitRateUi(
 
 @Immutable
 data class InsightsUi(
-    /** The selected range chip, or null while a range from the date sheet is on. */
-    val preset: InsightsRange?,
-    /** "This week", "7 days", "30 days" or "21 – 27 Sep". */
+    /** False while a range from the date sheet is on; Insights opens on this week. */
+    val thisWeek: Boolean,
+    /** "This week" or "21 – 27 Sep". */
     val rangeLabel: String,
     val from: LocalDate,
     val to: LocalDate,
@@ -100,11 +97,8 @@ data class InsightsUi(
     val rates: List<HabitRateUi>,
 )
 
-/** One of the chips, or a range from the date sheet. */
-private sealed interface Selection {
-    data class Preset(val range: InsightsRange) : Selection
-    data class Custom(val from: LocalDate, val to: LocalDate) : Selection
-}
+/** A range from the date sheet; without one, Insights shows this week. */
+private data class CustomRange(val from: LocalDate, val to: LocalDate)
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class InsightsViewModel(
@@ -112,35 +106,29 @@ class InsightsViewModel(
     private val settings: SettingsRepository,
     private val strings: Strings,
 ) : ViewModel() {
-    private val selection = MutableStateFlow<Selection>(Selection.Preset(InsightsRange.THIS_WEEK))
+    private val selection = MutableStateFlow<CustomRange?>(null)
     private val filter = MutableStateFlow<Set<Long>>(emptySet())
 
     val state: StateFlow<InsightsUi?> = combine(selection, settings.settings) { r, s -> r to s.weekStart }
         .flatMapLatest { (picked, weekStart) ->
             val today = LocalDate.now()
             // Days still to come are never part of a range.
-            val (from, to) = when (picked) {
-                is Selection.Custom -> picked.from to picked.to
-                is Selection.Preset -> when (picked.range) {
-                    InsightsRange.THIS_WEEK -> weekOf(today, weekStart).first() to today
-                    InsightsRange.DAYS_7 -> today.minusDays(6) to today
-                    InsightsRange.DAYS_30 -> today.minusDays(29) to today
-                }
-            }
+            val (from, to) = picked?.let { it.from to it.to } ?: (weekOf(today, weekStart).first() to today)
             // Every entry: streaks and the ranges before this one reach back past it.
             combine(repository.observeHabits(), repository.observeEntries(0, Long.MAX_VALUE), filter) { habits, entries, f ->
-                build(today, from, to, (picked as? Selection.Preset)?.range, weekStart, habits, entries, f)
+                build(today, from, to, picked == null, weekStart, habits, entries, f)
             }
         }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    fun setPreset(range: InsightsRange) {
-        selection.value = Selection.Preset(range)
+    /** Back to this week. */
+    fun clearRange() {
+        selection.value = null
     }
 
     fun setRange(from: LocalDate, to: LocalDate) {
-        selection.value = Selection.Custom(minOf(from, to), maxOf(from, to))
+        selection.value = CustomRange(minOf(from, to), maxOf(from, to))
     }
 
     fun setFilter(habitIds: Set<Long>) {
@@ -154,7 +142,7 @@ class InsightsViewModel(
         today: LocalDate,
         from: LocalDate,
         to: LocalDate,
-        preset: InsightsRange?,
+        thisWeek: Boolean,
         weekStart: DayOfWeek,
         allHabits: List<Habit>,
         entries: List<Entry>,
@@ -256,13 +244,8 @@ class InsightsViewModel(
         }
 
         return InsightsUi(
-            preset = preset,
-            rangeLabel = when (preset) {
-                InsightsRange.THIS_WEEK -> strings(R.string.this_week)
-                InsightsRange.DAYS_7 -> strings(R.string.range_7_days)
-                InsightsRange.DAYS_30 -> strings(R.string.range_30_days)
-                null -> chipRangeLabel(from, to, today)
-            },
+            thisWeek = thisWeek,
+            rangeLabel = if (thisWeek) strings(R.string.this_week) else chipRangeLabel(from, to, today),
             from = from,
             to = to,
             filter = filterIds,

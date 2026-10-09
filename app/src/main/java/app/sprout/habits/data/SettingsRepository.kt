@@ -19,6 +19,7 @@ import app.sprout.habits.ui.theme.ThemeSettings
 import java.time.DayOfWeek
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 @Immutable
@@ -46,6 +47,8 @@ data class Settings(
     val dismissedUpdate: String? = null,
     /** Ids of the sample habits a fresh install starts with; empty once removed or never added. */
     val sampleHabitIds: Set<Long> = emptySet(),
+    /** True once the user logged or changed a habit: the Today banner goes, the sample habits stay. */
+    val sampleBannerHidden: Boolean = false,
 )
 
 private val Context.dataStore by preferencesDataStore(name = "settings")
@@ -71,7 +74,17 @@ class SettingsRepository(context: Context) {
         it[LAST_UPDATE_CHECK] = at
     }
     suspend fun dismissUpdate(version: String) = store.edit { it[DISMISSED_UPDATE] = version }
+    /**
+     * The user logged or changed a habit: hide the sample banner for good. Does nothing before the
+     * sample habits are in, so seeding them doesn't hide it.
+     */
+    suspend fun hideSampleBanner() {
+        if (store.data.first().let { it[SAMPLE_HABITS] == null || it[SAMPLE_BANNER_HIDDEN] == true }) return
+        store.edit { it[SAMPLE_BANNER_HIDDEN] = true }
+    }
+
     suspend fun setSampleHabitIds(ids: Set<Long>) = store.edit {
+        it.remove(SAMPLE_BANNER_HIDDEN)
         if (ids.isEmpty()) it.remove(SAMPLE_HABITS) else it[SAMPLE_HABITS] = ids.mapTo(HashSet()) { id -> id.toString() }
     }
     /**
@@ -130,6 +143,7 @@ class SettingsRepository(context: Context) {
             lastUpdateCheckAt = this[LAST_UPDATE_CHECK],
             dismissedUpdate = this[DISMISSED_UPDATE],
             sampleHabitIds = this[SAMPLE_HABITS].orEmpty().mapNotNullTo(HashSet()) { it.toLongOrNull() },
+            sampleBannerHidden = this[SAMPLE_BANNER_HIDDEN] == true,
         )
     }
 
@@ -152,6 +166,7 @@ class SettingsRepository(context: Context) {
         val LAST_UPDATE_CHECK = longPreferencesKey("lastUpdateCheckAt")
         val DISMISSED_UPDATE = stringPreferencesKey("dismissedUpdateVersion")
         val SAMPLE_HABITS = stringSetPreferencesKey("sampleHabitIds")
+        val SAMPLE_BANNER_HIDDEN = booleanPreferencesKey("sampleBannerHidden")
 
         inline fun <reified E : Enum<E>> enumOrDefault(name: String?, default: E): E =
             name?.let { n -> enumValues<E>().firstOrNull { it.name == n } } ?: default

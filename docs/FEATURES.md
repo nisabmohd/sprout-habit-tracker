@@ -14,7 +14,7 @@ Every tab starts with the same header (`ui/components/TabHeader.kt`): the title,
 
 ## Sample data
 
-A fresh install starts with eight sample habits (from the designs), two weeks of history and notes on several days, in the app language (`data/SampleData.kt`). They're added only on the very first launch, never on an update or after a restore. A card on Today and a More → General row remove them (only the sample habits, with their entries and notes); their ids are kept in DataStore (`sampleHabitIds`). Sample habits have reminders only in debug builds.
+A fresh install starts with eight sample habits (from the designs), two weeks of history and notes on several days, in the app language (`data/SampleData.kt`). They're added only on the very first launch, never on an update or after a restore. A card on Today removes them (only the sample habits, with their entries and notes); their ids are kept in DataStore (`sampleHabitIds`). The card goes for good the first time you log or change a habit (`sampleBannerHidden`); after that the sample habits are deleted like any other habit. Sample habits have reminders only in debug builds.
 
 ## Habits
 
@@ -28,13 +28,13 @@ Code: `ui/edit/`, `ui/manage/`, `ui/habits/`, `ui/detail/`, statistics in `domai
 
 ## Journal and notes
 
-A note belongs to one habit and one day. The Journal tab lists notes newest first, grouped by day; each note shows the habit, that day's outcome, when it was written, and the text. It opens on all notes. Chips under the title narrow it to the last 7 or 30 days, and the two buttons at the top open bottom sheets to pick other dates or one or more habits. A picked range and the picked habits show as chips too; ✕ on the range chip goes back to All and ✕ on the habit chip clears the habits. When nothing matches, the Journal says which filter is hiding the notes and offers "Show all notes". A button whose filter is on is tinted and gets a small dot. When you write a new note for a habit and day that already have one, that note opens so you add to it. Notes can be added from Today, the Journal, a habit's detail screen or the press-and-hold sheet, and edited or deleted later. Press and hold a note card in the Journal for a sheet with Edit note, Share and Delete note; deleting shows an Undo snackbar.
+A note belongs to one habit and one day. The Journal tab lists notes newest first, grouped by day; each note shows the habit, that day's outcome and the time it was written ("written Thu, 11:28 PM" when that was a later day), and the text. It opens on all notes. The two buttons at the top open bottom sheets to pick dates or one or more habits; while one is on, it shows as a chip under the title, and its ✕ clears it. When nothing matches, the Journal says which filter is hiding the notes and offers "Show all notes". A button whose filter is on is tinted and gets a small dot. When you write a new note for a habit and day that already have one, that note opens so you add to it. Notes can be added from Today, the Journal, a habit's detail screen or the press-and-hold sheet, and edited or deleted later. Press and hold a note card in the Journal for a sheet with Edit note, Share and Delete note; deleting shows an Undo snackbar.
 
 Code: `ui/journal/`, `ui/note/`.
 
 ## Insights
 
-A summary for a range of dates: this week by default, the last 7 or 30 days from the chips under the title, or any range from the calendar button, for all habits or the ones you pick. It shows the average score with a bar per habit and the done and partial counts; a Patterns card with the weekday that goes best and the habit that dropped most against the range before; a bar per weekday (one per week for ranges over two weeks); and a row per habit with its days kept and a score ring, sorted by score or by streak (the ring then shows the streak within the chosen dates). Tapping a bar shows its numbers, and tapping a habit opens it. A past day with no entry counts as 0 in the score; only a day marked Skip is left out.
+A summary for a range of dates: this week by default, or any range from the calendar button (shown as a chip under the title, with ✕ to go back to this week), for all habits or the ones you pick. It shows the average score with a bar per habit and the done and partial counts; a Patterns card with the weekday that goes best and the habit that dropped most against the range before; a bar per weekday (one per week for ranges over two weeks); and a row per habit with its days kept and a score ring, sorted by score or by streak (the ring then shows the streak within the chosen dates). Tapping a bar shows its numbers, and tapping a habit opens it. A past day with no entry counts as 0 in the score; only a day marked Skip is left out.
 
 Code: `ui/insights/`.
 

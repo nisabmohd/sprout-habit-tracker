@@ -24,7 +24,7 @@
     <string name="this_week">今週</string>
     <string name="today">今日</string>
     <string name="yesterday">昨日</string>
-    <string name="note_written_at">%1$s %2$s</string>
+    <string name="note_written_at">%1$s %2$sに記入</string>
     <string name="percent">%1$d%%</string>
     <string name="welcome_title">小さな習慣を、\n正直に続けよう。</string>
     <string name="welcome_body">スワイプで完了、できた分だけ記録、無理な日はスキップ。うまくいかなかった日のことも書き残せます。</string>
@@ -42,9 +42,6 @@
     <string name="change_date_range">期間を変更</string>
     <string name="show_all_habits">すべての習慣を表示</string>
     <string name="insights_average">平均</string>
-    <string name="range_all">すべて</string>
-    <string name="range_7_days">7日間</string>
-    <string name="range_30_days">30日間</string>
     <string name="insights_patterns">パターン</string>
     <string name="insights_prime_time">ベストタイム</string>
     <string name="insights_needs_focus">要注意</string>
@@ -53,8 +50,6 @@
     <string name="insights_lowest">最も低いスコア</string>
     <string name="insights_weekly_rhythm">週のリズム</string>
     <string name="insights_breakdown">習慣ごと</string>
-    <string name="journal_empty_7">過去7日間のメモはありません</string>
-    <string name="journal_empty_30">過去30日間のメモはありません</string>
     <string name="journal_empty_range">%1$sのメモはありません</string>
     <string name="journal_empty_habits">これらの習慣のメモはありません</string>
     <string name="journal_empty_earlier">以前のメモは残っています。</string>
@@ -417,8 +412,6 @@
     <string name="sample_card_title">これはサンプルの習慣です</string>
     <string name="sample_card_body">スワイプ、長押し、ノートの追加を試してみてください。自分の習慣を追加するときに削除できます。</string>
     <string name="sample_remove">サンプルデータを削除</string>
-    <string name="sample_removed">サンプルデータを削除しました</string>
-    <string name="sample_remove_subtitle">サンプルの習慣と記録、ノートを削除します</string>
     <plurals name="days_kept">
         <item quantity="other">%2$d 日中 %1$d 日</item>
     </plurals>

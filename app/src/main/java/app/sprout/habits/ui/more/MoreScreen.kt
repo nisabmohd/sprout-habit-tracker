@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import app.sprout.habits.BuildConfig
 import androidx.compose.runtime.setValue
 import app.sprout.habits.R
-import app.sprout.habits.ui.components.HeaderIconButton
 import app.sprout.habits.ui.components.TabHeader
 import app.sprout.habits.ui.components.CappedFontScale
 import app.sprout.habits.data.Settings
@@ -101,7 +100,6 @@ fun MoreScreen(
     repository: SettingsRepository,
     backup: BackupManager,
     onOpenAbout: () -> Unit,
-    onRemoveSampleData: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -188,21 +186,6 @@ fun MoreScreen(
                     }
                     CardDivider()
                     SettingsRow(stringResource(R.string.notifications), onClick = { Notifications.openSettings(context) }) { TrailingValue(stringResource(R.string.system_settings)) }
-                    if (settings.sampleHabitIds.isNotEmpty()) {
-                        val removed = stringResource(R.string.sample_removed)
-                        CardDivider()
-                        val remove = {
-                            onRemoveSampleData()
-                            scope.launch { snackbar.showSnackbar(removed) }
-                            Unit
-                        }
-                        SettingsRow(stringResource(R.string.sample_remove), stringResource(R.string.sample_remove_subtitle), onClick = remove) {
-                            // The same round delete button as on the Today banner and in the headers.
-                            Box(Modifier.padding(start = 12.dp)) {
-                                HeaderIconButton(R.drawable.ic_delete, stringResource(R.string.sample_remove), danger = true, onClick = remove)
-                            }
-                        }
-                    }
                 }
             }
 

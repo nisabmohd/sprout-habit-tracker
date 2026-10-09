@@ -24,7 +24,7 @@
     <string name="this_week">Esta semana</string>
     <string name="today">Hoje</string>
     <string name="yesterday">Ontem</string>
-    <string name="note_written_at">%1$s, %2$s</string>
+    <string name="note_written_at">escrita %1$s, %2$s</string>
     <string name="percent">%1$d%%</string>
     <string name="welcome_title">Pequenos hábitos,\nlevados com sinceridade.</string>
     <string name="welcome_body">Deslize para concluir, registre uma parte, pule quando a vida apertar e escreva sobre os dias que não saíram como planejado.</string>
@@ -42,9 +42,6 @@
     <string name="change_date_range">Mudar o período</string>
     <string name="show_all_habits">Mostrar todos os hábitos</string>
     <string name="insights_average">média</string>
-    <string name="range_all">Tudo</string>
-    <string name="range_7_days">7 dias</string>
-    <string name="range_30_days">30 dias</string>
     <string name="insights_patterns">Padrões</string>
     <string name="insights_prime_time">Melhor momento</string>
     <string name="insights_needs_focus">Precisa de atenção</string>
@@ -53,8 +50,6 @@
     <string name="insights_lowest">Menor pontuação</string>
     <string name="insights_weekly_rhythm">Ritmo semanal</string>
     <string name="insights_breakdown">Por hábito</string>
-    <string name="journal_empty_7">Nenhuma nota nos últimos 7 dias</string>
-    <string name="journal_empty_30">Nenhuma nota nos últimos 30 dias</string>
     <string name="journal_empty_range">Nenhuma nota para %1$s</string>
     <string name="journal_empty_habits">Nenhuma nota para estes hábitos</string>
     <string name="journal_empty_earlier">Suas notas anteriores continuam aqui.</string>
@@ -444,8 +439,6 @@
     <string name="sample_card_title">Estes são hábitos de exemplo</string>
     <string name="sample_card_body">Experimente deslizar, tocar e segurar e adicionar notas. Remova quando quiser criar os seus.</string>
     <string name="sample_remove">Remover dados de exemplo</string>
-    <string name="sample_removed">Dados de exemplo removidos</string>
-    <string name="sample_remove_subtitle">Apaga os hábitos de exemplo, o histórico e as notas</string>
     <plurals name="days_kept">
         <item quantity="one">%1$d de %2$d dia</item>
         <item quantity="other">%1$d de %2$d dias</item>

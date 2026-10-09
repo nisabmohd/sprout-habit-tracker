@@ -16,7 +16,7 @@ import app.sprout.habits.data.SproutDatabase
 /** Holds the app's long-lived objects. The only dependency "graph" in the app. */
 class AppContainer(private val context: Context) {
     private val database by lazy { SproutDatabase.create(context) }
-    val repository by lazy { HabitRepository(database) }
+    val repository by lazy { HabitRepository(database) { settings.hideSampleBanner() } }
     val settings by lazy { SettingsRepository(context) }
     val reminders by lazy { ReminderScheduler(context, repository) }
     val reminderNotifier by lazy { ReminderNotifier(context, repository) }

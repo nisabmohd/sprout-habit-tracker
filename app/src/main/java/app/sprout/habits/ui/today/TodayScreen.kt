@@ -1,5 +1,7 @@
 package app.sprout.habits.ui.today
 
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
 import app.sprout.habits.ui.theme.SproutType
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
@@ -259,24 +261,26 @@ private fun EmptyState() {
 @Composable
 private fun SampleDataCard(onRemove: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    Row(
+    Column(
         Modifier
             .fillMaxWidth()
             .background(colors.primaryContainer, RoundedCornerShape(24.dp))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(start = 16.dp, end = 4.dp, top = 16.dp, bottom = 4.dp),
     ) {
-        Column(Modifier.weight(1f).padding(end = 12.dp)) {
-            Text(stringResource(R.string.sample_card_title), style = SproutType.cardTitle, color = colors.onPrimaryContainer)
-            Text(
-                stringResource(R.string.sample_card_body),
-                style = SproutType.supporting,
-                color = colors.onPrimaryContainer,
-                // The same gap as under the title of About's "Free and open source" card.
-                modifier = Modifier.padding(top = 8.dp),
-            )
+        Text(stringResource(R.string.sample_card_title), style = SproutType.cardTitle, color = colors.onPrimaryContainer, modifier = Modifier.padding(end = 12.dp))
+        Text(
+            stringResource(R.string.sample_card_body),
+            style = SproutType.supporting,
+            color = colors.onPrimaryContainer,
+            modifier = Modifier.padding(top = 4.dp, end = 12.dp),
+        )
+        // A plain text button at the bottom right, inked like the card's text.
+        TextButton(
+            onClick = onRemove,
+            colors = ButtonDefaults.textButtonColors(contentColor = colors.onPrimaryContainer),
+            modifier = Modifier.align(Alignment.End).padding(top = 4.dp),
+        ) {
+            Text(stringResource(R.string.sample_remove), style = SproutType.label)
         }
-        // The same round delete button as in the screen headers.
-        HeaderIconButton(R.drawable.ic_delete, stringResource(R.string.sample_remove), danger = true, onClick = onRemove)
     }
 }

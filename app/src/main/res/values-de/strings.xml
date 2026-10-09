@@ -24,7 +24,7 @@
     <string name="this_week">Diese Woche</string>
     <string name="today">Heute</string>
     <string name="yesterday">Gestern</string>
-    <string name="note_written_at">%1$s, %2$s</string>
+    <string name="note_written_at">geschrieben %1$s, %2$s</string>
     <string name="percent">%1$d %%</string>
     <string name="welcome_title">Kleine Gewohnheiten,\nehrlich geführt.</string>
     <string name="welcome_body">Wische zum Abhaken, trage einen Teil ein, lass aus, wenn das Leben dazwischenkommt, und schreib über die Tage, die anders liefen als geplant.</string>
@@ -42,9 +42,6 @@
     <string name="change_date_range">Zeitraum ändern</string>
     <string name="show_all_habits">Alle Gewohnheiten anzeigen</string>
     <string name="insights_average">Durchschnitt</string>
-    <string name="range_all">Alle</string>
-    <string name="range_7_days">7 Tage</string>
-    <string name="range_30_days">30 Tage</string>
     <string name="insights_patterns">Muster</string>
     <string name="insights_prime_time">Beste Zeit</string>
     <string name="insights_needs_focus">Braucht Fokus</string>
@@ -53,8 +50,6 @@
     <string name="insights_lowest">Niedrigster Wert</string>
     <string name="insights_weekly_rhythm">Wochenrhythmus</string>
     <string name="insights_breakdown">Nach Gewohnheit</string>
-    <string name="journal_empty_7">Keine Notizen in den letzten 7 Tagen</string>
-    <string name="journal_empty_30">Keine Notizen in den letzten 30 Tagen</string>
     <string name="journal_empty_range">Keine Notizen für %1$s</string>
     <string name="journal_empty_habits">Keine Notizen für diese Gewohnheiten</string>
     <string name="journal_empty_earlier">Deine früheren Notizen sind noch da.</string>
@@ -430,8 +425,6 @@
     <string name="sample_card_title">Das sind Beispiel-Gewohnheiten</string>
     <string name="sample_card_body">Probier Wischen, Gedrückthalten und Notizen aus. Entferne sie, wenn du deine eigenen anlegen willst.</string>
     <string name="sample_remove">Beispieldaten entfernen</string>
-    <string name="sample_removed">Beispieldaten entfernt</string>
-    <string name="sample_remove_subtitle">Löscht die Beispiel-Gewohnheiten, ihren Verlauf und ihre Notizen</string>
     <plurals name="days_kept">
         <item quantity="one">%1$d von %2$d Tag</item>
         <item quantity="other">%1$d von %2$d Tagen</item>

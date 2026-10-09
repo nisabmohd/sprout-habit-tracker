@@ -30,14 +30,8 @@ import kotlinx.coroutines.launch
 @Immutable
 data class JournalDayUi(val day: Long, val label: String, val notes: List<NoteCardUi>)
 
-/** The range chips under the title. The Journal opens on [ALL]: no date filter the user didn't pick. */
-enum class JournalRange { ALL, DAYS_7, DAYS_30 }
-
-/** Which dates the Journal shows: one of the chips, or a range from the date sheet. */
-private sealed interface DateFilter {
-    data class Preset(val range: JournalRange) : DateFilter
-    data class Range(val from: LocalDate, val to: LocalDate) : DateFilter
-}
+/** A range picked in the date sheet. The Journal has no preset ranges and opens on every note. */
+private data class DateRange(val from: LocalDate, val to: LocalDate)
 
 @Immutable
 data class JournalUi(
@@ -49,9 +43,7 @@ data class JournalUi(
     /** Null = all dates. */
     val from: LocalDate?,
     val to: LocalDate?,
-    /** The selected range chip, or null while a range from the date sheet is on. */
-    val preset: JournalRange?,
-    /** That range as its chip shows it, "21 – 27 Sep"; empty for a preset. */
+    /** That range as its chip shows it, "21 – 27 Sep"; empty for all dates. */
     val dateLabel: String,
     /** False when the journal has no notes at all, whatever the filters. */
     val hasNotes: Boolean,
@@ -68,7 +60,8 @@ class JournalViewModel(
     val deleted = _deleted.receiveAsFlow()
 
     private val filterIds = MutableStateFlow<Set<Long>>(emptySet())
-    private val dates = MutableStateFlow<DateFilter>(DateFilter.Preset(JournalRange.ALL))
+    /** Null = all dates, which is where the Journal opens. */
+    private val dates = MutableStateFlow<DateRange?>(null)
 
     /** Null while loading. */
     val state: StateFlow<JournalUi?> =
@@ -83,15 +76,7 @@ class JournalViewModel(
             val entryOf = entries.associateBy { it.habitId to it.date }
             val withNotes = notes.mapTo(HashSet()) { it.habitId }
             val today = LocalDate.now()
-            val r = when (date) {
-                is DateFilter.Preset -> when (date.range) {
-                    JournalRange.ALL -> null
-                    // Today and the days before it.
-                    JournalRange.DAYS_7 -> today.minusDays(6) to today
-                    JournalRange.DAYS_30 -> today.minusDays(29) to today
-                }
-                is DateFilter.Range -> date.from to date.to
-            }
+            val r = date?.let { it.from to it.to }
             val cards = notes
                 .filter { filter.isEmpty() || it.habitId in filter }
                 .filter { r == null || it.date in r.first.toEpochDay()..r.second.toEpochDay() }
@@ -108,8 +93,7 @@ class JournalViewModel(
                     .map { HabitFilterOption(it.id, it.name, HabitIcon.fromKey(it.icon).drawable, it.colorHue.toFloat()) },
                 from = r?.first,
                 to = r?.second,
-                preset = (date as? DateFilter.Preset)?.range,
-                dateLabel = (date as? DateFilter.Range)?.let { InsightsViewModel.chipRangeLabel(it.from, it.to, today) }.orEmpty(),
+                dateLabel = date?.let { InsightsViewModel.chipRangeLabel(it.from, it.to, today) }.orEmpty(),
                 hasNotes = notes.isNotEmpty(),
             )
         }
@@ -117,16 +101,16 @@ class JournalViewModel(
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     fun setRange(from: LocalDate, to: LocalDate) {
-        dates.value = DateFilter.Range(minOf(from, to), maxOf(from, to))
+        dates.value = DateRange(minOf(from, to), maxOf(from, to))
     }
 
-    fun setPreset(range: JournalRange) {
-        dates.value = DateFilter.Preset(range)
+    fun clearRange() {
+        dates.value = null
     }
 
     /** Every note again: all dates and every habit. */
     fun showAllNotes() {
-        dates.value = DateFilter.Preset(JournalRange.ALL)
+        dates.value = null
         filterIds.value = emptySet()
     }
 
